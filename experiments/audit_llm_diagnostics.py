@@ -241,6 +241,9 @@ def main():
         assert all(float(v["step"]) == 1000 for v in state["optimizer"]["state"].values())
         assert tensor_hash(state["initial_trainable"]) == report["initial_trainable_sha256"]
         assert tensor_hash(state["trainable"]) == report["final_trainable_sha256"]
+        dtypes = Counter(str(value.dtype) for value in state["trainable"].values())
+        assert set(dtypes) == {"torch.float32"}
+        report["trainable_dtypes"] = dict(dtypes)
         assert not any(
             k.startswith("encoder.") or k.startswith("diagnosis_head.") for k in state["trainable"]
         )

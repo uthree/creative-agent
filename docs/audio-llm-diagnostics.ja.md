@@ -1,5 +1,7 @@
 # LLMの出力能力と音声との接続を分ける比較
 
+[8条件・8,000更新の実測結果](audio-llm-diagnostics-report.ja.md)と[匿名集計](../experiments/results/audio-llm-diagnostics-20261101.json)を公開している。
+
 目的は、現在のLFM3構成が出力形式・長さへの適応で制約されているかを調べること。成功を任意の音源の認識能力と混同しない。
 
 ## 事前に固定する条件
@@ -47,3 +49,21 @@ uv run --no-sync python experiments/run_llm_comparison_suite.py \
 監査CLIに`--publish-tensorboard`を付けると、検証後の`diagnostics/`タグへ末尾改行のみの参考値、音符行の一致数、元の不正理由を追記する。元の応答、MIDIファイル、画像、主指標は変更しない。
 
 未知例の生成文が選択した訓練例の正解を再生していないかも集計する。末尾LFだけを除いた完全一致で数え、正しい未知例の認識と少数例の記憶を区別する。TensorBoardの`diagnostics/`にもコピー数を出す。
+
+## 保存結果の監査
+
+全条件の学習後、次のコマンドで履歴、optimizer、特徴、入力と教師の対応、元データhash、応答、MIDI比較画像を照合する。モデルの再読込と自由生成を伴うためCUDAが必要。`--no-replay`は応答再現と元音声からの特徴再計算を省く部分監査であり、完全監査の代用にはしない。
+
+```sh
+uv run --no-sync python experiments/audit_llm_diagnostics.py \
+  --suite runs/audio-llm-diagnostics-20261101 \
+  --manifest data/public-audio-20261101/manifest-long-midi-30-60.json \
+  --lfm-dir .local/models/LFM3-1.7B-ac2586a \
+  --qwen-dir "$QWEN_MODEL_DIR" \
+  --encoder-checkpoint runs/audio-multitask-lfm3-5000-20261101/checkpoint.pt \
+  --previous-suite runs/audio-public-single-task-20261101 \
+  --summary .local/audio-llm-diagnostics-verified.json \
+  --publish-tensorboard
+```
+
+新規条件のcheckpointにはLoRA・projectorとoptimizerを保存し、共通encoderは`shared_encoder.pt`に分けて保存する。音声条件の推論を再構成する際は、checkpoint内の未使用encoder初期値ではなく、この共通encoderとpool_frames=5を使う。監査は元の親checkpointから共通特徴を再計算する。学習済み重み、元データ、生成全文、イベント、保存ファイルの完全なhash一覧は除外対象のrunに残す。
