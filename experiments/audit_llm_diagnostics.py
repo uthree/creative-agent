@@ -270,15 +270,33 @@ def main():
         assert [e.step for e in events.Scalars("train/loss")] == list(range(1, 1001))
         images = 0
         midi_diagnostics = {}
+        copy_counts = {}
+        training_answers = {row["reference"].rstrip("\n") for row in rows["train"]}
         for split, examples in rows.items():
             for condition, expected in report["generation"][split].items():
                 saved = read(directory / split / f"{condition}.json")
                 assert score(task, saved["rows"]) == expected == saved["metrics"]
+                if split != "train":
+                    copies = sum(
+                        row["generated"]["text"].rstrip("\n") in training_answers
+                        for row in saved["rows"]
+                    )
+                    copy_counts.setdefault(split, {})[condition] = {
+                        "examples": len(saved["rows"]),
+                        "copied_training_responses": copies,
+                        "rate": copies / len(saved["rows"]),
+                        "comparison": "exact text after removing terminal LF only",
+                        "reference_overlap_with_selected_train": sum(
+                            row["reference"].rstrip("\n") in training_answers
+                            for row in saved["rows"]
+                        ),
+                    }
                 if task == "midi":
                     midi_diagnostics.setdefault(split, {})[condition] = midi_text_diagnostics(
                         saved["rows"]
                     )
             images += audit_images(directory, task, mode, split, examples)
+        report["training_answer_copy_counts"] = copy_counts
         if task == "midi":
             report["midi_text_diagnostics"] = midi_diagnostics
         replayed = 0
@@ -336,9 +354,22 @@ def main():
     }
     if args.publish_tensorboard:
         for name, report in result["runs"].items():
-            if "midi_text_diagnostics" not in report:
-                continue
             with SummaryWriter(str(args.suite / name / "tensorboard")) as writer:
+                writer.add_text(
+                    "diagnostics/training_copy_method",
+                    "Training-answer copies: exact response text, ignoring terminal LF.",
+                    1000,
+                )
+                for split, conditions in report["training_answer_copy_counts"].items():
+                    for condition, values in conditions.items():
+                        scalar_tree(
+                            writer,
+                            f"diagnostics/{split}/{condition}/training_answer_copies",
+                            values,
+                            1000,
+                        )
+                if "midi_text_diagnostics" not in report:
+                    continue
                 writer.add_text(
                     "diagnostics/method",
                     "Secondary diagnostic: append a missing final newline only. "
