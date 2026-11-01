@@ -1,5 +1,7 @@
 # 公開実データによる5課題の学習と汎化評価
 
+現行レシピは5フレーム連結→投影を使う。以下の2026年11月1日の保存checkpointを使う全重みwarm start・再開は、当時のGit revisionで再現する。旧平均projectorは現行の連結projectorへ直接読み込めない。[接続の変更と旧成果物の扱い](audio-multitask-lfm3.ja.md#フレーム連結への変更と旧成果物)を参照。
+
 2026年11月1日。[候補調査](public-audio-datasets-survey.ja.md)に基づき、容量を抑えて取得できるMini LibriSpeech、JSUT basic5000の一部、BabySlakhを使う。既存の音声encoder・projector・LFM3 LoRAを実データへ接続する。発話はLLMによる書き起こしを維持する。
 
 ## 取得と用途

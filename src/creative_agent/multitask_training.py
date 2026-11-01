@@ -42,6 +42,8 @@ def run_multitask_training(
 ):
     if type(steps) is not int or not 1 <= steps <= 100000:
         raise ValueError("steps must be in [1, 100000]")
+    if not resume and config.frame_reduction != "concat":
+        raise ValueError("new training requires frame_reduction=concat; mean is legacy only")
     device = torch.device(device)
     if device.type not in ("cuda", "cpu") or config.backbone != "tiny" and device.type != "cuda":
         raise ValueError("use CUDA for pretrained LFM3, CPU/CUDA for offline tests")
@@ -129,6 +131,8 @@ def _train(
         warm = torch.load(warm_checkpoint, map_location="cpu", weights_only=True)
         if warm.get("kind") != "audio_multitask_v1" or warm["backbone_identity"] != identity:
             raise ValueError("warm start backbone identity mismatch")
+        if warm["config"].get("frame_reduction", "mean") != config.frame_reduction:
+            raise ValueError("warm start frame reduction mismatch; the projector must be retrained")
         parameters = {n: p for n, p in model.named_parameters() if p.requires_grad}
         if parameters.keys() != warm["trainable"].keys() or any(
             p.shape != warm["trainable"][n].shape for n, p in parameters.items()
@@ -186,7 +190,7 @@ def _train(
                 )
                 positions = (frames + config.audio.hop_samples - 1) // config.audio.hop_samples
                 pooled = (positions + config.pool_frames - 1) // config.pool_frames
-                fake = torch.zeros(pooled, config.audio.width, device=device)
+                fake = torch.zeros(pooled, config.audio_feature_width, device=device)
                 with autocast(model):
                     model.prepare([fake], [prompt], [target])
                     model.prepare([fake], [prompt], reserve=config.max_new_tokens)

@@ -67,7 +67,7 @@ def main():
         reproduced = 0
         task = state["config"]["tasks"][0]
         if task != "ssl":
-            config = MultitaskConfig.from_dict(state["config"])
+            config = MultitaskConfig.from_saved_dict(state["config"])
             if model is None:
                 model = MultitaskModel(config, device="cuda", model_dir=args.model_dir).eval()
             model.config = config

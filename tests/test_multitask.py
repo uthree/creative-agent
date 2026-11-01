@@ -88,7 +88,10 @@ def test_config_and_global_source_split_integrity(config, data_root):
 
 def test_llm_labels_causal_prefix_and_canonical_midi_newline(config):
     model = MultitaskModel(config)
-    features = [torch.randn(3, 32), torch.randn(5, 32)]
+    features = [
+        torch.randn(3, config.audio_feature_width),
+        torch.randn(5, config.audio_feature_width),
+    ]
     prompts = ["Transcribe notes.", "Describe."]
     targets = ["N1\n60 10 100 80\n", "任意の音声です。"]
     inputs, labels, mask, lengths = model.prepare(features, prompts, targets)
@@ -100,8 +103,59 @@ def test_llm_labels_causal_prefix_and_canonical_midi_newline(config):
     alternate = model.prepare(features, prompts, ["different", "other"])[0]
     torch.testing.assert_close(inputs[0, : lengths[0]], alternate[0, : lengths[0]], rtol=0, atol=0)
     with pytest.raises(ValueError, match="no truncation"):
-        model.prepare([torch.randn(1024, 32)], ["prompt"], ["target"])
-    assert model.audio_features([torch.randn(2, 7681)])[0][0].shape == (4, 32)
+        model.prepare([torch.randn(1024, config.audio_feature_width)], ["prompt"], ["target"])
+    assert model.audio_features([torch.randn(2, 7681)])[0][0].shape == (4, 160)
+
+
+@pytest.mark.parametrize("group_size", [1, 2, 5])
+def test_frame_concat_preserves_order_tail_and_valid_gradients(config, monkeypatch, group_size):
+    config = replace(config, pool_frames=group_size)
+    model = MultitaskModel(config)
+    width, hop = config.audio.width, config.audio.hop_samples
+    length, short = 2 * group_size + 1, max(2, group_size - 2)
+    full = torch.arange(2 * length * width, dtype=torch.float32).reshape(2, length, width)
+    full.requires_grad_(True)
+    monkeypatch.setattr(model.encoder, "encode", lambda *args: full)
+    grouped, _, _ = model.audio_features(
+        [torch.zeros(2, length * hop), torch.zeros(2, short * hop)]
+    )
+    assert model.projector.in_features == group_size * width
+    torch.testing.assert_close(
+        grouped[0][:2], full[0, : 2 * group_size].reshape(2, group_size * width)
+    )
+    torch.testing.assert_close(grouped[0][2, :width], full[0, -1])
+    assert (grouped[0][2, width:] == 0).all()
+    assert grouped[1].shape == ((short + group_size - 1) // group_size, group_size * width)
+    torch.testing.assert_close(grouped[1].flatten()[: short * width], full[1, :short].flatten())
+    assert (grouped[1].flatten()[short * width :] == 0).all()
+    sum(row.sum() for row in grouped).backward()
+    assert (full.grad[0] == 1).all() and (full.grad[1, :short] == 1).all()
+    assert (full.grad[1, short:] == 0).all()
+
+
+def test_legacy_checkpoint_bridge_is_explicit_and_cannot_load_into_concat(config, tmp_path):
+    old_config = config.to_dict()
+    old_config.pop("frame_reduction")
+    assert MultitaskConfig.from_dict(old_config).frame_reduction == "concat"
+    legacy = MultitaskConfig.from_saved_dict(old_config)
+    assert legacy.frame_reduction == "mean" and legacy.audio_feature_width == config.audio.width
+    old_model = MultitaskModel(legacy).eval()
+    old_state = old_model.trainable_state()
+    restored = MultitaskModel(MultitaskConfig.from_saved_dict(old_config)).eval()
+    restored.load_trainable(old_state)
+    wave = torch.randn(2, 7 * config.audio.hop_samples)
+    grouped, full, _ = restored.audio_features([wave])
+    torch.testing.assert_close(grouped[0][0], full[0, :5].mean(0))
+    torch.testing.assert_close(grouped[0][1], full[0, 5:7].mean(0))
+    with pytest.raises(ValueError, match="shape mismatch"):
+        MultitaskModel(config).load_trainable(old_state)
+    recipe = tmp_path / "old-recipe.json"
+    recipe.write_text(json.dumps(old_config), encoding="utf-8")
+    assert MultitaskConfig.load(recipe).frame_reduction == "concat"
+    with pytest.raises(ValueError, match="frame_reduction"):
+        replace(config, frame_reduction="average")
+    with pytest.raises(ValueError, match="new training requires"):
+        run_multitask_training(legacy, tmp_path / "run", data_root=tmp_path, device="cpu")
 
 
 def test_lora_freezes_base_and_propagates_to_shared_encoder(config):

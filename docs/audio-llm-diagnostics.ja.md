@@ -9,7 +9,7 @@
 - LFM3-1.7BとQwen3-1.7B（公式revision `70d244cc86ccca08cf5af4e1e306ecf908b1ad5e`、Apache-2.0）。[公式モデルカード](https://huggingface.co/Qwen/Qwen3-1.7B)。思考出力を無効化、greedy、比較本体ではrepetition penalty 1.0。モデルの優劣を一般化する実験ではない。
 - 英語・日本語ASR、30秒・60秒の採譜を課題ごとに独立学習。SSLはLLMを使わないため比較しない。
 - 元のsource-disjoint manifestを維持し、IDのSHA256順で言語／長さごとに選ぶ。ASRは訓練各8・validation各2・test各4発話。MIDIは音符ありの訓練各2・validation各1・test各2区間。静かな空列を当てるだけの成功を除く。小規模な診断集合で、最終的な汎化保証ではない。
-- 共通encoderは最初の合成5k更新checkpointから取り出して凍結。100 Hzから5フレーム平均で20 Hzへ変換し、同じ特徴cacheを両LLMで使う。正音声・同じ長さの無音・同じsplitの別音声を事前に計算する。
+- 共通encoderは最初の合成5k更新checkpointから取り出して凍結。新規cacheでは100 Hzの特徴を5フレーム連結して640次元・20 Hzへ変換し、同じ特徴cacheを両LLMで使う。正音声・同じ長さの無音・同じsplitの別音声を事前に計算する。
 - 両LLMのLoRAとprojectorは新規初期化。既存LFMの学習済み接続は流用しない。音声条件はprojectorとLLMのq/v rank 8 LoRAのみ更新。テキスト条件はLoRAのみ更新し、通常のtoken embeddingへ入力する。
 - テキストの正解情報条件：ASRは正解文を渡して転記。MIDIはvelocity,pitch,offset,onsetのCSVからN1へ並べ替え・変換。これはoracle対照であり、認識の評価ではない。音声条件と同じ出力教師を使うが、入力の長さ・難しさは異なる。
 - 各条件1,000更新、batch 1、LR 3e-4、warmup 50更新、その後一定。言語／長さを交互に提示する専用乱数の順序を固定する。訓練提示数を揃え、token数と時間は別に記録する。1 seedで初期切り分けを行う。
@@ -32,7 +32,7 @@ TensorBoardへ入力音声、oracle入力、正解、実際の生成文、保存
 
 ```sh
 uv run --no-sync python experiments/run_llm_comparison_suite.py \
-  --output runs/audio-llm-diagnostics-20261101 \
+  --output runs/audio-llm-diagnostics-concat-20261102 \
   --manifest data/public-audio-20261101/manifest-long-midi-30-60.json \
   --lfm-dir .local/models/LFM3-1.7B-ac2586a \
   --qwen-dir "$QWEN_MODEL_DIR" \
@@ -56,7 +56,7 @@ uv run --no-sync python experiments/run_llm_comparison_suite.py \
 
 ```sh
 uv run --no-sync python experiments/audit_llm_diagnostics.py \
-  --suite runs/audio-llm-diagnostics-20261101 \
+  --suite runs/audio-llm-diagnostics-concat-20261102 \
   --manifest data/public-audio-20261101/manifest-long-midi-30-60.json \
   --lfm-dir .local/models/LFM3-1.7B-ac2586a \
   --qwen-dir "$QWEN_MODEL_DIR" \
@@ -66,4 +66,6 @@ uv run --no-sync python experiments/audit_llm_diagnostics.py \
   --publish-tensorboard
 ```
 
-新規条件のcheckpointにはLoRA・projectorとoptimizerを保存し、共通encoderは`shared_encoder.pt`に分けて保存する。音声条件の推論を再構成する際は、checkpoint内の未使用encoder初期値ではなく、この共通encoderとpool_frames=5を使う。監査は元の親checkpointから共通特徴を再計算する。学習済み重み、元データ、生成全文、イベント、保存ファイルの完全なhash一覧は除外対象のrunに残す。
+新規条件のcheckpointにはLoRA・projectorとoptimizerを保存し、共通encoderは`shared_encoder.pt`に分けて保存する。音声条件の推論を再構成する際は、checkpoint内の未使用encoder初期値ではなく、この共通encoderと、cache／checkpointに保存した`frame_reduction`・`pool_frames=5`を使う。監査は元の親checkpointから共通特徴を再計算する。学習済み重み、元データ、生成全文、イベント、保存ファイルの完全なhash一覧は除外対象のrunに残す。
+
+2026年11月1日開始の実測報告は平均方式での結果であり、変更後の精度を示さない。新規の`prepare`は親checkpointの古い圧縮設定を継承せず`concat`を選ぶ。旧平均cacheは新規学習に再利用せず、別のrunへ再生成する。[連結方式と旧成果物の扱い](audio-multitask-lfm3.ja.md#フレーム連結への変更と旧成果物)も参照。

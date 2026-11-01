@@ -37,6 +37,7 @@ class MultitaskConfig:
     lora_rank: int = 8
     lora_targets: tuple[str, ...] = ("q_proj", "v_proj")
     pool_frames: int = 5
+    frame_reduction: str = "concat"
     learning_rate: float = 0.0003
     warmup_steps: int = 100
     checkpoint_every: int = 250
@@ -84,6 +85,8 @@ class MultitaskConfig:
             raise ValueError("tasks must be a nonempty tuple of distinct supported tasks")
         if self.encoder_backend not in ("math", "flash"):
             raise ValueError("encoder_backend must be math or flash")
+        if self.frame_reduction not in ("concat", "mean"):
+            raise ValueError("frame_reduction must be concat or legacy mean")
         if type(self.initial_midi_generation) is not bool:
             raise ValueError("initial_midi_generation must be boolean")
         for key in (
@@ -113,6 +116,10 @@ class MultitaskConfig:
     def to_dict(self):
         return {**asdict(self), "tasks": list(self.tasks), "lora_targets": list(self.lora_targets)}
 
+    @property
+    def audio_feature_width(self):
+        return self.audio.width * (self.pool_frames if self.frame_reduction == "concat" else 1)
+
     @classmethod
     def from_dict(cls, values):
         values = dict(values)
@@ -120,6 +127,11 @@ class MultitaskConfig:
         values["lora_targets"] = tuple(values.get("lora_targets", ("q_proj", "v_proj")))
         values["audio"] = AudioSSLConfig(**values.get("audio", {}))
         return cls(**values)
+
+    @classmethod
+    def from_saved_dict(cls, values):
+        # Only historical checkpoints/caches default to mean pooling.
+        return cls.from_dict({"frame_reduction": "mean", **values})
 
     @classmethod
     def load(cls, path):

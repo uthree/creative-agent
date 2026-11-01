@@ -151,7 +151,7 @@ class MultitaskModel(nn.Module):
             self.backbone.gradient_checkpointing_enable(
                 gradient_checkpointing_kwargs={"use_reentrant": False}
             )
-        self.projector = nn.Linear(config.audio.width, self.backbone.config.hidden_size)
+        self.projector = nn.Linear(config.audio_feature_width, self.backbone.config.hidden_size)
         self.diagnosis_head = nn.Linear(config.audio.width, 2 * len(CLASSES))
         self.encoder.to(device)
         self.projector.to(device)
@@ -167,13 +167,21 @@ class MultitaskModel(nn.Module):
         features = self.encoder.encode(
             batch.waveforms.to(self.device), valid, torch.zeros_like(valid)
         )
-        pooled = []
+        grouped = []
         for row in range(len(waveforms)):
             full = features[row, : int(valid[row].sum())]
-            pooled.append(
-                torch.stack([chunk.mean(0) for chunk in full.split(self.config.pool_frames)])
-            )
-        return pooled, features, batch
+            if self.config.frame_reduction == "concat":
+                # Keep chronological order; pad only the last group of this example.
+                padding = (-len(full)) % self.config.pool_frames
+                grouped.append(
+                    F.pad(full, (0, 0, 0, padding)).reshape(-1, self.config.audio_feature_width)
+                )
+            else:
+                # Compatibility only: old checkpoints/caches require their original bridge.
+                grouped.append(
+                    torch.stack([chunk.mean(0) for chunk in full.split(self.config.pool_frames)])
+                )
+        return grouped, features, batch
 
     def prepare(self, features, prompts, targets=None, reserve=0):
         if targets is None:
@@ -190,7 +198,7 @@ class MultitaskModel(nn.Module):
             else:
                 if (
                     feature.ndim != 2
-                    or feature.shape[1] != self.config.audio.width
+                    or feature.shape[1] != self.config.audio_feature_width
                     or not len(feature)
                 ):
                     raise ValueError("invalid unpadded audio features")
@@ -297,6 +305,8 @@ class MultitaskModel(nn.Module):
         parameters = {name: p for name, p in self.named_parameters() if p.requires_grad}
         if parameters.keys() != values.keys():
             raise ValueError("trainable checkpoint names mismatch")
+        if any(parameter.shape != values[name].shape for name, parameter in parameters.items()):
+            raise ValueError("trainable checkpoint shape mismatch; check frame reduction/projector")
         with torch.no_grad():
             for name, parameter in parameters.items():
                 parameter.copy_(values[name].to(parameter.device))

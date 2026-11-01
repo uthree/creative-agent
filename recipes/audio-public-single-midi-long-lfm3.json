@@ -34,5 +34,6 @@
     "midi"
   ],
   "encoder_backend": "flash",
-  "initial_midi_generation": false
+  "initial_midi_generation": false,
+  "frame_reduction": "concat"
 }

@@ -123,12 +123,14 @@ def prepare_cache(manifest, encoder_checkpoint, output):
     output = Path(output)
     if output.exists():
         raise ValueError("diagnostic cache already exists")
+    output.parent.mkdir(parents=True, exist_ok=True)
     torch.set_num_threads(2)
     torch.manual_seed(SEED)
     data = PublicData(manifest)
     data.verify_unchanged(audio=True)
     parent = torch.load(encoder_checkpoint, map_location="cpu", weights_only=True)
-    config = MultitaskConfig.from_dict(parent["config"])
+    # Reuse encoder weights, not the parent's historical feature reduction.
+    config = replace(MultitaskConfig.from_saved_dict(parent["config"]), frame_reduction="concat")
     encoder = AudioSSLModel(config.audio, backend="flash").cuda().eval().requires_grad_(False)
     weights = {
         k.removeprefix("encoder."): v
@@ -216,7 +218,7 @@ def prepare_cache(manifest, encoder_checkpoint, output):
 
 
 def configure(cache, backbone, task, wide=False):
-    config = MultitaskConfig.from_dict(cache["config"])
+    config = MultitaskConfig.from_saved_dict(cache["config"])
     return replace(
         config,
         backbone=backbone,
@@ -341,12 +343,14 @@ def train_condition(
     output = Path(output)
     if output.exists():
         raise ValueError("run directory already exists; refusing to overwrite")
-    output.mkdir(parents=True)
+    cache = torch.load(cache_path, map_location="cpu", weights_only=True)
+    config = configure(cache, backbone, task, wide)
+    if config.frame_reduction != "concat":
+        raise ValueError("legacy mean feature cache; regenerate it with prepare before training")
     torch.set_num_threads(2)
     torch.manual_seed(SEED)
     torch.cuda.reset_peak_memory_stats()
-    cache = torch.load(cache_path, map_location="cpu", weights_only=True)
-    config = configure(cache, backbone, task, wide)
+    output.mkdir(parents=True)
     model = MultitaskModel(config, device="cuda", model_dir=model_dir)
     model.encoder.requires_grad_(False)
     model.diagnosis_head.requires_grad_(False)
@@ -506,7 +510,7 @@ def decode_ablation(cache_path, model_dir, suite, output, manifest):
             Path(suite) / subdir / "checkpoint.pt", map_location="cpu", weights_only=True
         )
         model = MultitaskModel(
-            MultitaskConfig.from_dict(state["config"]), device="cuda", model_dir=model_dir
+            MultitaskConfig.from_saved_dict(state["config"]), device="cuda", model_dir=model_dir
         ).eval()
         model.load_trainable(state["trainable"])
         assert model.frozen_hash() == state["frozen_hash"]

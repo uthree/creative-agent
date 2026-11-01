@@ -37,5 +37,6 @@
     "transcription",
     "midi"
   ],
-  "encoder_backend": "math"
+  "encoder_backend": "math",
+  "frame_reduction": "concat"
 }

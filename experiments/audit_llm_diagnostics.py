@@ -122,7 +122,7 @@ def audit_feature_cache(cache, data, encoder_checkpoint):
         if k.startswith("encoder.")
     }
     assert tensor_hash(weights) == cache["encoder_sha256"]
-    config = MultitaskConfig.from_dict(cache["config"])
+    config = MultitaskConfig.from_saved_dict(cache["config"])
     encoder = AudioSSLModel(config.audio, backend="flash").cuda().eval().requires_grad_(False)
     encoder.load_state_dict(weights, strict=True)
 
@@ -311,7 +311,7 @@ def main():
         replayed = 0
         if not args.no_replay:
             torch.manual_seed(20261101)
-            config = MultitaskConfig.from_dict(state["config"])
+            config = MultitaskConfig.from_saved_dict(state["config"])
             model = MultitaskModel(
                 config,
                 device="cuda",

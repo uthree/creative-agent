@@ -159,7 +159,7 @@ def audit_images(run, state):
 
 def controls(run, data, state, model_dir):
     assert snapshot_identity(model_dir) == state["backbone_identity"]
-    config = MultitaskConfig.from_dict(state["config"])
+    config = MultitaskConfig.from_saved_dict(state["config"])
     model = MultitaskModel(config, device="cuda", model_dir=model_dir).eval()
     assert model.frozen_hash() == state["frozen_hash"]
     model.load_trainable(state["trainable"])

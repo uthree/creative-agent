@@ -8,7 +8,7 @@ SSL、キャプション、音声問題検出、発話書き起こし、audio-to
 
 [LiquidAI/LFM3-1.7B](https://huggingface.co/LiquidAI/LFM3-1.7B)のsnapshot `ac2586a34f1a1c03329dbdcdefabd8b6478ddaa7` を使う。公式tokenizerとchat templateをローカルから読み、思考出力を無効にする指定を渡す。model本体はBF16で凍結し、attentionのq_proj/v_projへrank 8、alpha 16のLoRAを入れる。encoder、SSL headとmask token、診断head、projectorとLoRAはFP32の学習パラメーターで、CUDA計算にはBF16 autocastを使う。gradient checkpointingと応答位置だけのLM head計算でメモリを抑える。
 
-音声encoderは前回SSLのstep 21から読み込める。100 Hzの連続特徴列を有効位置だけ5位置ずつ平均し、20 Hz相当の列を線形projector経由でLLMへ渡す。末尾の不完全なグループも残す。音声encoderを更新するため、runをまたぐ固定特徴cacheは使わない。
+音声encoderは前回SSLのstep 21から読み込める。新規学習は`frame_reduction: "concat"`を使い、100 Hz・128次元の連続特徴を有効位置だけ5フレームずつ時刻順に連結する。640次元からLLMの2048次元へ1層の線形projectorで投影し、20 Hz相当の列を渡す。末尾の不足フレームだけをゼロで埋め、別の音声のフレームやbatch paddingを混ぜない。30秒は約600位置、60秒は約1200位置で、LLMの系列長は以前と同じ。音声encoderを更新するため、runをまたぐ固定特徴cacheは使わない。
 
 入力は最大2秒、LLMの全体上限1,024位置、生成上限160 tokens。公式generation_configを固定し、do_sample=False、EOSとpad IDを指定する。snapshot既定のrepetition penalty 1.1も有効で、prompt embeddingを使うため新たに生成したtoken列へ適用される。N1の末尾改行を保存するため、応答は正解文字列のtoken列とEOSを明示的に連結し、chat templateで教師末尾をtrimしない。指示・音声位置・assistant開始・paddingはloss対象外。
 
@@ -65,3 +65,17 @@ TEXTとAUDIOは `examples/<task>/<sample_id>/` で対応付ける。入力音声
 採譜のIMAGESは `midi_score_comparison`。上段が正解MIDI、中段が生成MIDI、下段が重ね合わせで、音高と時間の軸、凡例を付ける。正解も生成もMIDIへ書き、読み直した音符から描画する。生成形式が不正ならMIDIを作らず、画像にも赤字で形式エラーと表示する。有効な非空MIDIは倍音合成で再生用音声も記録するが、入力録音ではなく予測音符の再合成として区別する。
 
 SSLにはLLM応答がないので、入力と正解/予測の左右別スペクトル比較を記録する。全評価のraw応答、正解、生成MIDI、PNGは `evaluation/step-xxxxxx/` にも残す。音源、教師文、MIDI、モデル・adapter・checkpoint、TensorBoardイベントはGit対象外。公開には小さな集計と実測報告だけを残す。
+
+## フレーム連結への変更と旧成果物
+
+2026年11月2日（JST）に新規学習の接続を5フレーム平均から5フレーム連結へ変更した。ダウンサンプリングでは平均プーリングをできるだけ避け、順序を保つ連結と学習可能な投影を優先する。`pool_frames`はグループのフレーム数を表す。診断headとSSLには従来と同じ100 Hzの未連結特徴を渡す。単体のcaption／ASR／MIDIスモークは元から100 Hzを直接渡しており、この平均圧縮を使っていない。
+
+projectorは`Linear(128, 2048)`の264,192パラメータから`Linear(640, 2048)`の1,312,768パラメータへ増える。連結は順序を保持するが、学習後の投影が全情報を保持する保証や、認識精度の改善を確認した結果ではない。
+
+新規configの既定値と全multitaskレシピは`concat`。保存済みcheckpoint／cache専用の`from_saved_dict`は、`frame_reduction`がない旧形式を`mean`として扱い、旧projectorの形状と推論を再現する。新規設定の`from_dict`とレシピを読む`load`は、フィールド省略時も`concat`を使う。新規学習は旧平均方式を拒否し、旧cacheで診断学習を開始すると再生成を求めるエラーになる。
+
+旧projector／optimizerは新しい形状へそのまま移行できず、平均方式からの全重みwarm startも拒否する。新しいrunでprojectorを学習し直す。診断runnerの`prepare`は旧親checkpointからencoderだけを取り出し、新しい連結特徴cacheを作れる。過去の重み・cache・実測結果は変更しない。旧runの学習再開や当時のsource hashを含む監査は、対応するGit revisionで実施する。新方式のcheckpointは従来どおり同じ実装・設定で厳密再開できる。
+
+検証では、フレーム数1／2／5の順序・末尾ゼロ埋め・paddingの除外・全有効フレームへの勾配、旧形式の識別と新方式への誤読込拒否、5課題の更新と厳密再開を確認した。全テストはGPU環境130成功・任意のeSpeak NG用1件スキップ、CPU環境122成功・CUDA用8件とeSpeak NG用1件スキップ。Ruffのcheck／formatも成功した。
+
+さらに実データ38例の連結cacheを新規生成し、LFM3でASR・30秒採譜・60秒採譜の各1例を計3更新した。入力形状は118×640、600×640、1200×640で、全例でprojectorに有限の非ゼロ勾配が流れ、重みが更新された。LLM本体の固定、checkpointのtrainable重みの保存・再読込も確認した。生成は8 tokenに制限した接続確認であり、認識精度の比較には使わない。損失3更新、入力ステレオ音声3件、正解とLLM応答3件、採譜比較画像2枚を含む成果物は、Git除外対象の`runs/audio-frame-concat-smoke-20261102/`へ保存した。

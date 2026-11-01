@@ -5,7 +5,13 @@ from dataclasses import replace
 import pytest
 import torch
 
-from creative_agent.llm_diagnostics import balanced_schedule, configure, oracle_input, tensor_hash
+from creative_agent.llm_diagnostics import (
+    balanced_schedule,
+    configure,
+    oracle_input,
+    tensor_hash,
+    train_condition,
+)
 from creative_agent.multitask_data import MultitaskConfig
 from creative_agent.multitask_model import MARKER, MultitaskModel, install_lora
 
@@ -70,7 +76,7 @@ def test_frozen_feature_loss_updates_bridge_only_and_hash_tracks_values():
     model = MultitaskModel(small_config())
     model.encoder.requires_grad_(False)
     model.diagnosis_head.requires_grad_(False)
-    feature = torch.randn(4, 32)
+    feature = torch.randn(4, model.config.audio_feature_width)
     encoder_hash = tensor_hash(model.encoder.state_dict())
     bridge = model.projector.weight.detach().clone()
     loss, _ = model.text_loss([feature], ["Transcribe"], ["hello"])
@@ -79,6 +85,17 @@ def test_frozen_feature_loss_updates_bridge_only_and_hash_tracks_values():
     assert tensor_hash(model.encoder.state_dict()) == encoder_hash
     assert not torch.equal(bridge, model.projector.weight)
     assert all(p.grad is None for p in model.encoder.parameters())
+
+
+def test_legacy_cache_is_rejected_before_new_training(tmp_path):
+    config = small_config().to_dict()
+    config.pop("frame_reduction")
+    cache = tmp_path / "legacy.pt"
+    torch.save({"config": config}, cache)
+    output = tmp_path / "new-run"
+    with pytest.raises(ValueError, match="regenerate it with prepare"):
+        train_condition(cache, None, output, backbone="lfm3", task="midi", mode="audio")
+    assert not output.exists()
 
 
 def test_lfm_named_mlp_and_conv_projections_receive_wide_lora():

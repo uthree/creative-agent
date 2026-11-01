@@ -29,5 +29,6 @@
   "max_new_tokens": 192,
   "generation_examples": 4,
   "diagnostic_weight": 1.0,
-  "tiny_width": 32
+  "tiny_width": 32,
+  "frame_reduction": "concat"
 }
