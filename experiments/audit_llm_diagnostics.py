@@ -11,6 +11,7 @@ import numpy as np
 import torch
 from PIL import Image
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
+from torch.utils.tensorboard import SummaryWriter
 
 from creative_agent.audio import file_hash
 from creative_agent.llm_diagnostics import (
@@ -28,6 +29,7 @@ from creative_agent.multitask_model import MultitaskModel
 from creative_agent.multitask_objectives import autocast
 from creative_agent.multitask_visuals import midi_comparison_image
 from creative_agent.public_data import PublicData
+from creative_agent.public_evaluation import scalar_tree
 from creative_agent.training import source_identity
 
 
@@ -172,6 +174,7 @@ def main():
         parser.add_argument("--" + key, type=Path, required=True)
     parser.add_argument("--no-replay", action="store_true")
     parser.add_argument("--allow-partial", action="store_true")
+    parser.add_argument("--publish-tensorboard", action="store_true")
     args = parser.parse_args()
     torch.set_num_threads(2)
     result = read(args.suite / "comparison.json")
@@ -331,6 +334,38 @@ def main():
         "script_sha256": file_hash(Path(__file__)),
         "previous_responses_reproduced_token_for_token": decode_reproduced,
     }
+    if args.publish_tensorboard:
+        for name, report in result["runs"].items():
+            if "midi_text_diagnostics" not in report:
+                continue
+            with SummaryWriter(str(args.suite / name / "tensorboard")) as writer:
+                writer.add_text(
+                    "diagnostics/method",
+                    "Secondary diagnostic: append a missing final newline only. "
+                    "Notes, values and order are unchanged. "
+                    "Raw metrics and actual responses are retained.",
+                    1000,
+                )
+                for split, conditions in report["midi_text_diagnostics"].items():
+                    for condition, values in conditions.items():
+                        prefix = f"diagnostics/{split}/{condition}"
+                        scalar_tree(
+                            writer,
+                            prefix + "/suffix_newline_only",
+                            values["suffix_newline_only_diagnostic"]["metrics"],
+                            1000,
+                        )
+                        scalar_tree(
+                            writer,
+                            prefix + "/exact_row_multiset",
+                            values["exact_row_multiset"],
+                            1000,
+                        )
+                        writer.add_text(
+                            prefix + "/raw_invalid_reasons",
+                            json.dumps(values["invalid_reasons"]),
+                            1000,
+                        )
     # Aggregates only: no cached answers, full responses, filesystem locations or private IPs.
     text = json.dumps(result, ensure_ascii=False)
     assert "/home/" not in text and "192.168." not in text
