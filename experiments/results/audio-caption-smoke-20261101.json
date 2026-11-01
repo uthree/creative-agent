@@ -1,0 +1,305 @@
+{
+  "date_jst": "2026-11-01",
+  "scope": "stage2 caption CE and projector update smoke; not a caption-quality benchmark",
+  "verified_implementation_commit": "d79af3f7f542d769cc0997602649b6e7a41f37cc",
+  "runs": {
+    "cpu": {
+      "report": {
+        "status": "passed",
+        "scope": "projector-only caption CE wiring; no caption-quality claim",
+        "config": {
+          "audio": {
+            "sample_rate": 48000,
+            "hop_samples": 480,
+            "stem_width": 32,
+            "width": 128,
+            "layers": 2,
+            "heads": 4,
+            "ffn_width": 352,
+            "qk_norm": true,
+            "rope_time_scale": 100.0,
+            "mask_ratio": 0.5,
+            "mask_span": 5,
+            "learning_rate": 0.001,
+            "batch_size": 2,
+            "seed": 20261101,
+            "num_threads": 2,
+            "fixture_count": 16,
+            "duration_seconds": 2.0
+          },
+          "lm_width": 64,
+          "lm_layers": 2,
+          "lm_heads": 4,
+          "lm_ffn_width": 176,
+          "max_positions": 512,
+          "max_caption_bytes": 256,
+          "max_prompt_bytes": 128,
+          "max_new_tokens": 16,
+          "learning_rate": 0.003
+        },
+        "encoder_origin": {
+          "kind": "stage1_ssl_checkpoint",
+          "step": 11,
+          "sha256": "7c363c6b36ebf8702671e4f97c4b5014e858a60c116ebb98dbb009b147dbdf52"
+        },
+        "llm": "random tiny Qwen3, no pretrained weights",
+        "tokenizer": "utf8-bytes-plus-three-specials-v1",
+        "trainable_parameters": 8256,
+        "total_parameters": 765958,
+        "optimizer_steps": 11,
+        "session_optimizer_steps": 1,
+        "resumed_from_step": 10,
+        "skipped_updates": 0,
+        "frozen_unchanged": {
+          "encoder": true,
+          "llm": true
+        },
+        "projector_changed": true,
+        "initial_hashes": {
+          "encoder": "c62492e738a96bbc5e485b722f2ea61e7c4fa70430e317feb338d7bf02d992e3",
+          "llm": "d81c3ac27b256067c40d4405725b5cbd4d92805e2cb0a0a36b2352c84f1702d4",
+          "projector": "73805979a4d21ae5071a8483df4bd794cdc1bfc5b90be21d18bd448b2041d68e"
+        },
+        "data_signature": "2fc6fcac3980b259a09df66f034135791a75b9dc41b748bdc11df5fe97e2891a",
+        "train_works": 12,
+        "validation_works": 4,
+        "max_sequence_positions": 361,
+        "initial_validation": {
+          "mean_response_token_nll": {
+            "audio": 5.617350416756719,
+            "silence": 5.617496347166801,
+            "wrong_audio": 5.617223430852421
+          },
+          "supervised_token_counts": {
+            "audio": 366,
+            "silence": 366,
+            "wrong_audio": 366
+          },
+          "examples": []
+        },
+        "final_validation": {
+          "mean_response_token_nll": {
+            "audio": 5.36620463699591,
+            "silence": 5.366178575109263,
+            "wrong_audio": 5.365936137287995
+          },
+          "supervised_token_counts": {
+            "audio": 366,
+            "silence": 366,
+            "wrong_audio": 366
+          },
+          "generated_examples": 4
+        },
+        "last_training": {
+          "step": 11,
+          "epoch": 2,
+          "response_ce": 5.3689751625061035,
+          "projector_gradient_norm": 0.06895982474088669,
+          "supervised_tokens": 182,
+          "sequence_positions": 323,
+          "sample_ids": [
+            "synthetic-work-0005",
+            "synthetic-work-0015"
+          ]
+        },
+        "device": "cpu",
+        "precision": "float32",
+        "encoder_attention_backend": "math",
+        "lm_attention_backend": "math_sdpa",
+        "torch": "2.14.1+cpu",
+        "transformers": "4.57.6",
+        "gpu": null,
+        "peak_allocated_bytes": null,
+        "peak_reserved_bytes": null,
+        "elapsed_seconds_this_session": 0.5253221369930543,
+        "source": {
+          "file_sha256": {
+            "src/creative_agent/__init__.py": "506c3f2af75db592b115074ef68d9acffd640b70fb4670102c62b31ed6a319b9",
+            "src/creative_agent/audio.py": "270c420cbce81460792d0ea2c271d6c5497eea56df83c9343417cd9ba2a47d90",
+            "src/creative_agent/caption.py": "a159623bfc1eea904da5065cc50cc4107ceac1d713647e82f03f47325ce48a8e",
+            "src/creative_agent/caption_training.py": "5d01324690be15b478d3166b536dc79d54b6dccc38cf3fc9bcbc0d385eb810f5",
+            "src/creative_agent/cli.py": "f4752f0e7284dab4ba8b18f3b36075d34c0c0106deb3772e1d1019511eb36424",
+            "src/creative_agent/config.py": "9a85d1b6bb9781f811086cfb30a7c07633f9c69443a488a1c2229c3f242e996f",
+            "src/creative_agent/model.py": "b958800dd819fd4625ee1f5c5c02c47cc1e023e9e4e6ba916b8cf0c61ced476b",
+            "src/creative_agent/training.py": "a31d44b490b872805abc4d0fabfe32772785459be2f9b2752925f25f2eca2651",
+            "pyproject.toml": "c4edede314da1bc1027ea5b6805c088dfda4162af28ca102ca7c1c0f9234f67d",
+            "uv.lock": "9f5cdc3e02229a9fc20fcb0bfa412d315ab84f4df4ec79797d40308ffa470392"
+          },
+          "commit": "b712eac5561c87a196bf3271d2a6b4db2ba734c1",
+          "dirty": true
+        }
+      },
+      "checkpoint_sha256": "7b79d6eb80be2d4017d90344b97bb88cabc6b83e130bc7f3592cda794f963025",
+      "source_hashes_match_commit": true,
+      "audited_optimizer_steps": 11,
+      "optimizer_contains_only_projector": true,
+      "ssl_encoder_weights_match_original_exactly": true,
+      "frozen_llm_hash_matches": true,
+      "tensorboard_update_steps_match": true,
+      "paired_audio_reference_generated_verified": 4,
+      "invalid_utf8_generated_examples": 4
+    },
+    "cuda": {
+      "report": {
+        "status": "passed",
+        "scope": "projector-only caption CE wiring; no caption-quality claim",
+        "config": {
+          "audio": {
+            "sample_rate": 48000,
+            "hop_samples": 480,
+            "stem_width": 32,
+            "width": 128,
+            "layers": 2,
+            "heads": 4,
+            "ffn_width": 352,
+            "qk_norm": true,
+            "rope_time_scale": 100.0,
+            "mask_ratio": 0.5,
+            "mask_span": 5,
+            "learning_rate": 0.001,
+            "batch_size": 2,
+            "seed": 20261101,
+            "num_threads": 2,
+            "fixture_count": 16,
+            "duration_seconds": 2.0
+          },
+          "lm_width": 64,
+          "lm_layers": 2,
+          "lm_heads": 4,
+          "lm_ffn_width": 176,
+          "max_positions": 512,
+          "max_caption_bytes": 256,
+          "max_prompt_bytes": 128,
+          "max_new_tokens": 16,
+          "learning_rate": 0.003
+        },
+        "encoder_origin": {
+          "kind": "stage1_ssl_checkpoint",
+          "step": 21,
+          "sha256": "25579db3c62145d37707e69bcffd331a58deb3106033dd9c4aa7d0cce66be132"
+        },
+        "llm": "random tiny Qwen3, no pretrained weights",
+        "tokenizer": "utf8-bytes-plus-three-specials-v1",
+        "trainable_parameters": 8256,
+        "total_parameters": 765958,
+        "optimizer_steps": 21,
+        "session_optimizer_steps": 1,
+        "resumed_from_step": 20,
+        "skipped_updates": 0,
+        "frozen_unchanged": {
+          "encoder": true,
+          "llm": true
+        },
+        "projector_changed": true,
+        "initial_hashes": {
+          "encoder": "0e5603caf418441d9b93b9c5584756e2442d343fa92284fa6a7ebf8f322a8467",
+          "llm": "d81c3ac27b256067c40d4405725b5cbd4d92805e2cb0a0a36b2352c84f1702d4",
+          "projector": "73805979a4d21ae5071a8483df4bd794cdc1bfc5b90be21d18bd448b2041d68e"
+        },
+        "data_signature": "02d267224002bf246892ae9da60ef2651243b726f50522b705f933025ce5eb76",
+        "train_works": 12,
+        "validation_works": 4,
+        "max_sequence_positions": 361,
+        "initial_validation": {
+          "mean_response_token_nll": {
+            "audio": 5.612207067468779,
+            "silence": 5.612202970056586,
+            "wrong_audio": 5.612094695450829
+          },
+          "supervised_token_counts": {
+            "audio": 366,
+            "silence": 366,
+            "wrong_audio": 366
+          },
+          "examples": []
+        },
+        "final_validation": {
+          "mean_response_token_nll": {
+            "audio": 5.356969920663886,
+            "silence": 5.356949311136548,
+            "wrong_audio": 5.35666553179423
+          },
+          "supervised_token_counts": {
+            "audio": 366,
+            "silence": 366,
+            "wrong_audio": 366
+          },
+          "generated_examples": 4
+        },
+        "last_training": {
+          "step": 21,
+          "epoch": 4,
+          "response_ce": 5.357458114624023,
+          "projector_gradient_norm": 0.03514058515429497,
+          "supervised_tokens": 182,
+          "sequence_positions": 353,
+          "sample_ids": [
+            "synthetic-work-0006",
+            "synthetic-work-0005"
+          ]
+        },
+        "device": "cuda:0",
+        "precision": "float16",
+        "encoder_attention_backend": "flash",
+        "lm_attention_backend": "math_sdpa",
+        "torch": "2.14.1+cu126",
+        "transformers": "4.57.6",
+        "gpu": "NVIDIA GeForce RTX 3070",
+        "peak_allocated_bytes": 44206592,
+        "peak_reserved_bytes": 54525952,
+        "elapsed_seconds_this_session": 1.834843238000758,
+        "source": {
+          "file_sha256": {
+            "src/creative_agent/__init__.py": "506c3f2af75db592b115074ef68d9acffd640b70fb4670102c62b31ed6a319b9",
+            "src/creative_agent/audio.py": "270c420cbce81460792d0ea2c271d6c5497eea56df83c9343417cd9ba2a47d90",
+            "src/creative_agent/caption.py": "a159623bfc1eea904da5065cc50cc4107ceac1d713647e82f03f47325ce48a8e",
+            "src/creative_agent/caption_training.py": "5d01324690be15b478d3166b536dc79d54b6dccc38cf3fc9bcbc0d385eb810f5",
+            "src/creative_agent/cli.py": "f4752f0e7284dab4ba8b18f3b36075d34c0c0106deb3772e1d1019511eb36424",
+            "src/creative_agent/config.py": "9a85d1b6bb9781f811086cfb30a7c07633f9c69443a488a1c2229c3f242e996f",
+            "src/creative_agent/model.py": "b958800dd819fd4625ee1f5c5c02c47cc1e023e9e4e6ba916b8cf0c61ced476b",
+            "src/creative_agent/training.py": "a31d44b490b872805abc4d0fabfe32772785459be2f9b2752925f25f2eca2651",
+            "pyproject.toml": "c4edede314da1bc1027ea5b6805c088dfda4162af28ca102ca7c1c0f9234f67d",
+            "uv.lock": "9f5cdc3e02229a9fc20fcb0bfa412d315ab84f4df4ec79797d40308ffa470392"
+          },
+          "commit": "b712eac5561c87a196bf3271d2a6b4db2ba734c1",
+          "dirty": true
+        }
+      },
+      "checkpoint_sha256": "183f1a9b5cf55b9d5131e468baaad371c8398a806750c90864b7f4fb098c19a4",
+      "source_hashes_match_commit": true,
+      "audited_optimizer_steps": 21,
+      "optimizer_contains_only_projector": true,
+      "ssl_encoder_weights_match_original_exactly": true,
+      "frozen_llm_hash_matches": true,
+      "tensorboard_update_steps_match": true,
+      "paired_audio_reference_generated_verified": 4,
+      "invalid_utf8_generated_examples": 4
+    }
+  },
+  "local_tests": {
+    "cuda_environment": {
+      "passed": 30,
+      "skipped": 0
+    },
+    "cpu_only_environment": {
+      "passed": 26,
+      "skipped_cuda": 4
+    },
+    "ruff": "passed",
+    "lock": "checked offline"
+  },
+  "limitations": [
+    "The tiny Qwen3 and UTF-8 tokenizer are random/offline wiring fixtures, not a pretrained language model.",
+    "Caption NLL is not worse under silence or wrong-audio conditions; useful audio grounding is not established.",
+    "Raw generated bytes are generally not meaningful captions.",
+    "Execution preceded the implementation commit; all recorded code and lock hashes match that commit.",
+    "Only the resumed session is included in the final runtime and GPU memory measurements.",
+    "Audio, captions, generated text, full manifests, checkpoints and TensorBoard events remain local."
+  ],
+  "github_actions": {
+    "implementation_commit": "d79af3f7f542d769cc0997602649b6e7a41f37cc",
+    "url": "https://github.com/uthree/creative-agent/actions/runs/41279681934",
+    "ubuntu-latest": "success",
+    "windows-latest": "success"
+  }
+}
