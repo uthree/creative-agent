@@ -1,0 +1,1073 @@
+{
+  "date_jst": "2026-11-01",
+  "scope": "normal/single/compound diagnostic smoke; no detection-quality claim",
+  "verified_implementation_commit": "2988c61492e8a86d5127be598c417216040ff68a",
+  "runs": {
+    "cpu": {
+      "report": {
+        "status": "passed",
+        "scope": "diagnostic data/gradient/update/resume smoke; no quality claim",
+        "config": {
+          "audio": {
+            "sample_rate": 48000,
+            "hop_samples": 480,
+            "stem_width": 32,
+            "width": 128,
+            "layers": 2,
+            "heads": 4,
+            "ffn_width": 352,
+            "qk_norm": true,
+            "rope_time_scale": 100.0,
+            "mask_ratio": 0.5,
+            "mask_span": 5,
+            "learning_rate": 0.001,
+            "batch_size": 2,
+            "seed": 20261101,
+            "num_threads": 2,
+            "fixture_count": 16,
+            "duration_seconds": 2.0
+          },
+          "learning_rate": 0.001,
+          "frame_loss_weight": 1.0,
+          "threshold": 0.5,
+          "event_iou": 0.5
+        },
+        "classes": [
+          "dropout",
+          "clipping",
+          "channel_imbalance"
+        ],
+        "encoder_origin": {
+          "kind": "stage1_ssl_checkpoint",
+          "step": 11,
+          "sha256": "7c363c6b36ebf8702671e4f97c4b5014e858a60c116ebb98dbb009b147dbdf52"
+        },
+        "optimizer_steps": 11,
+        "session_optimizer_steps": 1,
+        "resumed_from_step": 10,
+        "skipped_updates": 0,
+        "parameter_groups_changed": {
+          "stem": true,
+          "transformer": true,
+          "normalization": true,
+          "diagnosis_head": true
+        },
+        "unused_ssl_head_unchanged": true,
+        "trainable_parameters": 437926,
+        "data_signature": "8600f913bc57a1f93de3d877ff5d713527e274666753d1b29db344c0efa80a2f",
+        "source_works": 16,
+        "split_counts": {
+          "train": {
+            "normal": 24,
+            "single": 36,
+            "compound": 48
+          },
+          "validation": {
+            "normal": 8,
+            "single": 12,
+            "compound": 16
+          }
+        },
+        "initial_validation": {
+          "examples": 36,
+          "threshold": 0.5,
+          "event_iou": 0.5,
+          "per_class": {
+            "dropout": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "clipping": {
+              "tp": 16,
+              "fp": 20,
+              "fn": 0,
+              "precision": 0.4444444444444444,
+              "recall": 1.0,
+              "f1": 0.6153846153846154
+            },
+            "channel_imbalance": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            }
+          },
+          "clip_macro_f1": 0.20512820512820515,
+          "clip_micro": {
+            "tp": 16,
+            "fp": 20,
+            "fn": 32,
+            "precision": 0.4444444444444444,
+            "recall": 0.3333333333333333,
+            "f1": 0.38095238095238093
+          },
+          "event_per_class": {
+            "dropout": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "clipping": {
+              "tp": 0,
+              "fp": 36,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "channel_imbalance": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            }
+          },
+          "event_macro_f1": 0.0,
+          "event_micro": {
+            "tp": 0,
+            "fp": 36,
+            "fn": 48,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "by_kind": {
+            "normal": {
+              "examples": 8,
+              "exact_matches": 0,
+              "exact_set_accuracy": 0.0
+            },
+            "single": {
+              "examples": 12,
+              "exact_matches": 4,
+              "exact_set_accuracy": 0.3333333333333333
+            },
+            "compound": {
+              "examples": 16,
+              "exact_matches": 0,
+              "exact_set_accuracy": 0.0
+            }
+          },
+          "normal_clips_with_false_alarm": 8,
+          "normal_clip_false_alarm_rate": 1.0,
+          "normal_false_events_per_hour": 2079.4286384736415,
+          "normal_seconds": 13.849958333333333,
+          "loss": {
+            "total": 1.240918089946111,
+            "clip": 0.6960498922401004,
+            "frame": 0.5448682059844335
+          }
+        },
+        "final_validation": {
+          "examples": 36,
+          "threshold": 0.5,
+          "event_iou": 0.5,
+          "per_class": {
+            "dropout": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "clipping": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "channel_imbalance": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            }
+          },
+          "clip_macro_f1": 0.0,
+          "clip_micro": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 48,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "event_per_class": {
+            "dropout": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "clipping": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "channel_imbalance": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            }
+          },
+          "event_macro_f1": 0.0,
+          "event_micro": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 48,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "by_kind": {
+            "normal": {
+              "examples": 8,
+              "exact_matches": 8,
+              "exact_set_accuracy": 1.0
+            },
+            "single": {
+              "examples": 12,
+              "exact_matches": 0,
+              "exact_set_accuracy": 0.0
+            },
+            "compound": {
+              "examples": 16,
+              "exact_matches": 0,
+              "exact_set_accuracy": 0.0
+            }
+          },
+          "normal_clips_with_false_alarm": 0,
+          "normal_clip_false_alarm_rate": 0.0,
+          "normal_false_events_per_hour": 0.0,
+          "normal_seconds": 13.849958333333333,
+          "loss": {
+            "total": 1.0849380360709295,
+            "clip": 0.8794543610678779,
+            "frame": 0.20548368079794777
+          }
+        },
+        "baselines": {
+          "always_none": {
+            "examples": 36,
+            "threshold": 0.5,
+            "event_iou": 0.5,
+            "per_class": {
+              "dropout": {
+                "tp": 0,
+                "fp": 0,
+                "fn": 16,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "clipping": {
+                "tp": 0,
+                "fp": 0,
+                "fn": 16,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "channel_imbalance": {
+                "tp": 0,
+                "fp": 0,
+                "fn": 16,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              }
+            },
+            "clip_macro_f1": 0.0,
+            "clip_micro": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 48,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "event_per_class": {
+              "dropout": {
+                "tp": 0,
+                "fp": 0,
+                "fn": 16,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "clipping": {
+                "tp": 0,
+                "fp": 0,
+                "fn": 16,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "channel_imbalance": {
+                "tp": 0,
+                "fp": 0,
+                "fn": 16,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              }
+            },
+            "event_macro_f1": 0.0,
+            "event_micro": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 48,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "by_kind": {
+              "normal": {
+                "examples": 8,
+                "exact_matches": 8,
+                "exact_set_accuracy": 1.0
+              },
+              "single": {
+                "examples": 12,
+                "exact_matches": 0,
+                "exact_set_accuracy": 0.0
+              },
+              "compound": {
+                "examples": 16,
+                "exact_matches": 0,
+                "exact_set_accuracy": 0.0
+              }
+            },
+            "normal_clips_with_false_alarm": 0,
+            "normal_clip_false_alarm_rate": 0.0,
+            "normal_false_events_per_hour": 0.0,
+            "normal_seconds": 13.849958333333333
+          },
+          "always_all": {
+            "examples": 36,
+            "threshold": 0.5,
+            "event_iou": 0.5,
+            "per_class": {
+              "dropout": {
+                "tp": 16,
+                "fp": 20,
+                "fn": 0,
+                "precision": 0.4444444444444444,
+                "recall": 1.0,
+                "f1": 0.6153846153846154
+              },
+              "clipping": {
+                "tp": 16,
+                "fp": 20,
+                "fn": 0,
+                "precision": 0.4444444444444444,
+                "recall": 1.0,
+                "f1": 0.6153846153846154
+              },
+              "channel_imbalance": {
+                "tp": 16,
+                "fp": 20,
+                "fn": 0,
+                "precision": 0.4444444444444444,
+                "recall": 1.0,
+                "f1": 0.6153846153846154
+              }
+            },
+            "clip_macro_f1": 0.6153846153846154,
+            "clip_micro": {
+              "tp": 48,
+              "fp": 60,
+              "fn": 0,
+              "precision": 0.4444444444444444,
+              "recall": 1.0,
+              "f1": 0.6153846153846154
+            },
+            "event_per_class": {
+              "dropout": {
+                "tp": 0,
+                "fp": 72,
+                "fn": 16,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "clipping": {
+                "tp": 0,
+                "fp": 72,
+                "fn": 16,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "channel_imbalance": {
+                "tp": 0,
+                "fp": 72,
+                "fn": 16,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              }
+            },
+            "event_macro_f1": 0.0,
+            "event_micro": {
+              "tp": 0,
+              "fp": 216,
+              "fn": 48,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "by_kind": {
+              "normal": {
+                "examples": 8,
+                "exact_matches": 0,
+                "exact_set_accuracy": 0.0
+              },
+              "single": {
+                "examples": 12,
+                "exact_matches": 0,
+                "exact_set_accuracy": 0.0
+              },
+              "compound": {
+                "examples": 16,
+                "exact_matches": 4,
+                "exact_set_accuracy": 0.25
+              }
+            },
+            "normal_clips_with_false_alarm": 8,
+            "normal_clip_false_alarm_rate": 1.0,
+            "normal_false_events_per_hour": 12476.57183084185,
+            "normal_seconds": 13.849958333333333
+          }
+        },
+        "last_training": {
+          "step": 11,
+          "epoch": 1,
+          "loss": {
+            "total": 0.8137162923812866,
+            "clip": 0.6439427733421326,
+            "frame": 0.16977354884147644
+          },
+          "gradient_norms": {
+            "stem": 0.073455184286845,
+            "transformer": 0.38650150503715774,
+            "normalization": 0.041542545732533374,
+            "diagnosis_head": 0.918419663035645
+          },
+          "sequence_positions": 182,
+          "sample_ids": [
+            "work-0014-clipping",
+            "work-0009-normal"
+          ]
+        },
+        "max_sequence_positions": 198,
+        "device": "cpu",
+        "precision": "float32",
+        "attention_backend": "math",
+        "torch": "2.14.1+cpu",
+        "gpu": null,
+        "peak_allocated_bytes": null,
+        "peak_reserved_bytes": null,
+        "elapsed_seconds_this_session": 0.9649929729930591,
+        "source": {
+          "file_sha256": {
+            "src/creative_agent/__init__.py": "506c3f2af75db592b115074ef68d9acffd640b70fb4670102c62b31ed6a319b9",
+            "src/creative_agent/audio.py": "270c420cbce81460792d0ea2c271d6c5497eea56df83c9343417cd9ba2a47d90",
+            "src/creative_agent/caption.py": "a159623bfc1eea904da5065cc50cc4107ceac1d713647e82f03f47325ce48a8e",
+            "src/creative_agent/caption_training.py": "5d01324690be15b478d3166b536dc79d54b6dccc38cf3fc9bcbc0d385eb810f5",
+            "src/creative_agent/cli.py": "1a63a09fd5ebea74a6904cb1f1247e3a253eb60a823b7be36585c3a663732fde",
+            "src/creative_agent/config.py": "9a85d1b6bb9781f811086cfb30a7c07633f9c69443a488a1c2229c3f242e996f",
+            "src/creative_agent/diagnosis.py": "ab0baf892064b55fda5e31642a6f6c6f47d06c2da0c49dca9121134ca147a15d",
+            "src/creative_agent/diagnosis_data.py": "db573ea7f265aaa75b7af01aa5d62b4aaae4ec71d462970d83404332306d4d73",
+            "src/creative_agent/diagnosis_training.py": "f4f71662e969c3da4f5982ee0c5387a680aae1d7018d73f64721f02387b141a6",
+            "src/creative_agent/model.py": "b958800dd819fd4625ee1f5c5c02c47cc1e023e9e4e6ba916b8cf0c61ced476b",
+            "src/creative_agent/training.py": "a31d44b490b872805abc4d0fabfe32772785459be2f9b2752925f25f2eca2651",
+            "pyproject.toml": "c4edede314da1bc1027ea5b6805c088dfda4162af28ca102ca7c1c0f9234f67d",
+            "uv.lock": "9f5cdc3e02229a9fc20fcb0bfa412d315ab84f4df4ec79797d40308ffa470392"
+          },
+          "commit": "925a42b881d15302062b77779fe9e5611d41855e",
+          "dirty": true
+        }
+      },
+      "checkpoint_sha256": "3087f2e3f474961dbf5ea38ad84772a0f347084d1fdb1b8f6a9df17e93712c5c",
+      "source_hashes_match_commit": true,
+      "optimizer_steps_audited": 11,
+      "prediction_and_metrics_recomputed_from_saved_weights": true,
+      "tensorboard_step_coverage_verified": true,
+      "paired_normal_single_compound_audio_events_verified": 3,
+      "source_split_disjoint": true,
+      "unused_ssl_head_and_mask_token_match_original": true
+    },
+    "cuda": {
+      "report": {
+        "status": "passed",
+        "scope": "diagnostic data/gradient/update/resume smoke; no quality claim",
+        "config": {
+          "audio": {
+            "sample_rate": 48000,
+            "hop_samples": 480,
+            "stem_width": 32,
+            "width": 128,
+            "layers": 2,
+            "heads": 4,
+            "ffn_width": 352,
+            "qk_norm": true,
+            "rope_time_scale": 100.0,
+            "mask_ratio": 0.5,
+            "mask_span": 5,
+            "learning_rate": 0.001,
+            "batch_size": 2,
+            "seed": 20261101,
+            "num_threads": 2,
+            "fixture_count": 16,
+            "duration_seconds": 2.0
+          },
+          "learning_rate": 0.001,
+          "frame_loss_weight": 1.0,
+          "threshold": 0.5,
+          "event_iou": 0.5
+        },
+        "classes": [
+          "dropout",
+          "clipping",
+          "channel_imbalance"
+        ],
+        "encoder_origin": {
+          "kind": "stage1_ssl_checkpoint",
+          "step": 21,
+          "sha256": "25579db3c62145d37707e69bcffd331a58deb3106033dd9c4aa7d0cce66be132"
+        },
+        "optimizer_steps": 21,
+        "session_optimizer_steps": 1,
+        "resumed_from_step": 20,
+        "skipped_updates": 0,
+        "parameter_groups_changed": {
+          "stem": true,
+          "transformer": true,
+          "normalization": true,
+          "diagnosis_head": true
+        },
+        "unused_ssl_head_unchanged": true,
+        "trainable_parameters": 437926,
+        "data_signature": "38f986dc1c10b9ad7b45be0f2b075574b4aafe7726ba2c33268c5e15a439d20f",
+        "source_works": 16,
+        "split_counts": {
+          "train": {
+            "normal": 24,
+            "single": 36,
+            "compound": 48
+          },
+          "validation": {
+            "normal": 8,
+            "single": 12,
+            "compound": 16
+          }
+        },
+        "initial_validation": {
+          "examples": 36,
+          "threshold": 0.5,
+          "event_iou": 0.5,
+          "per_class": {
+            "dropout": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "clipping": {
+              "tp": 16,
+              "fp": 20,
+              "fn": 0,
+              "precision": 0.4444444444444444,
+              "recall": 1.0,
+              "f1": 0.6153846153846154
+            },
+            "channel_imbalance": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            }
+          },
+          "clip_macro_f1": 0.20512820512820515,
+          "clip_micro": {
+            "tp": 16,
+            "fp": 20,
+            "fn": 32,
+            "precision": 0.4444444444444444,
+            "recall": 0.3333333333333333,
+            "f1": 0.38095238095238093
+          },
+          "event_per_class": {
+            "dropout": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "clipping": {
+              "tp": 0,
+              "fp": 36,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "channel_imbalance": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            }
+          },
+          "event_macro_f1": 0.0,
+          "event_micro": {
+            "tp": 0,
+            "fp": 36,
+            "fn": 48,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "by_kind": {
+            "normal": {
+              "examples": 8,
+              "exact_matches": 0,
+              "exact_set_accuracy": 0.0
+            },
+            "single": {
+              "examples": 12,
+              "exact_matches": 4,
+              "exact_set_accuracy": 0.3333333333333333
+            },
+            "compound": {
+              "examples": 16,
+              "exact_matches": 0,
+              "exact_set_accuracy": 0.0
+            }
+          },
+          "normal_clips_with_false_alarm": 8,
+          "normal_clip_false_alarm_rate": 1.0,
+          "normal_false_events_per_hour": 2079.4286384736415,
+          "normal_seconds": 13.849958333333333,
+          "loss": {
+            "total": 1.2440525359577603,
+            "clip": 0.6941082080205282,
+            "frame": 0.5499443312486013
+          }
+        },
+        "final_validation": {
+          "examples": 36,
+          "threshold": 0.5,
+          "event_iou": 0.5,
+          "per_class": {
+            "dropout": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "clipping": {
+              "tp": 16,
+              "fp": 20,
+              "fn": 0,
+              "precision": 0.4444444444444444,
+              "recall": 1.0,
+              "f1": 0.6153846153846154
+            },
+            "channel_imbalance": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            }
+          },
+          "clip_macro_f1": 0.20512820512820515,
+          "clip_micro": {
+            "tp": 16,
+            "fp": 20,
+            "fn": 32,
+            "precision": 0.4444444444444444,
+            "recall": 0.3333333333333333,
+            "f1": 0.38095238095238093
+          },
+          "event_per_class": {
+            "dropout": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "clipping": {
+              "tp": 0,
+              "fp": 148,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "channel_imbalance": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            }
+          },
+          "event_macro_f1": 0.0,
+          "event_micro": {
+            "tp": 0,
+            "fp": 148,
+            "fn": 48,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "by_kind": {
+            "normal": {
+              "examples": 8,
+              "exact_matches": 0,
+              "exact_set_accuracy": 0.0
+            },
+            "single": {
+              "examples": 12,
+              "exact_matches": 4,
+              "exact_set_accuracy": 0.3333333333333333
+            },
+            "compound": {
+              "examples": 16,
+              "exact_matches": 0,
+              "exact_set_accuracy": 0.0
+            }
+          },
+          "normal_clips_with_false_alarm": 8,
+          "normal_clip_false_alarm_rate": 1.0,
+          "normal_false_events_per_hour": 8837.571713512976,
+          "normal_seconds": 13.849958333333333,
+          "loss": {
+            "total": 1.0621384514702692,
+            "clip": 0.7027697182363934,
+            "frame": 0.3593687257832951
+          }
+        },
+        "baselines": {
+          "always_none": {
+            "examples": 36,
+            "threshold": 0.5,
+            "event_iou": 0.5,
+            "per_class": {
+              "dropout": {
+                "tp": 0,
+                "fp": 0,
+                "fn": 16,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "clipping": {
+                "tp": 0,
+                "fp": 0,
+                "fn": 16,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "channel_imbalance": {
+                "tp": 0,
+                "fp": 0,
+                "fn": 16,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              }
+            },
+            "clip_macro_f1": 0.0,
+            "clip_micro": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 48,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "event_per_class": {
+              "dropout": {
+                "tp": 0,
+                "fp": 0,
+                "fn": 16,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "clipping": {
+                "tp": 0,
+                "fp": 0,
+                "fn": 16,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "channel_imbalance": {
+                "tp": 0,
+                "fp": 0,
+                "fn": 16,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              }
+            },
+            "event_macro_f1": 0.0,
+            "event_micro": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 48,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "by_kind": {
+              "normal": {
+                "examples": 8,
+                "exact_matches": 8,
+                "exact_set_accuracy": 1.0
+              },
+              "single": {
+                "examples": 12,
+                "exact_matches": 0,
+                "exact_set_accuracy": 0.0
+              },
+              "compound": {
+                "examples": 16,
+                "exact_matches": 0,
+                "exact_set_accuracy": 0.0
+              }
+            },
+            "normal_clips_with_false_alarm": 0,
+            "normal_clip_false_alarm_rate": 0.0,
+            "normal_false_events_per_hour": 0.0,
+            "normal_seconds": 13.849958333333333
+          },
+          "always_all": {
+            "examples": 36,
+            "threshold": 0.5,
+            "event_iou": 0.5,
+            "per_class": {
+              "dropout": {
+                "tp": 16,
+                "fp": 20,
+                "fn": 0,
+                "precision": 0.4444444444444444,
+                "recall": 1.0,
+                "f1": 0.6153846153846154
+              },
+              "clipping": {
+                "tp": 16,
+                "fp": 20,
+                "fn": 0,
+                "precision": 0.4444444444444444,
+                "recall": 1.0,
+                "f1": 0.6153846153846154
+              },
+              "channel_imbalance": {
+                "tp": 16,
+                "fp": 20,
+                "fn": 0,
+                "precision": 0.4444444444444444,
+                "recall": 1.0,
+                "f1": 0.6153846153846154
+              }
+            },
+            "clip_macro_f1": 0.6153846153846154,
+            "clip_micro": {
+              "tp": 48,
+              "fp": 60,
+              "fn": 0,
+              "precision": 0.4444444444444444,
+              "recall": 1.0,
+              "f1": 0.6153846153846154
+            },
+            "event_per_class": {
+              "dropout": {
+                "tp": 0,
+                "fp": 72,
+                "fn": 16,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "clipping": {
+                "tp": 0,
+                "fp": 72,
+                "fn": 16,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "channel_imbalance": {
+                "tp": 0,
+                "fp": 72,
+                "fn": 16,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              }
+            },
+            "event_macro_f1": 0.0,
+            "event_micro": {
+              "tp": 0,
+              "fp": 216,
+              "fn": 48,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "by_kind": {
+              "normal": {
+                "examples": 8,
+                "exact_matches": 0,
+                "exact_set_accuracy": 0.0
+              },
+              "single": {
+                "examples": 12,
+                "exact_matches": 0,
+                "exact_set_accuracy": 0.0
+              },
+              "compound": {
+                "examples": 16,
+                "exact_matches": 4,
+                "exact_set_accuracy": 0.25
+              }
+            },
+            "normal_clips_with_false_alarm": 8,
+            "normal_clip_false_alarm_rate": 1.0,
+            "normal_false_events_per_hour": 12476.57183084185,
+            "normal_seconds": 13.849958333333333
+          }
+        },
+        "last_training": {
+          "step": 21,
+          "epoch": 1,
+          "loss": {
+            "total": 1.077303171157837,
+            "clip": 0.7178378105163574,
+            "frame": 0.3594653904438019
+          },
+          "gradient_norms": {
+            "stem": 0.04535081895201569,
+            "transformer": 0.26453096652439867,
+            "normalization": 0.045339126306975265,
+            "diagnosis_head": 0.9622424586549505
+          },
+          "sequence_positions": 198,
+          "sample_ids": [
+            "work-0003-normal",
+            "work-0013-overlap_drop_balance"
+          ]
+        },
+        "max_sequence_positions": 198,
+        "device": "cuda:0",
+        "precision": "float16",
+        "attention_backend": "flash",
+        "torch": "2.14.1+cu126",
+        "gpu": "NVIDIA GeForce RTX 3070",
+        "peak_allocated_bytes": 31384576,
+        "peak_reserved_bytes": 58720256,
+        "elapsed_seconds_this_session": 1.443528416013578,
+        "source": {
+          "file_sha256": {
+            "src/creative_agent/__init__.py": "506c3f2af75db592b115074ef68d9acffd640b70fb4670102c62b31ed6a319b9",
+            "src/creative_agent/audio.py": "270c420cbce81460792d0ea2c271d6c5497eea56df83c9343417cd9ba2a47d90",
+            "src/creative_agent/caption.py": "a159623bfc1eea904da5065cc50cc4107ceac1d713647e82f03f47325ce48a8e",
+            "src/creative_agent/caption_training.py": "5d01324690be15b478d3166b536dc79d54b6dccc38cf3fc9bcbc0d385eb810f5",
+            "src/creative_agent/cli.py": "1a63a09fd5ebea74a6904cb1f1247e3a253eb60a823b7be36585c3a663732fde",
+            "src/creative_agent/config.py": "9a85d1b6bb9781f811086cfb30a7c07633f9c69443a488a1c2229c3f242e996f",
+            "src/creative_agent/diagnosis.py": "ab0baf892064b55fda5e31642a6f6c6f47d06c2da0c49dca9121134ca147a15d",
+            "src/creative_agent/diagnosis_data.py": "db573ea7f265aaa75b7af01aa5d62b4aaae4ec71d462970d83404332306d4d73",
+            "src/creative_agent/diagnosis_training.py": "f4f71662e969c3da4f5982ee0c5387a680aae1d7018d73f64721f02387b141a6",
+            "src/creative_agent/model.py": "b958800dd819fd4625ee1f5c5c02c47cc1e023e9e4e6ba916b8cf0c61ced476b",
+            "src/creative_agent/training.py": "a31d44b490b872805abc4d0fabfe32772785459be2f9b2752925f25f2eca2651",
+            "pyproject.toml": "c4edede314da1bc1027ea5b6805c088dfda4162af28ca102ca7c1c0f9234f67d",
+            "uv.lock": "9f5cdc3e02229a9fc20fcb0bfa412d315ab84f4df4ec79797d40308ffa470392"
+          },
+          "commit": "925a42b881d15302062b77779fe9e5611d41855e",
+          "dirty": true
+        }
+      },
+      "checkpoint_sha256": "63db37aed2853a604fd49f1d326e0688e4c01b9d011caa0961f76404081ae1b3",
+      "source_hashes_match_commit": true,
+      "optimizer_steps_audited": 21,
+      "prediction_and_metrics_recomputed_from_saved_weights": true,
+      "tensorboard_step_coverage_verified": true,
+      "paired_normal_single_compound_audio_events_verified": 3,
+      "source_split_disjoint": true,
+      "unused_ssl_head_and_mask_token_match_original": true
+    }
+  },
+  "local_tests": {
+    "cuda_environment": {
+      "passed": 44,
+      "skipped": 0
+    },
+    "cpu_only_environment": {
+      "passed": 38,
+      "skipped_cuda": 6
+    },
+    "ruff": "passed",
+    "lock": "checked offline"
+  },
+  "limitations": [
+    "Only three known synthetic problem types on one signal generator.",
+    "Validation contains 36 derived clips from four independent original works.",
+    "GPU normal false-alarm rate is 100%; event macro F1 is 0.",
+    "CPU output behaves as no-problem for all validation clips; positive recall is 0.",
+    "Threshold was fixed at 0.5; quality targets have not been met.",
+    "Runtime and peak memory in the final reports cover only the resumed sessions.",
+    "All source and lock hashes from pre-commit runs were verified against the implementation commit.",
+    "Audio, raw manifests, labels, predictions, weights and TensorBoard events remain local."
+  ],
+  "github_actions": {
+    "implementation_commit": "2988c61492e8a86d5127be598c417216040ff68a",
+    "url": "https://github.com/uthree/creative-agent/actions/runs/41280815061",
+    "ubuntu-latest": "success",
+    "windows-latest": "success"
+  }
+}
