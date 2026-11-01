@@ -115,7 +115,8 @@ class PublicData:
             ):
                 raise ValueError("invalid public segment bounds")
             frames = round(row["source_frames"] * 48000 / source["sample_rate"])
-            if row["frames"] != frames or not 960 <= frames <= 480000:
+            maximum = 48000 * (60 if row["task"] == "midi" else 10)
+            if row["frames"] != frames or not 960 <= frames <= maximum:
                 raise ValueError("invalid resampled segment length")
             if row["task"] == "transcription":
                 text = row["target"]
@@ -123,6 +124,8 @@ class PublicData:
                     raise ValueError("public transcript crosses splits")
                 transcripts[text] = row["split"]
             if row["task"] == "midi":
+                if row["duration_ms"] * 48 != frames:
+                    raise ValueError("public MIDI duration differs from audio segment")
                 notes = tuple(Note(**n) for n in row["notes"])
                 if notes_text(notes, row["duration_ms"]) != row["target"]:
                     raise ValueError("public MIDI target differs from notes")

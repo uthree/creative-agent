@@ -23,11 +23,11 @@ class Note:
             raise ValueError("note offset must follow a nonnegative onset")
 
 
-def validate_notes(notes, duration_ms, max_notes=16):
-    if type(duration_ms) is not int or not 0 < duration_ms <= 10000:
-        raise ValueError("note recording duration must be integer milliseconds in [1, 10000]")
+def validate_notes(notes, duration_ms, max_notes=256):
+    if type(duration_ms) is not int or not 0 < duration_ms <= 60000:
+        raise ValueError("note recording duration must be integer milliseconds in [1, 60000]")
     if len(notes) > max_notes:
-        raise ValueError("too many notes for the smoke budget")
+        raise ValueError("too many notes for the configured budget")
     if any(not isinstance(note, Note) for note in notes):
         raise ValueError("expected Note events")
     previous = {}
@@ -41,13 +41,13 @@ def validate_notes(notes, duration_ms, max_notes=16):
     return tuple(ordered)
 
 
-def notes_text(notes, duration_ms, max_notes=16):
+def notes_text(notes, duration_ms, max_notes=256):
     ordered = validate_notes(notes, duration_ms, max_notes)
     return "N1\n" + "".join(f"{n.pitch} {n.onset_ms} {n.offset_ms} {n.velocity}\n" for n in ordered)
 
 
-def parse_notes(text, duration_ms, max_notes=16):
-    if not isinstance(text, str) or len(text) > 4096 or not text.startswith("N1\n"):
+def parse_notes(text, duration_ms, max_notes=256):
+    if not isinstance(text, str) or len(text) > 16384 or not text.startswith("N1\n"):
         raise ValueError("expected complete N1 note text")
     lines = text[3:].splitlines()
     if any(re.fullmatch(r"[0-9]+ [0-9]+ [0-9]+ [0-9]+", line) is None for line in lines):
@@ -60,7 +60,7 @@ def parse_notes(text, duration_ms, max_notes=16):
     return notes
 
 
-def write_midi(path: Path, notes, duration_ms, max_notes=16):
+def write_midi(path: Path, notes, duration_ms, max_notes=256):
     notes = validate_notes(notes, duration_ms, max_notes)
     midi = mido.MidiFile(type=0, ticks_per_beat=1000)
     track = mido.MidiTrack()
@@ -87,7 +87,7 @@ def write_midi(path: Path, notes, duration_ms, max_notes=16):
     midi.save(path)
 
 
-def read_midi(path: Path, duration_ms, max_notes=16):
+def read_midi(path: Path, duration_ms, max_notes=256):
     """Honor tempo changes; reject pedal, drums, multiple channels and incomplete notes."""
     midi = mido.MidiFile(path)
     if midi.type not in (0, 1) or midi.ticks_per_beat <= 0:

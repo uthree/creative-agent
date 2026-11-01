@@ -79,7 +79,7 @@ class MultitaskModel(nn.Module):
     def __init__(self, config, *, device="cpu", model_dir=None, encoder_checkpoint=None):
         super().__init__()
         self.config = config
-        self.encoder = AudioSSLModel(config.audio, backend="math")
+        self.encoder = AudioSSLModel(config.audio, backend=config.encoder_backend)
         self.encoder_origin = {"kind": "deterministic_random"}
         if encoder_checkpoint is not None:
             state = torch.load(encoder_checkpoint, map_location="cpu", weights_only=True)

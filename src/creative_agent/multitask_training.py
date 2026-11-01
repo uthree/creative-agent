@@ -45,6 +45,8 @@ def run_multitask_training(
     device = torch.device(device)
     if device.type not in ("cuda", "cpu") or config.backbone == "lfm3" and device.type != "cuda":
         raise ValueError("use CUDA for pretrained LFM3, CPU/CUDA for offline tests")
+    if config.encoder_backend == "flash" and device.type != "cuda":
+        raise ValueError("Flash encoder requires CUDA")
     output = output.resolve()
     state = None
     if public_manifest is None:
@@ -165,7 +167,9 @@ def _train(
 
     # Preflight every teacher and generation reserve, so no long-run target is silently truncated.
     with torch.no_grad():
-        for task in TASKS[1:]:
+        for task in config.tasks:
+            if task == "ssl":
+                continue
             dataset = data.datasets[task]
             for index in range(len(dataset.waveforms)):
                 _, prompt, target = data.record(task, index)
@@ -205,7 +209,7 @@ def _train(
         writer.add_text("run/public_data_policy", json.dumps(data.policy, indent=2), step)
     writer.add_text(
         "run/tasks",
-        "Five tasks share encoder; caption, diagnosis, ASR and MIDI share projector and LFM3 LoRA",
+        "Active tasks: " + ", ".join(config.tasks),
         step,
     )
     if state:
@@ -251,7 +255,7 @@ def _train(
     try:
         with (output / "training.jsonl").open("a", encoding="utf-8") as stream:
             while step < steps:
-                task = TASKS[step % len(TASKS)]
+                task = config.tasks[step % len(config.tasks)]
                 sampler = samplers[task]
                 if sampler["cursor"] == len(sampler["order"]):
                     indices = data.datasets[task].splits["train"]

@@ -30,6 +30,8 @@ DIAGNOSIS_PROMPT = (
 @dataclass(frozen=True)
 class MultitaskConfig:
     audio: AudioSSLConfig = field(default_factory=AudioSSLConfig)
+    tasks: tuple[str, ...] = TASKS
+    encoder_backend: str = "math"
     backbone: str = "lfm3"
     lora_rank: int = 8
     pool_frames: int = 5
@@ -46,6 +48,15 @@ class MultitaskConfig:
     def __post_init__(self):
         if not isinstance(self.audio, AudioSSLConfig) or self.backbone not in ("lfm3", "tiny"):
             raise ValueError("expected audio configuration and lfm3/tiny backbone")
+        if (
+            not isinstance(self.tasks, tuple)
+            or not self.tasks
+            or any(task not in TASKS for task in self.tasks)
+            or len(set(self.tasks)) != len(self.tasks)
+        ):
+            raise ValueError("tasks must be a nonempty tuple of distinct supported tasks")
+        if self.encoder_backend not in ("math", "flash"):
+            raise ValueError("encoder_backend must be math or flash")
         for key in (
             "lora_rank",
             "pool_frames",
@@ -59,7 +70,7 @@ class MultitaskConfig:
         ):
             if type(getattr(self, key)) is not int or getattr(self, key) <= 0:
                 raise ValueError(f"{key} must be a positive integer")
-        if self.max_positions > 2048 or self.max_new_tokens > 512 or self.generation_examples > 8:
+        if self.max_positions > 8192 or self.max_new_tokens > 4096 or self.generation_examples > 8:
             raise ValueError("multitask pilot context/evaluation budget exceeded")
         if self.tiny_width % 8:
             raise ValueError("tiny_width must be divisible by 8")
@@ -71,11 +82,12 @@ class MultitaskConfig:
             raise ValueError("learning rate must be below one")
 
     def to_dict(self):
-        return asdict(self)
+        return {**asdict(self), "tasks": list(self.tasks)}
 
     @classmethod
     def from_dict(cls, values):
         values = dict(values)
+        values["tasks"] = tuple(values.get("tasks", TASKS))
         values["audio"] = AudioSSLConfig(**values.get("audio", {}))
         return cls(**values)
 

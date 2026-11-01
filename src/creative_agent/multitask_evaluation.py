@@ -10,7 +10,6 @@ from creative_agent.diagnosis import decode_events, score_predictions
 from creative_agent.diagnosis_data import CLASSES, example_kind
 from creative_agent.midi import parse_notes, read_midi, write_midi
 from creative_agent.midi_data import render_notes
-from creative_agent.multitask_data import TASKS
 from creative_agent.multitask_objectives import autocast, task_loss
 from creative_agent.multitask_visuals import midi_comparison_image, spectral_comparison_image
 from creative_agent.training import log_stereo_audio
@@ -80,7 +79,7 @@ def _evaluate(model, data, output, step, writer):
     directory = output / "evaluation" / f"step-{step:06d}"
     directory.mkdir(parents=True, exist_ok=True)
     metrics, examples = {}, []
-    for task in TASKS:
+    for task in model.config.tasks:
         dataset = data.datasets[task]
         indices = dataset.splits["validation"]
         chosen = generated_indices(data, task, model.config.generation_examples)

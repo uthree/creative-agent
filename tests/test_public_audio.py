@@ -2,7 +2,7 @@ import io
 import json
 import tarfile
 import zipfile
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from pathlib import Path
 
 import mido
@@ -14,7 +14,8 @@ from tensorboard.backend.event_processing.event_accumulator import EventAccumula
 
 from creative_agent.audio import file_hash
 from creative_agent.config import AudioSSLConfig
-from creative_agent.midi import Note, notes_text, write_midi
+from creative_agent.long_midi import cropped_notes, prepare_long_midi_manifest
+from creative_agent.midi import Note, notes_text, parse_notes, read_midi, write_midi
 from creative_agent.multitask_data import TASKS, MultitaskConfig
 from creative_agent.multitask_objectives import task_loss
 from creative_agent.multitask_training import run_multitask_training
@@ -356,3 +357,132 @@ def test_public_japanese_manifest_survives_non_utf8_system_default(
     public_manifest.write_text(json.dumps(document, ensure_ascii=False), encoding="utf-8")
     data = PublicData(public_manifest)
     assert data.record("transcription", 0)[2] == "日本語の発話。train"
+
+
+@pytest.mark.parametrize("task", TASKS)
+def test_single_task_updates_only_selected_objective(public_manifest, tmp_path, task):
+    config = MultitaskConfig(
+        audio=AudioSSLConfig(
+            stem_width=4,
+            width=16,
+            layers=1,
+            ffn_width=32,
+            num_threads=1,
+            duration_seconds=0.2,
+            batch_size=1,
+        ),
+        backbone="tiny",
+        tiny_width=16,
+        tasks=(task,),
+        max_new_tokens=192,
+        evaluate_every=10,
+        checkpoint_every=10,
+        warmup_steps=1,
+    )
+    assert MultitaskConfig.from_dict(config.to_dict()) == config
+    output = tmp_path / task
+    report = run_multitask_training(
+        config,
+        output,
+        data_root=tmp_path,
+        public_manifest=public_manifest,
+        steps=3,
+        device="cpu",
+    )
+    assert report["task_updates"] == {t: 3 if t == task else 0 for t in TASKS}
+    assert set(report["initial_test_metrics"]) == set(report["final_test_metrics"]) == {task}
+    state = torch.load(output / "checkpoint.pt", weights_only=True)
+    assert {r["task"] for r in state["history"]} == {task}
+    for name in state["trainable"]:
+        inactive = (
+            task != "diagnosis"
+            and name.startswith("diagnosis_head.")
+            or task != "ssl"
+            and name.startswith("encoder.head.")
+            or task == "ssl"
+            and (name.startswith("backbone.") or name.startswith("projector."))
+        )
+        if inactive:
+            assert torch.equal(state["trainable"][name], state["initial_trainable"][name])
+    if task == "transcription":
+        resumed = tmp_path / "resumed"
+        run_multitask_training(
+            config,
+            resumed,
+            data_root=tmp_path,
+            public_manifest=public_manifest,
+            steps=1,
+            device="cpu",
+        )
+        continuation = run_multitask_training(
+            config,
+            resumed,
+            data_root=tmp_path,
+            public_manifest=public_manifest,
+            steps=3,
+            device="cpu",
+            resume=True,
+        )
+        final = torch.load(resumed / "checkpoint.pt", weights_only=True)
+        assert final["history"] == state["history"]
+        assert continuation["final_test_metrics"] == report["final_test_metrics"]
+        for name in state["trainable"]:
+            assert torch.equal(final["trainable"][name], state["trainable"][name])
+        with pytest.raises(ValueError, match="configuration mismatch"):
+            run_multitask_training(
+                replace(config, tasks=("caption",)),
+                resumed,
+                data_root=tmp_path,
+                public_manifest=public_manifest,
+                steps=4,
+                device="cpu",
+                resume=True,
+            )
+
+
+def test_long_midi_crop_preserves_intersecting_keys_and_roundtrip(tmp_path):
+    notes = (Note(60, 29000, 31000, 80), Note(64, 59000, 61000, 90))
+    assert cropped_notes(notes, 30000, 30000) == (
+        Note(60, 0, 1000, 80),
+        Note(64, 29000, 30000, 90),
+    )
+    long = tuple(Note(60 + i % 12, i * 200, i * 200 + 100, 80) for i in range(256))
+    text = notes_text(long, 60000)
+    assert len(text) > 4096 and parse_notes(text, 60000) == long
+    path = tmp_path / "minute.mid"
+    write_midi(path, long, 60000)
+    assert read_midi(path, 60000) == long
+
+
+def test_long_midi_manifest_keeps_source_splits_and_observes_entire_audio(public_manifest):
+    document = json.loads(public_manifest.read_text(encoding="utf-8"))
+    for i, source in enumerate(document["sources"]):
+        path = public_manifest.parent / source["path"]
+        samples = np.random.default_rng(i).normal(0, 0.05, 16000 * 60)
+        sf.write(path, samples, 16000, subtype="PCM_16")
+        midi = path.with_suffix(".mid")
+        notes = tuple(Note(60 + j % 12, j * 300, j * 300 + 200, 80) for j in range(180))
+        write_midi(midi, notes, 60000)
+        source.update(
+            frames=len(samples),
+            sha256=file_hash(path),
+            instrument="piano",
+            midi_path=midi.name,
+            midi_sha256=file_hash(midi),
+        )
+    public_manifest.write_text(json.dumps(document), encoding="utf-8")
+    output = public_manifest.with_name("long.json")
+    prepare_long_midi_manifest(public_manifest, output)
+    result = PublicData(output)
+    assert result.sources == PublicData(public_manifest).sources
+    midi = result.datasets["midi"]
+    for split, indices in midi.splits.items():
+        assert {midi.assets[i]["duration_ms"] for i in indices} == {30000, 60000}
+        assert all(midi.assets[i]["split"] == split for i in indices)
+        for i in indices:
+            assert midi.waveforms[i].shape[-1] == midi.assets[i]["duration_ms"] * 48
+    malformed = json.loads(output.read_text(encoding="utf-8"))
+    next(r for r in malformed["records"] if r["task"] == "midi")["duration_ms"] -= 1
+    output.write_text(json.dumps(malformed), encoding="utf-8")
+    with pytest.raises(ValueError, match="duration differs"):
+        PublicData(output)

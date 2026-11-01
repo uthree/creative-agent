@@ -11,7 +11,6 @@ from PIL import Image
 
 from creative_agent.diagnosis import decode_events, score_predictions
 from creative_agent.midi import note_counts, parse_notes, read_midi, summarize_counts, write_midi
-from creative_agent.multitask_data import TASKS
 from creative_agent.multitask_evaluation import parse_diagnosis
 from creative_agent.multitask_objectives import autocast, task_loss
 from creative_agent.multitask_visuals import midi_comparison_image
@@ -81,7 +80,7 @@ def score_midi(rows):
             prediction = ()
         for key, counts in totals.items():
             counts.update(note_counts(reference, prediction, offsets=key == "onset_offset"))
-    return {
+    result = {
         "examples": len(rows),
         "valid_note_sequence_rate": valid / max(1, len(rows)),
         "exact_note_sequence_rate": exact / max(1, len(rows)),
@@ -90,6 +89,13 @@ def score_midi(rows):
         "silence_examples": sum(not parse_notes(r["reference"], r["duration_ms"]) for r in rows),
         "velocity": "measured key velocity; excluded from onset/offset F1",
     }
+    durations = sorted({r["duration_ms"] for r in rows})
+    if len(durations) > 1 and max(durations) >= 30000:
+        result["by_duration_seconds"] = {
+            str(duration // 1000): score_midi([r for r in rows if r["duration_ms"] == duration])
+            for duration in durations
+        }
+    return result
 
 
 def scalar_tree(writer, prefix, values, step):
@@ -150,11 +156,21 @@ def _split(model, data, output, step, writer, split):
     metrics, examples = {}, []
     directory = output / "evaluation" / f"step-{step:06d}" / split
     directory.mkdir(parents=True, exist_ok=True)
-    for task in TASKS:
+    for task in model.config.tasks:
         dataset = data.datasets[task]
         indices = dataset.splits["train" if split == "train_probe" else split]
         if split == "train_probe":
             indices = indices[:8]
+            if task == "midi" and "long_midi" in data.policy:
+                indices = [
+                    i
+                    for duration in (30000, 60000)
+                    for i in [
+                        j
+                        for j in dataset.splits["train"]
+                        if dataset.assets[j]["duration_ms"] == duration
+                    ][:4]
+                ]
         rows, heads, total, nll, tokens = [], [], 0.0, Counter(), 0
         zero_loss = 0.0
         media_counts = Counter()
@@ -239,6 +255,8 @@ def _split(model, data, output, step, writer, split):
                 )
             else:
                 media_group = row.get("language", "music")
+                if task == "midi" and "long_midi" in data.policy:
+                    media_group = f"{row['duration_ms'] // 1000}s"
             if media_counts[media_group] < (1 if task == "diagnosis" else 2):
                 media_counts[media_group] += 1
                 tag = f"{split}/examples/{task}/{media_group}/{media_counts[media_group]}"

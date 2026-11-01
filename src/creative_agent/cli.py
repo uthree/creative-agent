@@ -19,6 +19,10 @@ def main() -> None:
     prepare = commands.add_parser("prepare-public-audio")
     prepare.add_argument("--data-root", type=Path, required=True)
     prepare.add_argument("--seed", type=int, default=20261101)
+    long_midi = commands.add_parser("prepare-long-midi")
+    long_midi.add_argument("--manifest", type=Path, required=True)
+    long_midi.add_argument("--output", type=Path, required=True)
+    long_midi.add_argument("--seed", type=int, default=20261101)
     mixed = commands.add_parser("train-audio-multitask")
     mixed.add_argument("--config", type=Path, required=True)
     mixed.add_argument("--output", type=Path, required=True)
@@ -30,6 +34,7 @@ def main() -> None:
     mixed.add_argument("--resume", action="store_true")
     mixed.add_argument("--public-manifest", type=Path)
     mixed.add_argument("--warm-checkpoint", type=Path)
+    mixed.add_argument("--task", choices=("ssl", "caption", "diagnosis", "transcription", "midi"))
     for name in (
         "prepare-audio-fixtures",
         "smoke-audio-ssl",
@@ -82,12 +87,22 @@ def main() -> None:
 
         print(prepare_public_manifest(args.data_root, seed=args.seed))
         return
+    if args.command == "prepare-long-midi":
+        from creative_agent.long_midi import prepare_long_midi_manifest
+
+        print(json.dumps(prepare_long_midi_manifest(args.manifest, args.output, seed=args.seed)))
+        return
     if args.command == "train-audio-multitask":
+        from dataclasses import replace
+
         from creative_agent.multitask_data import MultitaskConfig
         from creative_agent.multitask_training import run_multitask_training
 
+        config = MultitaskConfig.load(args.config)
+        if args.task:
+            config = replace(config, tasks=(args.task,))
         report = run_multitask_training(
-            MultitaskConfig.load(args.config),
+            config,
             args.output,
             data_root=args.data_root,
             model_dir=args.model_dir,
