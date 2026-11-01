@@ -1,0 +1,19 @@
+{
+  "sample_rate": 48000,
+  "hop_samples": 480,
+  "stem_width": 32,
+  "width": 128,
+  "layers": 2,
+  "heads": 4,
+  "ffn_width": 352,
+  "qk_norm": true,
+  "rope_time_scale": 100.0,
+  "mask_ratio": 0.5,
+  "mask_span": 5,
+  "learning_rate": 0.001,
+  "batch_size": 2,
+  "seed": 20261101,
+  "num_threads": 2,
+  "fixture_count": 16,
+  "duration_seconds": 2.0
+}
