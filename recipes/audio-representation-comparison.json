@@ -1,0 +1,16 @@
+{
+  "width": 128,
+  "heads": 4,
+  "layers": 2,
+  "ffn_width": 352,
+  "stem_width": 32,
+  "clusters": 64,
+  "mel_bins": 40,
+  "crop_seconds": 4.0,
+  "mask_ratio": 0.4,
+  "mask_span": 4,
+  "mix_probability": 0.5,
+  "learning_rate": 0.0003,
+  "warmup_steps": 50,
+  "batch_size": 8
+}
