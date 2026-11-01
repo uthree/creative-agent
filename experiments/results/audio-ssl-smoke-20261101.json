@@ -1,0 +1,229 @@
+{
+  "date_jst": "2026-11-01",
+  "scope": "stage1 audio SSL smoke; no perception or music-quality claim",
+  "verified_implementation_commit": "8dc2fdde267b7bcb4d0e7db7773d3427f6390149",
+  "source_files_match_commit": true,
+  "runs": {
+    "cpu": {
+      "report": {
+        "status": "passed",
+        "scope": "audio SSL wiring, updates and checkpoint smoke only",
+        "config": {
+          "sample_rate": 48000,
+          "hop_samples": 480,
+          "stem_width": 32,
+          "width": 128,
+          "layers": 2,
+          "heads": 4,
+          "ffn_width": 352,
+          "qk_norm": true,
+          "rope_time_scale": 100.0,
+          "mask_ratio": 0.5,
+          "mask_span": 5,
+          "learning_rate": 0.001,
+          "batch_size": 2,
+          "seed": 20261101,
+          "num_threads": 2,
+          "fixture_count": 16,
+          "duration_seconds": 2.0
+        },
+        "data_signature": "f200bf484fc7f34e541acae18da3ae865865a93de037603cfbd14b76009709f5",
+        "train_works": 12,
+        "validation_works": 4,
+        "optimizer_steps": 11,
+        "session_optimizer_steps": 1,
+        "resumed_from_step": 10,
+        "skipped_updates": 0,
+        "parameter_groups_changed": {
+          "stem": true,
+          "transformer": true,
+          "head": true
+        },
+        "initial_validation": {
+          "total": 0.7054603478812069,
+          "complex": 0.34608458766358435,
+          "log_magnitude": 0.35937576814193944
+        },
+        "final_validation": {
+          "total": 0.03414410251499601,
+          "complex": 0.017594263205207843,
+          "log_magnitude": 0.016549839309788164
+        },
+        "last_training": {
+          "step": 11,
+          "epoch": 2,
+          "sample_ids": [
+            "synthetic-work-0010",
+            "synthetic-work-0011"
+          ],
+          "loss": {
+            "total": 0.03470125049352646,
+            "complex": 0.017859911546111107,
+            "log_magnitude": 0.016841338947415352
+          },
+          "gradient_norms": {
+            "stem": 0.022109308641838278,
+            "transformer": 0.10527325847221117,
+            "head": 0.1578239197150417
+          },
+          "unclipped_gradient_norm": 0.19176897406578064,
+          "masked_positions": 183,
+          "max_positions": 194
+        },
+        "device": "cpu",
+        "precision": "float32",
+        "attention_backend": "math",
+        "max_positions_this_session": 194,
+        "parameters": 623814,
+        "elapsed_seconds_this_session": 0.7793610950175207,
+        "torch": "2.14.1+cpu",
+        "cuda_runtime": null,
+        "gpu": null,
+        "peak_allocated_bytes": null,
+        "peak_reserved_bytes": null,
+        "source": {
+          "file_sha256": {
+            "src/creative_agent/__init__.py": "506c3f2af75db592b115074ef68d9acffd640b70fb4670102c62b31ed6a319b9",
+            "src/creative_agent/audio.py": "270c420cbce81460792d0ea2c271d6c5497eea56df83c9343417cd9ba2a47d90",
+            "src/creative_agent/cli.py": "b24a15ea188b0b8ae9209bd015cc5bb4274db74859214acc000561e56bba558a",
+            "src/creative_agent/config.py": "9a85d1b6bb9781f811086cfb30a7c07633f9c69443a488a1c2229c3f242e996f",
+            "src/creative_agent/model.py": "b958800dd819fd4625ee1f5c5c02c47cc1e023e9e4e6ba916b8cf0c61ced476b",
+            "src/creative_agent/training.py": "acfac87046696d20cac6a31d088a79bdf7979ded907d4d3861e0b79b8a0afdec",
+            "pyproject.toml": "74000b0590b5089496b844981eaeaccd5df6f02cc50b579462e804ccd6f6d771",
+            "uv.lock": "9ee7d82c7ef3b3a6cecc67ff23b30363131787dd2a070b273fb44cda49465360"
+          },
+          "commit": "f158283cb1ae6e6f95ddb2670457cbb7393f8ebb",
+          "dirty": true
+        }
+      },
+      "checkpoint_sha256": "7c363c6b36ebf8702671e4f97c4b5014e858a60c116ebb98dbb009b147dbdf52",
+      "audited_optimizer_steps": 11,
+      "tensorboard_update_steps_match": true,
+      "tensorboard_stereo_verified": true
+    },
+    "cuda": {
+      "report": {
+        "status": "passed",
+        "scope": "audio SSL wiring, updates and checkpoint smoke only",
+        "config": {
+          "sample_rate": 48000,
+          "hop_samples": 480,
+          "stem_width": 32,
+          "width": 128,
+          "layers": 2,
+          "heads": 4,
+          "ffn_width": 352,
+          "qk_norm": true,
+          "rope_time_scale": 100.0,
+          "mask_ratio": 0.5,
+          "mask_span": 5,
+          "learning_rate": 0.001,
+          "batch_size": 2,
+          "seed": 20261101,
+          "num_threads": 2,
+          "fixture_count": 16,
+          "duration_seconds": 2.0
+        },
+        "data_signature": "e9cb41aee94893ff3b55527d64fbd85856975c5efcdfd4990caa33455c218ac9",
+        "train_works": 12,
+        "validation_works": 4,
+        "optimizer_steps": 21,
+        "session_optimizer_steps": 1,
+        "resumed_from_step": 20,
+        "skipped_updates": 0,
+        "parameter_groups_changed": {
+          "stem": true,
+          "transformer": true,
+          "head": true
+        },
+        "initial_validation": {
+          "total": 0.7054594348620817,
+          "complex": 0.34608414011194527,
+          "log_magnitude": 0.35937529475013646
+        },
+        "final_validation": {
+          "total": 0.017103682525154484,
+          "complex": 0.009567746041999387,
+          "log_magnitude": 0.007535936227445141
+        },
+        "last_training": {
+          "step": 21,
+          "epoch": 4,
+          "sample_ids": [
+            "synthetic-work-0013",
+            "synthetic-work-0002"
+          ],
+          "loss": {
+            "total": 0.019542541354894638,
+            "complex": 0.011101817712187767,
+            "log_magnitude": 0.008440722711384296
+          },
+          "gradient_norms": {
+            "stem": 0.009631725880610637,
+            "transformer": 0.046929663770921184,
+            "head": 0.111935635978387
+          },
+          "unclipped_gradient_norm": 0.12206673622131348,
+          "masked_positions": 194,
+          "max_positions": 198
+        },
+        "device": "cuda:0",
+        "precision": "float16",
+        "attention_backend": "flash",
+        "max_positions_this_session": 198,
+        "parameters": 623814,
+        "elapsed_seconds_this_session": 1.2555755839857738,
+        "torch": "2.14.1+cu126",
+        "cuda_runtime": "12.6",
+        "gpu": "NVIDIA GeForce RTX 3070",
+        "peak_allocated_bytes": 38415360,
+        "peak_reserved_bytes": 62914560,
+        "source": {
+          "file_sha256": {
+            "src/creative_agent/__init__.py": "506c3f2af75db592b115074ef68d9acffd640b70fb4670102c62b31ed6a319b9",
+            "src/creative_agent/audio.py": "270c420cbce81460792d0ea2c271d6c5497eea56df83c9343417cd9ba2a47d90",
+            "src/creative_agent/cli.py": "b24a15ea188b0b8ae9209bd015cc5bb4274db74859214acc000561e56bba558a",
+            "src/creative_agent/config.py": "9a85d1b6bb9781f811086cfb30a7c07633f9c69443a488a1c2229c3f242e996f",
+            "src/creative_agent/model.py": "b958800dd819fd4625ee1f5c5c02c47cc1e023e9e4e6ba916b8cf0c61ced476b",
+            "src/creative_agent/training.py": "acfac87046696d20cac6a31d088a79bdf7979ded907d4d3861e0b79b8a0afdec",
+            "pyproject.toml": "74000b0590b5089496b844981eaeaccd5df6f02cc50b579462e804ccd6f6d771",
+            "uv.lock": "9ee7d82c7ef3b3a6cecc67ff23b30363131787dd2a070b273fb44cda49465360"
+          },
+          "commit": "f158283cb1ae6e6f95ddb2670457cbb7393f8ebb",
+          "dirty": true
+        }
+      },
+      "checkpoint_sha256": "25579db3c62145d37707e69bcffd331a58deb3106033dd9c4aa7d0cce66be132",
+      "audited_optimizer_steps": 21,
+      "tensorboard_update_steps_match": true,
+      "tensorboard_stereo_verified": true
+    }
+  },
+  "posthoc_zero_prediction_validation_loss": 0.003303990698004992,
+  "baseline_note": "Same validation works, fixed masks, targets and loss; zero prediction uses no model or audio understanding.",
+  "local_tests": {
+    "cuda_environment": {
+      "passed": 18,
+      "skipped": 0
+    },
+    "cpu_only_environment": {
+      "passed": 15,
+      "skipped_cuda": 3
+    },
+    "ruff": "passed",
+    "lock": "checked offline"
+  },
+  "limitations": [
+    "Synthetic sinusoids only; no real recordings.",
+    "Only full nonoverlapping masked patches are scored.",
+    "Loss reduction from random initialization does not establish useful representation learning.",
+    "GPU time and memory in the resumed report measure only the resumed session.",
+    "Execution occurred before the implementation commit; every recorded source and lock hash was verified against that commit."
+  ],
+  "github_actions": {
+    "implementation_commit": "8dc2fdde267b7bcb4d0e7db7773d3427f6390149",
+    "url": "https://github.com/uthree/creative-agent/actions/runs/41278840157",
+    "ubuntu-latest": "success",
+    "windows-latest": "success"
+  }
+}
