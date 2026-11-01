@@ -83,7 +83,7 @@ def evaluate_captions(model, dataset, features, silence, generate=False):
     }
 
 
-def run_caption_smoke(
+def run_text_smoke(
     config: CaptionConfig,
     output: Path,
     *,
@@ -94,7 +94,15 @@ def run_caption_smoke(
     resume=False,
     manifest: Path | None = None,
     encoder_checkpoint: Path | None = None,
+    task="caption",
 ):
+    if task not in ("caption", "transcription"):
+        raise ValueError("unsupported audio-text task")
+    dataset_type, prepare = CaptionDataset, prepare_caption_fixtures
+    if task == "transcription":
+        from creative_agent.transcription import TranscriptionDataset, prepare_speech_fixtures
+
+        dataset_type, prepare = TranscriptionDataset, prepare_speech_fixtures
     if type(steps) is not int or not 0 < steps <= 1000:
         raise ValueError("smoke target steps must be in [1, 1000]")
     device, precision, backend = resolve_runtime(device, precision, backend)
@@ -104,8 +112,8 @@ def run_caption_smoke(
         if encoder_checkpoint is not None:
             raise ValueError("resume restores its encoder; do not supply encoder_checkpoint")
         state = torch.load(output / "checkpoint.pt", map_location="cpu", weights_only=True)
-        if state.get("kind") != "audio_caption_smoke_v1" or state["config"] != config.to_dict():
-            raise ValueError("caption checkpoint configuration mismatch")
+        if state.get("kind") != f"audio_{task}_smoke_v1" or state["config"] != config.to_dict():
+            raise ValueError(f"{task} checkpoint configuration mismatch")
         if (state["device_type"], state["precision"], state["backend"]) != (
             device.type,
             precision,
@@ -119,10 +127,8 @@ def run_caption_smoke(
         if encoder_checkpoint is not None and not encoder_checkpoint.is_file():
             raise ValueError("SSL encoder checkpoint does not exist")
         output.mkdir(parents=True, exist_ok=False)
-        manifest = (
-            manifest.resolve() if manifest else prepare_caption_fixtures(output / "data", config)
-        )
-    dataset = CaptionDataset(manifest, config)
+        manifest = manifest.resolve() if manifest else prepare(output / "data", config)
+    dataset = dataset_type(manifest, config)
     source = source_identity()
     if state is not None:
         if state["data_signature"] != dataset.signature:
@@ -143,13 +149,24 @@ def run_caption_smoke(
             source,
             state,
             encoder_checkpoint,
+            task,
         )
     finally:
         torch.set_num_threads(previous_threads)
 
 
 def _train(
-    config, output, steps, device, precision, backend, dataset, source, state, encoder_checkpoint
+    config,
+    output,
+    steps,
+    device,
+    precision,
+    backend,
+    dataset,
+    source,
+    state,
+    encoder_checkpoint,
+    task,
 ):
     started = time.perf_counter()
     random.seed(config.audio.seed)
@@ -208,7 +225,7 @@ def _train(
     start_step = step
     writer = SummaryWriter(str(output / "tensorboard"), purge_step=step + 1 if state else None)
     writer.add_text("run/config", json.dumps(config.to_dict(), indent=2), step)
-    writer.add_text("run/scope", "Frozen encoder/LM; projector-only caption CE wiring smoke", step)
+    writer.add_text("run/scope", f"Frozen encoder/LM; projector-only {task} CE wiring smoke", step)
     (output / "training.jsonl").write_text(
         "".join(json.dumps(row) + "\n" for row in history),
         encoding="utf-8",
@@ -276,7 +293,7 @@ def _train(
                 atomic_checkpoint(
                     output / "checkpoint.pt",
                     {
-                        "kind": "audio_caption_smoke_v1",
+                        "kind": f"audio_{task}_smoke_v1",
                         "config": config.to_dict(),
                         "step": step,
                         "model": model.state_dict(),
@@ -308,6 +325,12 @@ def _train(
                 log.write(json.dumps(row) + "\n")
                 log.flush()
         final = evaluate_captions(model, dataset, features, silence, generate=True)
+        if task == "transcription":
+            final["transcription_metrics"] = dataset.score(final["examples"])
+            for name in ("cer", "wer", "exact_match_rate"):
+                value = final["transcription_metrics"][name]
+                if value is not None:
+                    writer.add_scalar("validation/" + name, value, step)
         for condition, value in final["mean_response_token_nll"].items():
             if value is not None:
                 writer.add_scalar("validation/response_ce/" + condition, value, step)
@@ -334,7 +357,8 @@ def _train(
         torch.cuda.synchronize(device)
     report = {
         "status": "passed",
-        "scope": "projector-only caption CE wiring; no caption-quality claim",
+        "scope": f"projector-only {task} CE wiring; no recognition-quality claim",
+        "task": task,
         "config": config.to_dict(),
         "encoder_origin": model.encoder_origin,
         "llm": "random tiny Qwen3, no pretrained weights",
@@ -371,7 +395,13 @@ def _train(
         "elapsed_seconds_this_session": time.perf_counter() - started,
         "source": source,
     }
+    if task == "transcription":
+        report["speech_data"] = dataset.provenance
     (output / "report.json").write_text(
         json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     return report
+
+
+def run_caption_smoke(config: CaptionConfig, output: Path, **kwargs):
+    return run_text_smoke(config, output, task="caption", **kwargs)

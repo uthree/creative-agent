@@ -17,10 +17,14 @@ def main() -> None:
         "smoke-audio-ssl",
         "smoke-audio-caption",
         "smoke-audio-diagnosis",
+        "prepare-speech-fixtures",
+        "smoke-audio-transcription",
     ):
         command = commands.add_parser(name)
         command.add_argument("--config", type=Path)
         command.add_argument("--output", type=Path, required=True)
+        if name == "prepare-speech-fixtures":
+            command.add_argument("--espeak", default="espeak-ng")
         if name.startswith("smoke-"):
             command.add_argument("--device", default="auto")
             command.add_argument("--steps", type=int, default=20, help="total successful updates")
@@ -30,9 +34,37 @@ def main() -> None:
             command.add_argument("--backend", choices=("auto", "math", "flash"), default="auto")
             command.add_argument("--manifest", type=Path)
             command.add_argument("--resume", action="store_true")
-            if name in ("smoke-audio-caption", "smoke-audio-diagnosis"):
+            if name in (
+                "smoke-audio-caption",
+                "smoke-audio-diagnosis",
+                "smoke-audio-transcription",
+            ):
                 command.add_argument("--encoder-checkpoint", type=Path)
     args = parser.parse_args()
+    if args.command in ("prepare-speech-fixtures", "smoke-audio-transcription"):
+        from creative_agent.transcription import (
+            TranscriptionConfig,
+            prepare_speech_fixtures,
+            run_transcription_smoke,
+        )
+
+        config = TranscriptionConfig.load(args.config) if args.config else TranscriptionConfig()
+        if args.command == "prepare-speech-fixtures":
+            print(prepare_speech_fixtures(args.output, config, espeak=args.espeak))
+        else:
+            report = run_transcription_smoke(
+                config,
+                args.output,
+                steps=args.steps,
+                device=args.device,
+                precision=args.precision,
+                backend=args.backend,
+                resume=args.resume,
+                manifest=args.manifest,
+                encoder_checkpoint=args.encoder_checkpoint,
+            )
+            print(json.dumps(report, ensure_ascii=False, indent=2))
+        return
     if args.command == "smoke-audio-diagnosis":
         from creative_agent.diagnosis_data import DiagnosisConfig
         from creative_agent.diagnosis_training import run_diagnosis_smoke

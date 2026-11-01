@@ -293,4 +293,10 @@ class CaptionModel(nn.Module):
             batch.attention_mask = torch.ones(
                 batch.embeddings.shape[:2], dtype=torch.bool, device=self.device
             )
-        return {"token_ids": ids, "text": ByteTokenizer.decode(ids)}
+        return {
+            "token_ids": ids,
+            "text": ByteTokenizer.decode(ids),
+            "stopped_on_eos": ids[-1] == ByteTokenizer.eos_id,
+            "hit_token_limit": len(ids) == self.config.max_new_tokens
+            and ids[-1] != ByteTokenizer.eos_id,
+        }

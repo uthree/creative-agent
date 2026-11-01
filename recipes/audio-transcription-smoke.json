@@ -1,0 +1,30 @@
+{
+  "audio": {
+    "sample_rate": 48000,
+    "hop_samples": 480,
+    "stem_width": 32,
+    "width": 128,
+    "layers": 2,
+    "heads": 4,
+    "ffn_width": 352,
+    "qk_norm": true,
+    "rope_time_scale": 100.0,
+    "mask_ratio": 0.5,
+    "mask_span": 5,
+    "learning_rate": 0.001,
+    "batch_size": 2,
+    "seed": 20261101,
+    "num_threads": 2,
+    "fixture_count": 8,
+    "duration_seconds": 3.0
+  },
+  "lm_width": 64,
+  "lm_layers": 2,
+  "lm_heads": 4,
+  "lm_ffn_width": 176,
+  "max_positions": 512,
+  "max_prompt_bytes": 128,
+  "max_new_tokens": 32,
+  "learning_rate": 0.003,
+  "max_transcript_bytes": 256
+}
