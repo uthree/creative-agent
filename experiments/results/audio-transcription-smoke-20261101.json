@@ -1,0 +1,409 @@
+{
+  "date_utc": "2026-11-01",
+  "scope": "LLM speech transcription wiring smoke; recognition quality not achieved",
+  "verified_implementation_commit": "5b344e9770dfe80575e014113036120ce755d1c5",
+  "recipe_sha256": "29741ad9b505146f5c73583d4ad4b32124b9d0a67b0c2ce47a1a15f4d8182300",
+  "tests": {
+    "cuda_environment": {
+      "passed": 59,
+      "skipped": 0
+    },
+    "cpu_only_environment": {
+      "passed": 52,
+      "skipped": 7,
+      "reason": "CUDA required"
+    },
+    "external_tts_absent_cpu_ci_expected": {
+      "passed": 51,
+      "skipped": 8
+    },
+    "lint_format_and_lock": "passed"
+  },
+  "runs": {
+    "cpu": {
+      "report": {
+        "status": "passed",
+        "scope": "projector-only transcription CE wiring; no recognition-quality claim",
+        "task": "transcription",
+        "config": {
+          "audio": {
+            "sample_rate": 48000,
+            "hop_samples": 480,
+            "stem_width": 32,
+            "width": 128,
+            "layers": 2,
+            "heads": 4,
+            "ffn_width": 352,
+            "qk_norm": true,
+            "rope_time_scale": 100.0,
+            "mask_ratio": 0.5,
+            "mask_span": 5,
+            "learning_rate": 0.001,
+            "batch_size": 2,
+            "seed": 20261101,
+            "num_threads": 2,
+            "fixture_count": 8,
+            "duration_seconds": 3.0
+          },
+          "lm_width": 64,
+          "lm_layers": 2,
+          "lm_heads": 4,
+          "lm_ffn_width": 176,
+          "max_positions": 512,
+          "max_prompt_bytes": 128,
+          "max_new_tokens": 32,
+          "learning_rate": 0.003,
+          "max_transcript_bytes": 256
+        },
+        "encoder_origin": {
+          "kind": "stage1_ssl_checkpoint",
+          "step": 11,
+          "sha256": "7c363c6b36ebf8702671e4f97c4b5014e858a60c116ebb98dbb009b147dbdf52"
+        },
+        "llm": "random tiny Qwen3, no pretrained weights",
+        "tokenizer": "utf8-bytes-plus-three-specials-v1",
+        "trainable_parameters": 8256,
+        "total_parameters": 765958,
+        "optimizer_steps": 11,
+        "session_optimizer_steps": 1,
+        "resumed_from_step": 10,
+        "skipped_updates": 0,
+        "frozen_unchanged": {
+          "encoder": true,
+          "llm": true
+        },
+        "projector_changed": true,
+        "initial_hashes": {
+          "encoder": "c62492e738a96bbc5e485b722f2ea61e7c4fa70430e317feb338d7bf02d992e3",
+          "llm": "d81c3ac27b256067c40d4405725b5cbd4d92805e2cb0a0a36b2352c84f1702d4",
+          "projector": "73805979a4d21ae5071a8483df4bd794cdc1bfc5b90be21d18bd448b2041d68e"
+        },
+        "data_signature": "e2f5dee45a0ea80645088e41c0f052f48ef7accf44f330880a1a15cefc06bcfb",
+        "train_works": 6,
+        "validation_works": 2,
+        "max_sequence_positions": 225,
+        "initial_validation": {
+          "mean_response_token_nll": {
+            "audio": 5.607730367909307,
+            "silence": 5.607813607091489,
+            "wrong_audio": 5.611058857129968
+          },
+          "supervised_token_counts": {
+            "audio": 23,
+            "silence": 23,
+            "wrong_audio": 23
+          }
+        },
+        "final_validation": {
+          "mean_response_token_nll": {
+            "audio": 5.406839868296748,
+            "silence": 5.406814658123514,
+            "wrong_audio": 5.405513182930324
+          },
+          "supervised_token_counts": {
+            "audio": 23,
+            "silence": 23,
+            "wrong_audio": 23
+          },
+          "transcription_metrics": {
+            "normalization": "Unicode NFC only; CER includes spaces and punctuation",
+            "cer": 2.9523809523809526,
+            "character_edits": 62,
+            "reference_characters": 21,
+            "wer": 1.0,
+            "word_edits": 4,
+            "reference_words": 4,
+            "wer_scope": "English utterances only, whitespace-delimited; no Japanese WER",
+            "exact_match_rate": 0.0,
+            "utterances": 2,
+            "generation_token_limit_count": 2,
+            "generation_eos_count": 0
+          }
+        },
+        "last_training": {
+          "step": 11,
+          "epoch": 4,
+          "response_ce": 5.373210430145264,
+          "projector_gradient_norm": 0.10157410055398941,
+          "supervised_tokens": 24,
+          "sequence_positions": 205,
+          "sample_ids": [
+            "synthetic-speech-0006",
+            "synthetic-speech-0002"
+          ]
+        },
+        "device": "cpu",
+        "precision": "float32",
+        "encoder_attention_backend": "math",
+        "lm_attention_backend": "math_sdpa",
+        "torch": "2.14.1+cpu",
+        "transformers": "4.57.6",
+        "gpu": null,
+        "peak_allocated_bytes": null,
+        "peak_reserved_bytes": null,
+        "elapsed_seconds_this_session": 0.2964090660098009,
+        "source": {
+          "file_sha256": {
+            "src/creative_agent/__init__.py": "506c3f2af75db592b115074ef68d9acffd640b70fb4670102c62b31ed6a319b9",
+            "src/creative_agent/audio.py": "270c420cbce81460792d0ea2c271d6c5497eea56df83c9343417cd9ba2a47d90",
+            "src/creative_agent/caption.py": "dc0612b2abb8dd58a9da3497aa383863d6b70cc77a91b35c1f9e8d3032736e46",
+            "src/creative_agent/caption_training.py": "162af3f751153967403b963ba4c2db316756f9d5e9d8086c2051df8cfc08d0d7",
+            "src/creative_agent/cli.py": "e2cd27151930919331b3a379333e8671f79014589393c12caa671c99706da5db",
+            "src/creative_agent/config.py": "9a85d1b6bb9781f811086cfb30a7c07633f9c69443a488a1c2229c3f242e996f",
+            "src/creative_agent/diagnosis.py": "ab0baf892064b55fda5e31642a6f6c6f47d06c2da0c49dca9121134ca147a15d",
+            "src/creative_agent/diagnosis_data.py": "db573ea7f265aaa75b7af01aa5d62b4aaae4ec71d462970d83404332306d4d73",
+            "src/creative_agent/diagnosis_training.py": "f4f71662e969c3da4f5982ee0c5387a680aae1d7018d73f64721f02387b141a6",
+            "src/creative_agent/model.py": "b958800dd819fd4625ee1f5c5c02c47cc1e023e9e4e6ba916b8cf0c61ced476b",
+            "src/creative_agent/training.py": "a31d44b490b872805abc4d0fabfe32772785459be2f9b2752925f25f2eca2651",
+            "src/creative_agent/transcription.py": "f1f08753597b9457f63bbd2f17d86568dfe6801514148646658cd7dd1faa3442",
+            "pyproject.toml": "c4edede314da1bc1027ea5b6805c088dfda4162af28ca102ca7c1c0f9234f67d",
+            "uv.lock": "9f5cdc3e02229a9fc20fcb0bfa412d315ab84f4df4ec79797d40308ffa470392"
+          },
+          "commit": "d97bf736d40c68a01a1f0b4d694e638cff032686",
+          "dirty": true,
+          "verified_against_commit": "5b344e9770dfe80575e014113036120ce755d1c5"
+        },
+        "speech_data": {
+          "source_kinds": [
+            "synthetic_speech"
+          ],
+          "languages": [
+            "en"
+          ],
+          "train_utterances": 6,
+          "validation_utterances": 2,
+          "transcript_overlap": 0,
+          "shared_speaker_count": 1,
+          "preprocessing": [
+            "linear upsample to 48000 Hz; duplicate mono to L/R"
+          ],
+          "synthesis": {
+            "engine_version": "eSpeak NG text-to-speech: 1.52.0",
+            "voice": "en-us",
+            "speed": 150
+          }
+        }
+      },
+      "before_resume": {
+        "optimizer_steps": 10,
+        "elapsed_seconds_this_session": 0.5159006290195975,
+        "final_mean_response_token_nll": {
+          "audio": 5.408203746961511,
+          "silence": 5.408176587975544,
+          "wrong_audio": 5.406943341960078
+        }
+      },
+      "checkpoint_sha256": "37c9d432d0902c369e35d53e2df908747ade17df2b816344cbbd17bf0242b109",
+      "audit": {
+        "source_and_lock_match_implementation_commit": true,
+        "optimizer_steps_match_history_and_log": true,
+        "only_train_split_in_update_history": true,
+        "encoder_exactly_matches_ssl_parent": true,
+        "frozen_llm_hash_unchanged": true,
+        "projector_hash_changed": true,
+        "reloaded_validation_losses_generations_and_metrics_exact_match": true,
+        "tensorboard_update_steps_complete_and_unique": true,
+        "tensorboard_audio_reference_and_generation_pairs_match": true,
+        "tensorboard_audio_rate": 48000,
+        "tensorboard_audio_channels": 2
+      }
+    },
+    "cuda": {
+      "report": {
+        "status": "passed",
+        "scope": "projector-only transcription CE wiring; no recognition-quality claim",
+        "task": "transcription",
+        "config": {
+          "audio": {
+            "sample_rate": 48000,
+            "hop_samples": 480,
+            "stem_width": 32,
+            "width": 128,
+            "layers": 2,
+            "heads": 4,
+            "ffn_width": 352,
+            "qk_norm": true,
+            "rope_time_scale": 100.0,
+            "mask_ratio": 0.5,
+            "mask_span": 5,
+            "learning_rate": 0.001,
+            "batch_size": 2,
+            "seed": 20261101,
+            "num_threads": 2,
+            "fixture_count": 8,
+            "duration_seconds": 3.0
+          },
+          "lm_width": 64,
+          "lm_layers": 2,
+          "lm_heads": 4,
+          "lm_ffn_width": 176,
+          "max_positions": 512,
+          "max_prompt_bytes": 128,
+          "max_new_tokens": 32,
+          "learning_rate": 0.003,
+          "max_transcript_bytes": 256
+        },
+        "encoder_origin": {
+          "kind": "stage1_ssl_checkpoint",
+          "step": 21,
+          "sha256": "25579db3c62145d37707e69bcffd331a58deb3106033dd9c4aa7d0cce66be132"
+        },
+        "llm": "random tiny Qwen3, no pretrained weights",
+        "tokenizer": "utf8-bytes-plus-three-specials-v1",
+        "trainable_parameters": 8256,
+        "total_parameters": 765958,
+        "optimizer_steps": 21,
+        "session_optimizer_steps": 1,
+        "resumed_from_step": 20,
+        "skipped_updates": 0,
+        "frozen_unchanged": {
+          "encoder": true,
+          "llm": true
+        },
+        "projector_changed": true,
+        "initial_hashes": {
+          "encoder": "0e5603caf418441d9b93b9c5584756e2442d343fa92284fa6a7ebf8f322a8467",
+          "llm": "d81c3ac27b256067c40d4405725b5cbd4d92805e2cb0a0a36b2352c84f1702d4",
+          "projector": "73805979a4d21ae5071a8483df4bd794cdc1bfc5b90be21d18bd448b2041d68e"
+        },
+        "data_signature": "e2f5dee45a0ea80645088e41c0f052f48ef7accf44f330880a1a15cefc06bcfb",
+        "train_works": 6,
+        "validation_works": 2,
+        "max_sequence_positions": 225,
+        "initial_validation": {
+          "mean_response_token_nll": {
+            "audio": 5.5953715573186456,
+            "silence": 5.595354515573253,
+            "wrong_audio": 5.598346171171769
+          },
+          "supervised_token_counts": {
+            "audio": 23,
+            "silence": 23,
+            "wrong_audio": 23
+          }
+        },
+        "final_validation": {
+          "mean_response_token_nll": {
+            "audio": 5.400041953377102,
+            "silence": 5.4000331007916,
+            "wrong_audio": 5.398842003034509
+          },
+          "supervised_token_counts": {
+            "audio": 23,
+            "silence": 23,
+            "wrong_audio": 23
+          },
+          "transcription_metrics": {
+            "normalization": "Unicode NFC only; CER includes spaces and punctuation",
+            "cer": 2.9523809523809526,
+            "character_edits": 62,
+            "reference_characters": 21,
+            "wer": 1.0,
+            "word_edits": 4,
+            "reference_words": 4,
+            "wer_scope": "English utterances only, whitespace-delimited; no Japanese WER",
+            "exact_match_rate": 0.0,
+            "utterances": 2,
+            "generation_token_limit_count": 2,
+            "generation_eos_count": 0
+          }
+        },
+        "last_training": {
+          "step": 21,
+          "epoch": 7,
+          "response_ce": 5.4269514083862305,
+          "projector_gradient_norm": 0.11094982922077179,
+          "supervised_tokens": 20,
+          "sequence_positions": 185,
+          "sample_ids": [
+            "synthetic-speech-0001",
+            "synthetic-speech-0006"
+          ]
+        },
+        "device": "cuda:0",
+        "precision": "float16",
+        "encoder_attention_backend": "flash",
+        "lm_attention_backend": "math_sdpa",
+        "torch": "2.14.1+cu126",
+        "transformers": "4.57.6",
+        "gpu": "NVIDIA GeForce RTX 3070",
+        "peak_allocated_bytes": 28259840,
+        "peak_reserved_bytes": 50331648,
+        "elapsed_seconds_this_session": 1.7210247179900762,
+        "source": {
+          "file_sha256": {
+            "src/creative_agent/__init__.py": "506c3f2af75db592b115074ef68d9acffd640b70fb4670102c62b31ed6a319b9",
+            "src/creative_agent/audio.py": "270c420cbce81460792d0ea2c271d6c5497eea56df83c9343417cd9ba2a47d90",
+            "src/creative_agent/caption.py": "dc0612b2abb8dd58a9da3497aa383863d6b70cc77a91b35c1f9e8d3032736e46",
+            "src/creative_agent/caption_training.py": "162af3f751153967403b963ba4c2db316756f9d5e9d8086c2051df8cfc08d0d7",
+            "src/creative_agent/cli.py": "e2cd27151930919331b3a379333e8671f79014589393c12caa671c99706da5db",
+            "src/creative_agent/config.py": "9a85d1b6bb9781f811086cfb30a7c07633f9c69443a488a1c2229c3f242e996f",
+            "src/creative_agent/diagnosis.py": "ab0baf892064b55fda5e31642a6f6c6f47d06c2da0c49dca9121134ca147a15d",
+            "src/creative_agent/diagnosis_data.py": "db573ea7f265aaa75b7af01aa5d62b4aaae4ec71d462970d83404332306d4d73",
+            "src/creative_agent/diagnosis_training.py": "f4f71662e969c3da4f5982ee0c5387a680aae1d7018d73f64721f02387b141a6",
+            "src/creative_agent/model.py": "b958800dd819fd4625ee1f5c5c02c47cc1e023e9e4e6ba916b8cf0c61ced476b",
+            "src/creative_agent/training.py": "a31d44b490b872805abc4d0fabfe32772785459be2f9b2752925f25f2eca2651",
+            "src/creative_agent/transcription.py": "f1f08753597b9457f63bbd2f17d86568dfe6801514148646658cd7dd1faa3442",
+            "pyproject.toml": "c4edede314da1bc1027ea5b6805c088dfda4162af28ca102ca7c1c0f9234f67d",
+            "uv.lock": "9f5cdc3e02229a9fc20fcb0bfa412d315ab84f4df4ec79797d40308ffa470392"
+          },
+          "commit": "d97bf736d40c68a01a1f0b4d694e638cff032686",
+          "dirty": true,
+          "verified_against_commit": "5b344e9770dfe80575e014113036120ce755d1c5"
+        },
+        "speech_data": {
+          "source_kinds": [
+            "synthetic_speech"
+          ],
+          "languages": [
+            "en"
+          ],
+          "train_utterances": 6,
+          "validation_utterances": 2,
+          "transcript_overlap": 0,
+          "shared_speaker_count": 1,
+          "preprocessing": [
+            "linear upsample to 48000 Hz; duplicate mono to L/R"
+          ],
+          "synthesis": {
+            "engine_version": "eSpeak NG text-to-speech: 1.52.0",
+            "voice": "en-us",
+            "speed": 150
+          }
+        }
+      },
+      "before_resume": {
+        "optimizer_steps": 20,
+        "elapsed_seconds_this_session": 2.1789425240131095,
+        "final_mean_response_token_nll": {
+          "audio": 5.400696091029955,
+          "silence": 5.400683340818985,
+          "wrong_audio": 5.399501220039699
+        }
+      },
+      "checkpoint_sha256": "c9316b8862cbec11425abb1124b757502bbd80d92ea4e30248f7804af296a2b8",
+      "audit": {
+        "source_and_lock_match_implementation_commit": true,
+        "optimizer_steps_match_history_and_log": true,
+        "only_train_split_in_update_history": true,
+        "encoder_exactly_matches_ssl_parent": true,
+        "frozen_llm_hash_unchanged": true,
+        "projector_hash_changed": true,
+        "reloaded_validation_losses_generations_and_metrics_exact_match": true,
+        "tensorboard_update_steps_complete_and_unique": true,
+        "tensorboard_audio_reference_and_generation_pairs_match": true,
+        "tensorboard_audio_rate": 48000,
+        "tensorboard_audio_channels": 2
+      }
+    }
+  },
+  "ci": {
+    "url": "https://github.com/uthree/creative-agent/actions/runs/41281520031",
+    "conclusion": "success",
+    "platforms": [
+      "ubuntu-latest",
+      "windows-latest"
+    ],
+    "implementation_commit": "5b344e9770dfe80575e014113036120ce755d1c5"
+  }
+}
