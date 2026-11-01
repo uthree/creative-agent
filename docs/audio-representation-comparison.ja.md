@@ -1,5 +1,7 @@
 # 20 FPS CNNと浅いTransformerの自己教師あり比較
 
+[9 run・9,000更新の実測結果](audio-representation-comparison-report.ja.md)と[匿名集計](../experiments/results/audio-ssl-cnn-comparison-20261102.json)を参照。
+
 音楽・発話から内容を保持するencoderを学習し、LLMへ接続する前に比較する。新しい`RepresentationEncoder`は48 kHzステレオ波形から20 FPS・128次元を返す。LLM、文字起こし教師、MIDI教師はこのSSLの損失に使わない。
 
 ## 参考と実装範囲
@@ -56,4 +58,4 @@ uv run --no-sync python experiments/run_ssl_comparison.py train \
 
 新encoderのcheckpointは`audio_representation_encoder_v1`で、従来の100 FPSスペクトル復元モデルと区別する。LLM用projector・LoRAの再学習、従来の診断headやSSL復元教師との統合はこのencoder単体の比較には含めない。
 
-監査は`experiments/audit_ssl_comparison.py --manifest ... --suite ... --summary ...`で実行する。履歴・optimizer更新数・seedからの初期重み・Git commitとソースhash・codebook・sampling順・TensorBoard・全保存指標を照合し、3群を含む固定test batchの予測を保存重みから再現する。30秒／60秒の実音楽でも20 FPSの出力形状と推論時間を確認する。比較表と匿名集計は実行後に追加する。
+監査は`experiments/audit_ssl_comparison.py --manifest ... --suite ... --summary ...`で実行する。履歴・optimizer更新数・seedからの初期重み・Git commitとソースhash・codebook・sampling順・TensorBoard・全保存指標を照合し、3群を含む固定test batchの予測を保存重みから再現する。30秒／60秒の実音楽でも20 FPSの出力形状と推論時間を確認する。比較表と匿名集計は実測報告へ記録した。
