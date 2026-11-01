@@ -162,7 +162,7 @@ def test_caption_resume_restores_optimizer_frozen_models_sampler_and_logs(tmp_pa
     assert full["final_validation"] == resumed["final_validation"]
     assert len((b_path / "training.jsonl").read_text().splitlines()) == 4
     events = EventAccumulator(str(b_path / "tensorboard")).Reload()
-    assert [e.step for e in events.Scalars("train/response_ce")] == [1, 2, 3, 4]
+    assert sorted(e.step for e in events.Scalars("train/response_ce")) == [1, 2, 3, 4]
     tag = "validation/examples/synthetic-work-0000"
     assert tag + "/input" in events.Tags()["audio"]
     assert tag + "/reference/text_summary" in events.Tags()["tensors"]

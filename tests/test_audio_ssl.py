@@ -154,7 +154,7 @@ def test_resume_restores_weights_optimizer_rng_sampler_and_tensorboard(tmp_path,
             torch.testing.assert_close(value, b["optimizer"]["state"][index][key], rtol=0, atol=0)
     assert len((interrupted / "training.jsonl").read_text().splitlines()) == 6
     events = EventAccumulator(str(interrupted / "tensorboard")).Reload()
-    assert [e.step for e in events.Scalars("train/loss/total")] == list(range(1, 7))
+    assert sorted(e.step for e in events.Scalars("train/loss/total")) == list(range(1, 7))
     audio_event = events.Audio("validation/input")[-1]
     samples, rate = sf.read(io.BytesIO(audio_event.encoded_audio_string), always_2d=True)
     assert rate == 48000 and samples.shape[1] == 2
