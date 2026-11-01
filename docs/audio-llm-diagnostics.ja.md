@@ -25,3 +25,19 @@ TensorBoardへ入力音声、oracle入力、正解、実際の生成文、保存
 ## 実行
 
 `uv run --no-sync python experiments/run_llm_diagnostics.py --help`を参照。`prepare`でmanifestと共通encoder checkpointからcacheを作成し、`decode`で既存モデルの生成設定を比較、`train`でbackbone/task/modeを指定する。出力先は既存ディレクトリへ上書きしない。データ・oracle全文・特徴・重み・イベントは除外対象のローカルrunに保存し、匿名集計と結果文書をGitへ残す。
+
+全条件を同じGPUで順に実行する入口は次のとおり。`QWEN_MODEL_DIR`には固定revisionのローカルsnapshotを指定する。
+
+```sh
+uv run --no-sync python experiments/run_llm_comparison_suite.py \
+  --output runs/audio-llm-diagnostics-20261101 \
+  --manifest data/public-audio-20261101/manifest-long-midi-30-60.json \
+  --lfm-dir .local/models/LFM3-1.7B-ac2586a \
+  --qwen-dir "$QWEN_MODEL_DIR" \
+  --encoder-checkpoint runs/audio-multitask-lfm3-5000-20261101/checkpoint.pt \
+  --previous-suite runs/audio-public-single-task-20261101
+```
+
+完了した`report.json`がある条件は再実行しない。途中のディレクトリを上書きする再開機能はなく、失敗した実行は別名へ退避して保存する。LoRA拡張の追加基準は、LFMの全訓練例の完全一致率が95%未満であること。未知例の結果で追加条件やcheckpointを選ばない。
+
+診断runnerは毎更新1例を明示的に渡す。cache由来の`config.audio`に残るSSL用batch・区間長・学習率の既定値は、このrunnerの実効batch・公開音声長・LLM学習率を規定しない。実効batch 1、実際の区間長はmanifest、学習率は外側の`config.learning_rate`を使う。異なるtokenizerのNLL同士の絶対値は直接比較せず、同一モデル内の正音声／無音／別音声差を見る。
