@@ -34,6 +34,7 @@ from creative_agent.training import source_identity
 def midi_text_diagnostics(rows):
     errors = Counter()
     exact_ignoring_terminal_newlines = matching_rows = reference_rows = prefix_rows = 0
+    matching_unordered = predicted_rows = 0
     for row in rows:
         actual, reference = row["generated"]["text"], row["reference"]
         exact_ignoring_terminal_newlines += actual.rstrip("\n") == reference.rstrip("\n")
@@ -44,17 +45,38 @@ def midi_text_diagnostics(rows):
         expected = reference.splitlines()[1:]
         predicted = actual.splitlines()[1:] if actual.startswith("N1\n") else []
         reference_rows += len(expected)
+        predicted_rows += len(predicted)
+        matching_unordered += sum((Counter(expected) & Counter(predicted)).values())
         matching_rows += sum(a == b for a, b in zip(expected, predicted, strict=False))
         for a, b in zip(expected, predicted, strict=False):
             if a != b:
                 break
             prefix_rows += 1
+    newline_rows = []
+    changed = 0
+    for row in rows:
+        text = row["generated"]["text"]
+        append = text.startswith("N1\n") and not text.endswith("\n")
+        changed += append
+        newline_rows.append(
+            {**row, "generated": {**row["generated"], "text": text + ("\n" if append else "")}}
+        )
     return {
+        "suffix_newline_only_diagnostic": {
+            "changed_outputs": changed,
+            "metrics": score("midi", newline_rows),
+        },
         "invalid_reasons": dict(errors),
         "exact_ignoring_terminal_newlines": exact_ignoring_terminal_newlines,
         "reference_note_rows": reference_rows,
         "position_matching_note_rows": matching_rows,
         "correct_prefix_note_rows": prefix_rows,
+        "exact_row_multiset": {
+            "matching": matching_unordered,
+            "predicted": predicted_rows,
+            "reference": reference_rows,
+            "f1": 2 * matching_unordered / max(1, predicted_rows + reference_rows),
+        },
         "primary_metrics_use_strict_unrepaired_outputs": True,
     }
 

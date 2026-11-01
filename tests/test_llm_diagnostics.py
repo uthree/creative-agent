@@ -93,9 +93,22 @@ def test_lfm_named_mlp_and_conv_projections_receive_wide_lora():
 
 
 def test_diagnostic_budget_accommodates_different_numeric_tokenizers():
+    from creative_agent.midi import Note, notes_text
+
     cache = {"config": small_config().to_dict()}
-    for backbone in ("lfm3", "qwen3"):
-        config = configure(cache, backbone, "midi")
-        assert config.max_new_tokens == 6144
-        assert config.max_positions == 12288
-        assert MultitaskConfig.from_dict(config.to_dict()) == config
+    configs = [configure(cache, backbone, "midi") for backbone in ("lfm3", "qwen3")]
+    assert configs[0].max_new_tokens == configs[1].max_new_tokens
+    assert configs[0].max_positions == configs[1].max_positions
+    model = MultitaskModel(replace(configs[0], backbone="tiny"))
+    reference = notes_text(
+        [Note(60 + i % 12, i * 200, i * 200 + 100, 80) for i in range(240)], 60000
+    )
+    oracle = oracle_input("midi", reference, 60000)
+    teacher_tokens = len(model.tokenizer.encode(reference)) + 1
+    assert 4096 < teacher_tokens <= configs[0].max_new_tokens
+    _, labels, _, _ = model.prepare([oracle], ["Convert notes"], [reference])
+    assert int((labels != -100).sum()) == teacher_tokens
+    model.prepare([oracle], ["Convert notes"], reserve=configs[0].max_new_tokens)
+    model.config = replace(model.config, max_positions=8192, max_new_tokens=4096)
+    with pytest.raises(ValueError, match="no truncation"):
+        model.prepare([oracle], ["Convert notes"], [reference])

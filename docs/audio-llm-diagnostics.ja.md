@@ -41,3 +41,5 @@ uv run --no-sync python experiments/run_llm_comparison_suite.py \
 完了した`report.json`がある条件は再実行しない。途中のディレクトリを上書きする再開機能はなく、失敗した実行は別名へ退避して保存する。LoRA拡張の追加基準は、LFMの全訓練例の完全一致率が95%未満であること。未知例の結果で追加条件やcheckpointを選ばない。
 
 診断runnerは毎更新1例を明示的に渡す。cache由来の`config.audio`に残るSSL用batch・区間長・学習率の既定値は、このrunnerの実効batch・公開音声長・LLM学習率を規定しない。実効batch 1、実際の区間長はmanifest、学習率は外側の`config.learning_rate`を使う。異なるtokenizerのNLL同士の絶対値は直接比較せず、同一モデル内の正音声／無音／別音声差を見る。
+
+主指標と実際の生成文・MIDI画像は修復しない。補助診断として、N1で始まる応答の欠けた末尾改行だけを追加した場合の値も別に保存する。音符・順序・数値は変えず、生成上限到達も残す。これは形式要因の切り分け用で、実際の生成成功率へ混ぜない。
