@@ -1,4 +1,4 @@
-"""Caption-only CE smoke with frozen encoder/LLM and resumable projector updates."""
+"""Response-only CE smoke with frozen encoder/LLM and resumable projector updates."""
 
 import json
 import random
@@ -96,13 +96,17 @@ def run_text_smoke(
     encoder_checkpoint: Path | None = None,
     task="caption",
 ):
-    if task not in ("caption", "transcription"):
+    if task not in ("caption", "transcription", "midi"):
         raise ValueError("unsupported audio-text task")
     dataset_type, prepare = CaptionDataset, prepare_caption_fixtures
     if task == "transcription":
         from creative_agent.transcription import TranscriptionDataset, prepare_speech_fixtures
 
         dataset_type, prepare = TranscriptionDataset, prepare_speech_fixtures
+    elif task == "midi":
+        from creative_agent.midi_data import MidiDataset, prepare_midi_fixtures
+
+        dataset_type, prepare = MidiDataset, prepare_midi_fixtures
     if type(steps) is not int or not 0 < steps <= 1000:
         raise ValueError("smoke target steps must be in [1, 1000]")
     device, precision, backend = resolve_runtime(device, precision, backend)
@@ -331,6 +335,15 @@ def _train(
                 value = final["transcription_metrics"][name]
                 if value is not None:
                     writer.add_scalar("validation/" + name, value, step)
+        elif task == "midi":
+            final["midi_metrics"] = dataset.score(final["examples"])
+            final["midi_exports"] = dataset.export(output, final["examples"], step)
+            for name in ("valid_note_sequence_rate", "exact_note_sequence_rate"):
+                writer.add_scalar("validation/" + name, final["midi_metrics"][name], step)
+            for name in ("onset", "onset_offset"):
+                writer.add_scalar(
+                    "validation/" + name + "_f1", final["midi_metrics"][name]["f1"], step
+                )
         for condition, value in final["mean_response_token_nll"].items():
             if value is not None:
                 writer.add_scalar("validation/response_ce/" + condition, value, step)
@@ -397,6 +410,8 @@ def _train(
     }
     if task == "transcription":
         report["speech_data"] = dataset.provenance
+    elif task == "midi":
+        report["midi_data"] = dataset.provenance
     (output / "report.json").write_text(
         json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
