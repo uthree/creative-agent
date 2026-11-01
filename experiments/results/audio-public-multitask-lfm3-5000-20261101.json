@@ -1,0 +1,2478 @@
+{
+  "status": "completed",
+  "optimizer_steps": 5000,
+  "task_updates": {
+    "ssl": 1000,
+    "caption": 1000,
+    "diagnosis": 1000,
+    "transcription": 1000,
+    "midi": 1000
+  },
+  "session_optimizer_steps": 5000,
+  "resumed_from_step": null,
+  "config": {
+    "audio": {
+      "sample_rate": 48000,
+      "hop_samples": 480,
+      "stem_width": 32,
+      "width": 128,
+      "layers": 2,
+      "heads": 4,
+      "ffn_width": 352,
+      "qk_norm": true,
+      "rope_time_scale": 100.0,
+      "mask_ratio": 0.5,
+      "mask_span": 5,
+      "learning_rate": 0.001,
+      "batch_size": 2,
+      "seed": 20261101,
+      "num_threads": 2,
+      "fixture_count": 16,
+      "duration_seconds": 10.0
+    },
+    "backbone": "lfm3",
+    "lora_rank": 8,
+    "pool_frames": 5,
+    "learning_rate": 0.0003,
+    "warmup_steps": 100,
+    "checkpoint_every": 250,
+    "evaluate_every": 2500,
+    "max_positions": 1024,
+    "max_new_tokens": 192,
+    "generation_examples": 4,
+    "diagnostic_weight": 1.0,
+    "tiny_width": 32
+  },
+  "data": {
+    "ssl": {
+      "train": {
+        "examples": 512,
+        "source_recordings": 162,
+        "audio_seconds": 1288.6721666666667,
+        "languages": {
+          "ja": 65,
+          "none": 420,
+          "en": 27
+        }
+      },
+      "validation": {
+        "examples": 8,
+        "source_recordings": 7,
+        "audio_seconds": 16.0,
+        "languages": {
+          "none": 8
+        }
+      },
+      "test": {
+        "examples": 8,
+        "source_recordings": 7,
+        "audio_seconds": 16.0,
+        "languages": {
+          "none": 8
+        }
+      }
+    },
+    "caption": {
+      "train": {
+        "examples": 600,
+        "source_recordings": 71,
+        "audio_seconds": 1200.0,
+        "languages": {
+          "none": 600
+        }
+      },
+      "validation": {
+        "examples": 12,
+        "source_recordings": 10,
+        "audio_seconds": 24.0,
+        "languages": {
+          "none": 12
+        }
+      },
+      "test": {
+        "examples": 24,
+        "source_recordings": 14,
+        "audio_seconds": 48.0,
+        "languages": {
+          "none": 24
+        }
+      }
+    },
+    "diagnosis": {
+      "train": {
+        "examples": 736,
+        "source_recordings": 86,
+        "audio_seconds": 1472.0,
+        "languages": {
+          "none": 736
+        }
+      },
+      "validation": {
+        "examples": 24,
+        "source_recordings": 3,
+        "audio_seconds": 48.0,
+        "languages": {
+          "none": 24
+        }
+      },
+      "test": {
+        "examples": 24,
+        "source_recordings": 3,
+        "audio_seconds": 48.0,
+        "languages": {
+          "none": 24
+        }
+      }
+    },
+    "transcription": {
+      "train": {
+        "examples": 892,
+        "source_recordings": 892,
+        "audio_seconds": 4278.1375625,
+        "languages": {
+          "ja": 640,
+          "en": 252
+        }
+      },
+      "validation": {
+        "examples": 16,
+        "source_recordings": 16,
+        "audio_seconds": 70.83429166666667,
+        "languages": {
+          "en": 8,
+          "ja": 8
+        }
+      },
+      "test": {
+        "examples": 32,
+        "source_recordings": 32,
+        "audio_seconds": 144.94929166666665,
+        "languages": {
+          "en": 16,
+          "ja": 16
+        }
+      }
+    },
+    "midi": {
+      "train": {
+        "examples": 800,
+        "source_recordings": 19,
+        "audio_seconds": 1189.601,
+        "languages": {
+          "none": 800
+        }
+      },
+      "validation": {
+        "examples": 16,
+        "source_recordings": 4,
+        "audio_seconds": 26.002,
+        "languages": {
+          "none": 16
+        }
+      },
+      "test": {
+        "examples": 32,
+        "source_recordings": 5,
+        "audio_seconds": 55.715,
+        "languages": {
+          "none": 32
+        }
+      }
+    },
+    "sources": {
+      "jsut-1.1-basic5000": 664,
+      "mini-librispeech": 276,
+      "babyslakh-v2": 96
+    }
+  },
+  "signatures": {
+    "manifest": "bbe02d91a1b0193e57c56a79b1c114a2a2ebca677c907dd4f721cd42d3e51659"
+  },
+  "backbone": "lfm3",
+  "backbone_identity": {
+    "model.safetensors": "135922caef64e81e52af88ede8b7c3ddaa9d6da220a9737fb3065275dbfb4330",
+    "config.json": "8c6ae8b8f6d88c87cfb98cf4b5e34e943d0ee07e24215c4121b3159a46e1399d",
+    "tokenizer.json": "7e226e34bface23ccf6e495d157bf77186c1c30a7659880e1a8994db528c3701",
+    "tokenizer_config.json": "bf028f813efc6137bc07ed045cafe71820df9a5e26a38e39954706ed1e30a457",
+    "special_tokens_map.json": "7946f864cbfb62a1b041bda937244210a1a87f4a6cab3a48b791131b2cd57f88",
+    "generation_config.json": "0095ba7158e938b1e2d3082d412f00d8be85e42cbbd7608b63866f7a081cf270",
+    "chat_template.jinja": "f45005c50cd2a97329722bf3a2dee9f16c04cdf825a589b280fb7e99e6827818",
+    "modeling_lfm3.py": "e8cd5254ea99ce6bd731b57b10908c2e8b5010ce8315341f895a38484885eeab",
+    "configuration_lfm3.py": "176cced35657aedfea7d7002221360582d1c05fcaca882c21508bc3a73b282e5",
+    "lfm3_conv.py": "80d4a985382a22774212759248a6b4c737bfbf9c2a47b3dd7f797dda748e4bb4"
+  },
+  "frozen_backbone_unchanged": true,
+  "trainable_parameters": 1474508,
+  "parameter_group_changes_l2": {
+    "ssl_head": 1.5141370756025663,
+    "encoder": 10.160510723271994,
+    "lora": 14.399796498867394,
+    "projector": 7.767613237017223,
+    "diagnosis_head": 0.37770492262664096
+  },
+  "initial_metrics": {
+    "ssl": {
+      "mean_loss": 0.004909922950901091,
+      "examples": 8,
+      "zero_prediction_baseline_loss": 0.0037202743405941874
+    },
+    "caption": {
+      "mean_loss": 2.049708902835846,
+      "examples": 12,
+      "nll": {
+        "audio": 2.049708902835846,
+        "silence": 2.1787288983662925,
+        "wrong_audio": 1.710871696472168
+      },
+      "controls": "silence: same length; wrong: same language, nearest length, center crop/right pad",
+      "token_limit_count": 0,
+      "exact_match_rate": 0.0,
+      "teacher_kind": "weak instrument template, not human music caption",
+      "training_majority_baseline_accuracy": 0.3333333333333333,
+      "per_class_exact_match_rate": {
+        "This is a bass recording.": 0.0,
+        "This is a guitar recording.": 0.0,
+        "This is a piano recording.": 0.0
+      }
+    },
+    "diagnosis": {
+      "mean_loss": 2.027975675960382,
+      "examples": 24,
+      "nll": {
+        "audio": 0.8146466740243169,
+        "silence": 0.797941111140113,
+        "wrong_audio": 0.8817546892863231
+      },
+      "controls": "silence: same length; wrong: same language, nearest length, center crop/right pad",
+      "token_limit_count": 0,
+      "head": {
+        "examples": 24,
+        "threshold": 0.5,
+        "event_iou": 0.5,
+        "per_class": {
+          "dropout": {
+            "tp": 6,
+            "fp": 6,
+            "fn": 6,
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5
+          },
+          "clipping": {
+            "tp": 6,
+            "fp": 6,
+            "fn": 6,
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5
+          },
+          "channel_imbalance": {
+            "tp": 8,
+            "fp": 8,
+            "fn": 4,
+            "precision": 0.5,
+            "recall": 0.6666666666666666,
+            "f1": 0.5714285714285714
+          }
+        },
+        "clip_macro_f1": 0.5238095238095238,
+        "clip_micro": {
+          "tp": 20,
+          "fp": 20,
+          "fn": 16,
+          "precision": 0.5,
+          "recall": 0.5555555555555556,
+          "f1": 0.5263157894736842
+        },
+        "event_per_class": {
+          "dropout": {
+            "tp": 0,
+            "fp": 22,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "clipping": {
+            "tp": 0,
+            "fp": 29,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "channel_imbalance": {
+            "tp": 0,
+            "fp": 69,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "event_macro_f1": 0.0,
+        "event_micro": {
+          "tp": 0,
+          "fp": 120,
+          "fn": 36,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "by_kind": {
+          "normal": {
+            "examples": 3,
+            "exact_matches": 0,
+            "exact_set_accuracy": 0.0
+          },
+          "single": {
+            "examples": 9,
+            "exact_matches": 1,
+            "exact_set_accuracy": 0.1111111111111111
+          },
+          "compound": {
+            "examples": 12,
+            "exact_matches": 1,
+            "exact_set_accuracy": 0.08333333333333333
+          }
+        },
+        "normal_clips_with_false_alarm": 3,
+        "normal_clip_false_alarm_rate": 1.0,
+        "normal_false_events_per_hour": 6600.0,
+        "normal_seconds": 6.0
+      },
+      "always_positive_baseline_clip_macro_f1": 0.6666666666666666,
+      "llm": {
+        "examples": 24,
+        "threshold": 0.5,
+        "event_iou": 0.5,
+        "per_class": {
+          "dropout": {
+            "tp": 8,
+            "fp": 8,
+            "fn": 4,
+            "precision": 0.5,
+            "recall": 0.6666666666666666,
+            "f1": 0.5714285714285714
+          },
+          "clipping": {
+            "tp": 4,
+            "fp": 4,
+            "fn": 8,
+            "precision": 0.5,
+            "recall": 0.3333333333333333,
+            "f1": 0.4
+          },
+          "channel_imbalance": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "clip_macro_f1": 0.3238095238095238,
+        "clip_micro": {
+          "tp": 12,
+          "fp": 12,
+          "fn": 24,
+          "precision": 0.5,
+          "recall": 0.3333333333333333,
+          "f1": 0.4
+        },
+        "event_per_class": {
+          "dropout": {
+            "tp": 0,
+            "fp": 16,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "clipping": {
+            "tp": 0,
+            "fp": 8,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "channel_imbalance": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "event_macro_f1": 0.0,
+        "event_micro": {
+          "tp": 0,
+          "fp": 24,
+          "fn": 36,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "by_kind": {
+          "normal": {
+            "examples": 3,
+            "exact_matches": 0,
+            "exact_set_accuracy": 0.0
+          },
+          "single": {
+            "examples": 9,
+            "exact_matches": 3,
+            "exact_set_accuracy": 0.3333333333333333
+          },
+          "compound": {
+            "examples": 12,
+            "exact_matches": 0,
+            "exact_set_accuracy": 0.0
+          }
+        },
+        "normal_clips_with_false_alarm": 3,
+        "normal_clip_false_alarm_rate": 1.0,
+        "normal_false_events_per_hour": 1800.0,
+        "normal_seconds": 6.0,
+        "invalid_generations": 0,
+        "invalid_normal_generations": 0
+      }
+    },
+    "transcription": {
+      "mean_loss": 7.297888606786728,
+      "examples": 16,
+      "nll": {
+        "audio": 7.136791047765247,
+        "silence": 7.335420080085299,
+        "wrong_audio": 7.197298726039146
+      },
+      "controls": "silence: same length; wrong: same language, nearest length, center crop/right pad",
+      "token_limit_count": 0,
+      "generation": {
+        "utterances": 16,
+        "cer": 0.908256880733945,
+        "character_edits": 594,
+        "reference_characters": 654,
+        "wer": 0.967032967032967,
+        "word_edits": 88,
+        "reference_words": 91,
+        "exact_match_rate": 0.0,
+        "raw_cer": 0.908256880733945,
+        "by_language": {
+          "en": {
+            "utterances": 8,
+            "cer": 0.8623853211009175,
+            "character_edits": 376,
+            "reference_characters": 436,
+            "wer": 0.967032967032967,
+            "word_edits": 88,
+            "reference_words": 91,
+            "exact_match_rate": 0.0,
+            "raw_cer": 0.8623853211009175
+          },
+          "ja": {
+            "utterances": 8,
+            "cer": 1.0,
+            "character_edits": 218,
+            "reference_characters": 218,
+            "wer": null,
+            "word_edits": 0,
+            "reference_words": 0,
+            "exact_match_rate": 0.0,
+            "raw_cer": 1.0
+          }
+        },
+        "normalization": "en: NFC, casefold, punctuation removal except apostrophe, whitespace; ja: NFC only"
+      }
+    },
+    "midi": {
+      "mean_loss": 4.632959634065628,
+      "examples": 16,
+      "nll": {
+        "audio": 4.661433683109472,
+        "silence": 4.649047105034898,
+        "wrong_audio": 4.735799108501487
+      },
+      "controls": "silence: same length; wrong: same language, nearest length, center crop/right pad",
+      "token_limit_count": 0,
+      "generation": {
+        "examples": 16,
+        "valid_note_sequence_rate": 0.4375,
+        "exact_note_sequence_rate": 0.0,
+        "invalid_generations": 9,
+        "onset": {
+          "true_positive": 0,
+          "false_positive": 15,
+          "false_negative": 113,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "onset_offset": {
+          "true_positive": 0,
+          "false_positive": 15,
+          "false_negative": 113,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "silence_examples": 0,
+        "velocity": "measured key velocity; excluded from onset/offset F1"
+      }
+    }
+  },
+  "final_metrics": {
+    "ssl": {
+      "mean_loss": 0.003400756831979379,
+      "examples": 8,
+      "zero_prediction_baseline_loss": 0.0037202743405941874
+    },
+    "caption": {
+      "mean_loss": 0.12746228538405072,
+      "examples": 12,
+      "nll": {
+        "audio": 0.12746228538405072,
+        "silence": 0.24034651865561804,
+        "wrong_audio": 0.953177402416865
+      },
+      "controls": "silence: same length; wrong: same language, nearest length, center crop/right pad",
+      "token_limit_count": 0,
+      "exact_match_rate": 0.6666666666666666,
+      "teacher_kind": "weak instrument template, not human music caption",
+      "training_majority_baseline_accuracy": 0.3333333333333333,
+      "per_class_exact_match_rate": {
+        "This is a bass recording.": 1.0,
+        "This is a guitar recording.": 0.5,
+        "This is a piano recording.": 0.5
+      }
+    },
+    "diagnosis": {
+      "mean_loss": 1.0595230410496395,
+      "examples": 24,
+      "nll": {
+        "audio": 0.2058184300049692,
+        "silence": 0.20670080383192316,
+        "wrong_audio": 0.20286496177059898
+      },
+      "controls": "silence: same length; wrong: same language, nearest length, center crop/right pad",
+      "token_limit_count": 0,
+      "head": {
+        "examples": 24,
+        "threshold": 0.5,
+        "event_iou": 0.5,
+        "per_class": {
+          "dropout": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "clipping": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "channel_imbalance": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "clip_macro_f1": 0.0,
+        "clip_micro": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 36,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "event_per_class": {
+          "dropout": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "clipping": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "channel_imbalance": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "event_macro_f1": 0.0,
+        "event_micro": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 36,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "by_kind": {
+          "normal": {
+            "examples": 3,
+            "exact_matches": 3,
+            "exact_set_accuracy": 1.0
+          },
+          "single": {
+            "examples": 9,
+            "exact_matches": 0,
+            "exact_set_accuracy": 0.0
+          },
+          "compound": {
+            "examples": 12,
+            "exact_matches": 0,
+            "exact_set_accuracy": 0.0
+          }
+        },
+        "normal_clips_with_false_alarm": 0,
+        "normal_clip_false_alarm_rate": 0.0,
+        "normal_false_events_per_hour": 0.0,
+        "normal_seconds": 6.0
+      },
+      "always_positive_baseline_clip_macro_f1": 0.6666666666666666,
+      "llm": {
+        "examples": 24,
+        "threshold": 0.5,
+        "event_iou": 0.5,
+        "per_class": {
+          "dropout": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 11,
+            "precision": 1.0,
+            "recall": 0.08333333333333333,
+            "f1": 0.15384615384615385
+          },
+          "clipping": {
+            "tp": 12,
+            "fp": 12,
+            "fn": 0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.6666666666666666
+          },
+          "channel_imbalance": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "clip_macro_f1": 0.2735042735042735,
+        "clip_micro": {
+          "tp": 13,
+          "fp": 12,
+          "fn": 23,
+          "precision": 0.52,
+          "recall": 0.3611111111111111,
+          "f1": 0.4262295081967213
+        },
+        "event_per_class": {
+          "dropout": {
+            "tp": 0,
+            "fp": 1,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "clipping": {
+            "tp": 8,
+            "fp": 16,
+            "fn": 4,
+            "precision": 0.3333333333333333,
+            "recall": 0.6666666666666666,
+            "f1": 0.4444444444444444
+          },
+          "channel_imbalance": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "event_macro_f1": 0.14814814814814814,
+        "event_micro": {
+          "tp": 8,
+          "fp": 17,
+          "fn": 28,
+          "precision": 0.32,
+          "recall": 0.2222222222222222,
+          "f1": 0.26229508196721313
+        },
+        "by_kind": {
+          "normal": {
+            "examples": 3,
+            "exact_matches": 0,
+            "exact_set_accuracy": 0.0
+          },
+          "single": {
+            "examples": 9,
+            "exact_matches": 3,
+            "exact_set_accuracy": 0.3333333333333333
+          },
+          "compound": {
+            "examples": 12,
+            "exact_matches": 0,
+            "exact_set_accuracy": 0.0
+          }
+        },
+        "normal_clips_with_false_alarm": 3,
+        "normal_clip_false_alarm_rate": 1.0,
+        "normal_false_events_per_hour": 1800.0,
+        "normal_seconds": 6.0,
+        "invalid_generations": 0,
+        "invalid_normal_generations": 0
+      }
+    },
+    "transcription": {
+      "mean_loss": 3.7980105578899384,
+      "examples": 16,
+      "nll": {
+        "audio": 3.7896760746614255,
+        "silence": 3.9457863542570997,
+        "wrong_audio": 3.7287984401432435
+      },
+      "controls": "silence: same length; wrong: same language, nearest length, center crop/right pad",
+      "token_limit_count": 0,
+      "generation": {
+        "utterances": 16,
+        "cer": 0.9740061162079511,
+        "character_edits": 637,
+        "reference_characters": 654,
+        "wer": 1.021978021978022,
+        "word_edits": 93,
+        "reference_words": 91,
+        "exact_match_rate": 0.0,
+        "raw_cer": 0.9740061162079511,
+        "by_language": {
+          "en": {
+            "utterances": 8,
+            "cer": 0.8532110091743119,
+            "character_edits": 372,
+            "reference_characters": 436,
+            "wer": 1.021978021978022,
+            "word_edits": 93,
+            "reference_words": 91,
+            "exact_match_rate": 0.0,
+            "raw_cer": 0.8532110091743119
+          },
+          "ja": {
+            "utterances": 8,
+            "cer": 1.2155963302752293,
+            "character_edits": 265,
+            "reference_characters": 218,
+            "wer": null,
+            "word_edits": 0,
+            "reference_words": 0,
+            "exact_match_rate": 0.0,
+            "raw_cer": 1.2155963302752293
+          }
+        },
+        "normalization": "en: NFC, casefold, punctuation removal except apostrophe, whitespace; ja: NFC only"
+      }
+    },
+    "midi": {
+      "mean_loss": 1.766555368900299,
+      "examples": 16,
+      "nll": {
+        "audio": 1.762185500218318,
+        "silence": 1.8063321004252462,
+        "wrong_audio": 1.795753757981859
+      },
+      "controls": "silence: same length; wrong: same language, nearest length, center crop/right pad",
+      "token_limit_count": 0,
+      "generation": {
+        "examples": 16,
+        "valid_note_sequence_rate": 0.8125,
+        "exact_note_sequence_rate": 0.0,
+        "invalid_generations": 3,
+        "onset": {
+          "true_positive": 11,
+          "false_positive": 75,
+          "false_negative": 102,
+          "precision": 0.12790697674418605,
+          "recall": 0.09734513274336283,
+          "f1": 0.11055276381909548
+        },
+        "onset_offset": {
+          "true_positive": 4,
+          "false_positive": 82,
+          "false_negative": 109,
+          "precision": 0.046511627906976744,
+          "recall": 0.035398230088495575,
+          "f1": 0.04020100502512563
+        },
+        "silence_examples": 0,
+        "velocity": "measured key velocity; excluded from onset/offset F1"
+      }
+    }
+  },
+  "evaluated_steps": [
+    0,
+    2500,
+    5000
+  ],
+  "source": {
+    "file_sha256": {
+      "src/creative_agent/__init__.py": "506c3f2af75db592b115074ef68d9acffd640b70fb4670102c62b31ed6a319b9",
+      "src/creative_agent/audio.py": "270c420cbce81460792d0ea2c271d6c5497eea56df83c9343417cd9ba2a47d90",
+      "src/creative_agent/caption.py": "dc0612b2abb8dd58a9da3497aa383863d6b70cc77a91b35c1f9e8d3032736e46",
+      "src/creative_agent/caption_training.py": "7d8ce7237a4fce4638a846d310344f3b40b434b12b635be46fc1feb2d14150fc",
+      "src/creative_agent/cli.py": "3eefc08116f2d7e0aaae0b4f2ec95c3685e4e4470fa44234d54344d7b3ec642f",
+      "src/creative_agent/config.py": "9a85d1b6bb9781f811086cfb30a7c07633f9c69443a488a1c2229c3f242e996f",
+      "src/creative_agent/diagnosis.py": "ab0baf892064b55fda5e31642a6f6c6f47d06c2da0c49dca9121134ca147a15d",
+      "src/creative_agent/diagnosis_data.py": "db573ea7f265aaa75b7af01aa5d62b4aaae4ec71d462970d83404332306d4d73",
+      "src/creative_agent/diagnosis_training.py": "f4f71662e969c3da4f5982ee0c5387a680aae1d7018d73f64721f02387b141a6",
+      "src/creative_agent/midi.py": "e7c3f6f69294156fa1b015c662a90eee2054ab561f02151816ece4c820a815da",
+      "src/creative_agent/midi_data.py": "70aecfa791934b4114634a3fb653e100ccd7218265ebed3d4abb3c450690399b",
+      "src/creative_agent/midi_training.py": "dafbb22ec35ea287239ee18a219a3ecaa80e6bf4069e562b241e85e289daadca",
+      "src/creative_agent/model.py": "b958800dd819fd4625ee1f5c5c02c47cc1e023e9e4e6ba916b8cf0c61ced476b",
+      "src/creative_agent/multitask_data.py": "7bffcd189f8b9b54abd3aa393ff31e33d2d2f9524a4f8199088d2682780e3d0e",
+      "src/creative_agent/multitask_evaluation.py": "cb86e3dd1da71c1ba5d13f01a9399a3249da8cd22c8ddee6a1c38126381fd16c",
+      "src/creative_agent/multitask_model.py": "6af6084cbd371bdc750dec9fb24bd36296639db9372504299a6f7dc46081910e",
+      "src/creative_agent/multitask_objectives.py": "88badae1928e502efdc50c0a4dd6bbc353e6a0ca43339118ce7d032326c0e55b",
+      "src/creative_agent/multitask_training.py": "bdeb0b25771d149e195f31b0d98f4f7cb65e74bd6c96c34f1e0a42df7a7369ed",
+      "src/creative_agent/multitask_visuals.py": "dcad52278299a66462f9441d213761a5ca2cdf20d49c2d779fe370e919f72989",
+      "src/creative_agent/public_data.py": "cedb752199074a8ab8dceec99ed7cf8fea1db948bf5914fb74a3a351e53f63ff",
+      "src/creative_agent/public_evaluation.py": "3f9044ea703333d0574ad4fc253cfa3bd4200ed7d3ef480f90b1c8c96e56481e",
+      "src/creative_agent/public_fetch.py": "75344991912bdc0fb057b312d5c003321a1895f805e39dc67b83b5a6524b4923",
+      "src/creative_agent/public_prepare.py": "791d01e0a480215d95d647e760637db23d818f175e3c5b00504c4738a75ba2c2",
+      "src/creative_agent/training.py": "a31d44b490b872805abc4d0fabfe32772785459be2f9b2752925f25f2eca2651",
+      "src/creative_agent/transcription.py": "f1f08753597b9457f63bbd2f17d86568dfe6801514148646658cd7dd1faa3442",
+      "pyproject.toml": "a1ea8e4c423826e7209c0c4c45d0b65665507b63b0d5be97949f7d57b0bc2d01",
+      "uv.lock": "42ec83c0a74e7dae3f77df677da871dfe86ae0fb7bad256899b1704c7faa22a0"
+    },
+    "commit": "aacdb316ea067f3a2a5faf78ac8c457e1ea06ab5",
+    "dirty": false
+  },
+  "warm_origin": {
+    "sha256": "7b5c96498eae853f20b64fa1e1243d9c8cc946fba2cbcd74cc065673b5360c7b",
+    "step": 5000,
+    "optimizer_reset": true
+  },
+  "initial_test_metrics": {
+    "ssl": {
+      "mean_loss": 0.005163903231732547,
+      "examples": 8,
+      "zero_prediction_baseline_loss": 0.004188853839877993
+    },
+    "caption": {
+      "mean_loss": 1.9660838842391968,
+      "examples": 24,
+      "nll": {
+        "audio": 1.9660838842391968,
+        "silence": 2.1787288983662925,
+        "wrong_audio": 1.9500535329182942
+      },
+      "controls": "silence: same length; wrong: same language, nearest length, center crop/right pad",
+      "token_limit_count": 0,
+      "exact_match_rate": 0.0,
+      "teacher_kind": "weak instrument template, not human music caption",
+      "training_majority_baseline_accuracy": 0.3333333333333333,
+      "per_class_exact_match_rate": {
+        "This is a bass recording.": 0.0,
+        "This is a guitar recording.": 0.0,
+        "This is a piano recording.": 0.0
+      }
+    },
+    "diagnosis": {
+      "mean_loss": 1.7417118946711223,
+      "examples": 24,
+      "nll": {
+        "audio": 0.7578226116849629,
+        "silence": 0.7341633779776199,
+        "wrong_audio": 0.7322002379263676
+      },
+      "controls": "silence: same length; wrong: same language, nearest length, center crop/right pad",
+      "token_limit_count": 0,
+      "head": {
+        "examples": 24,
+        "threshold": 0.5,
+        "event_iou": 0.5,
+        "per_class": {
+          "dropout": {
+            "tp": 5,
+            "fp": 6,
+            "fn": 7,
+            "precision": 0.45454545454545453,
+            "recall": 0.4166666666666667,
+            "f1": 0.43478260869565216
+          },
+          "clipping": {
+            "tp": 9,
+            "fp": 10,
+            "fn": 3,
+            "precision": 0.47368421052631576,
+            "recall": 0.75,
+            "f1": 0.5806451612903226
+          },
+          "channel_imbalance": {
+            "tp": 10,
+            "fp": 5,
+            "fn": 2,
+            "precision": 0.6666666666666666,
+            "recall": 0.8333333333333334,
+            "f1": 0.7407407407407407
+          }
+        },
+        "clip_macro_f1": 0.5853895035755718,
+        "clip_micro": {
+          "tp": 24,
+          "fp": 21,
+          "fn": 12,
+          "precision": 0.5333333333333333,
+          "recall": 0.6666666666666666,
+          "f1": 0.5925925925925926
+        },
+        "event_per_class": {
+          "dropout": {
+            "tp": 0,
+            "fp": 15,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "clipping": {
+            "tp": 0,
+            "fp": 35,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "channel_imbalance": {
+            "tp": 0,
+            "fp": 23,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "event_macro_f1": 0.0,
+        "event_micro": {
+          "tp": 0,
+          "fp": 73,
+          "fn": 36,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "by_kind": {
+          "normal": {
+            "examples": 3,
+            "exact_matches": 0,
+            "exact_set_accuracy": 0.0
+          },
+          "single": {
+            "examples": 9,
+            "exact_matches": 0,
+            "exact_set_accuracy": 0.0
+          },
+          "compound": {
+            "examples": 12,
+            "exact_matches": 3,
+            "exact_set_accuracy": 0.25
+          }
+        },
+        "normal_clips_with_false_alarm": 3,
+        "normal_clip_false_alarm_rate": 1.0,
+        "normal_false_events_per_hour": 4200.0,
+        "normal_seconds": 6.0
+      },
+      "always_positive_baseline_clip_macro_f1": 0.6666666666666666,
+      "llm": {
+        "examples": 24,
+        "threshold": 0.5,
+        "event_iou": 0.5,
+        "per_class": {
+          "dropout": {
+            "tp": 10,
+            "fp": 10,
+            "fn": 2,
+            "precision": 0.5,
+            "recall": 0.8333333333333334,
+            "f1": 0.625
+          },
+          "clipping": {
+            "tp": 2,
+            "fp": 2,
+            "fn": 10,
+            "precision": 0.5,
+            "recall": 0.16666666666666666,
+            "f1": 0.25
+          },
+          "channel_imbalance": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "clip_macro_f1": 0.2916666666666667,
+        "clip_micro": {
+          "tp": 12,
+          "fp": 12,
+          "fn": 24,
+          "precision": 0.5,
+          "recall": 0.3333333333333333,
+          "f1": 0.4
+        },
+        "event_per_class": {
+          "dropout": {
+            "tp": 0,
+            "fp": 20,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "clipping": {
+            "tp": 0,
+            "fp": 4,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "channel_imbalance": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "event_macro_f1": 0.0,
+        "event_micro": {
+          "tp": 0,
+          "fp": 24,
+          "fn": 36,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "by_kind": {
+          "normal": {
+            "examples": 3,
+            "exact_matches": 0,
+            "exact_set_accuracy": 0.0
+          },
+          "single": {
+            "examples": 9,
+            "exact_matches": 3,
+            "exact_set_accuracy": 0.3333333333333333
+          },
+          "compound": {
+            "examples": 12,
+            "exact_matches": 0,
+            "exact_set_accuracy": 0.0
+          }
+        },
+        "normal_clips_with_false_alarm": 3,
+        "normal_clip_false_alarm_rate": 1.0,
+        "normal_false_events_per_hour": 1800.0,
+        "normal_seconds": 6.0,
+        "invalid_generations": 0,
+        "invalid_normal_generations": 0
+      }
+    },
+    "transcription": {
+      "mean_loss": 7.8991327583789825,
+      "examples": 32,
+      "nll": {
+        "audio": 7.5185169187085386,
+        "silence": 7.755169610579087,
+        "wrong_audio": 7.602858114156013
+      },
+      "controls": "silence: same length; wrong: same language, nearest length, center crop/right pad",
+      "token_limit_count": 0,
+      "generation": {
+        "utterances": 32,
+        "cer": 0.9093851132686084,
+        "character_edits": 1405,
+        "reference_characters": 1545,
+        "wer": 0.976303317535545,
+        "word_edits": 206,
+        "reference_words": 211,
+        "exact_match_rate": 0.0,
+        "raw_cer": 0.9093851132686084,
+        "by_language": {
+          "en": {
+            "utterances": 16,
+            "cer": 0.8731884057971014,
+            "character_edits": 964,
+            "reference_characters": 1104,
+            "wer": 0.976303317535545,
+            "word_edits": 206,
+            "reference_words": 211,
+            "exact_match_rate": 0.0,
+            "raw_cer": 0.8731884057971014
+          },
+          "ja": {
+            "utterances": 16,
+            "cer": 1.0,
+            "character_edits": 441,
+            "reference_characters": 441,
+            "wer": null,
+            "word_edits": 0,
+            "reference_words": 0,
+            "exact_match_rate": 0.0,
+            "raw_cer": 1.0
+          }
+        },
+        "normalization": "en: NFC, casefold, punctuation removal except apostrophe, whitespace; ja: NFC only"
+      }
+    },
+    "midi": {
+      "mean_loss": 4.300033375620842,
+      "examples": 32,
+      "nll": {
+        "audio": 4.051676193829349,
+        "silence": 4.265429131592376,
+        "wrong_audio": 4.014594621558602
+      },
+      "controls": "silence: same length; wrong: same language, nearest length, center crop/right pad",
+      "token_limit_count": 0,
+      "generation": {
+        "examples": 32,
+        "valid_note_sequence_rate": 0.75,
+        "exact_note_sequence_rate": 0.0,
+        "invalid_generations": 8,
+        "onset": {
+          "true_positive": 0,
+          "false_positive": 60,
+          "false_negative": 195,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "onset_offset": {
+          "true_positive": 0,
+          "false_positive": 60,
+          "false_negative": 195,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "silence_examples": 0,
+        "velocity": "measured key velocity; excluded from onset/offset F1"
+      }
+    }
+  },
+  "final_test_metrics": {
+    "ssl": {
+      "mean_loss": 0.0037635284825228155,
+      "examples": 8,
+      "zero_prediction_baseline_loss": 0.004188853839877993
+    },
+    "caption": {
+      "mean_loss": 0.12897385213424664,
+      "examples": 24,
+      "nll": {
+        "audio": 0.12897385213424664,
+        "silence": 0.24034651865561804,
+        "wrong_audio": 0.4400128749354432
+      },
+      "controls": "silence: same length; wrong: same language, nearest length, center crop/right pad",
+      "token_limit_count": 0,
+      "exact_match_rate": 0.7916666666666666,
+      "teacher_kind": "weak instrument template, not human music caption",
+      "training_majority_baseline_accuracy": 0.3333333333333333,
+      "per_class_exact_match_rate": {
+        "This is a bass recording.": 1.0,
+        "This is a guitar recording.": 0.625,
+        "This is a piano recording.": 0.75
+      }
+    },
+    "diagnosis": {
+      "mean_loss": 1.0662957206368446,
+      "examples": 24,
+      "nll": {
+        "audio": 0.20877966665275108,
+        "silence": 0.20489587299046086,
+        "wrong_audio": 0.2009704656930952
+      },
+      "controls": "silence: same length; wrong: same language, nearest length, center crop/right pad",
+      "token_limit_count": 0,
+      "head": {
+        "examples": 24,
+        "threshold": 0.5,
+        "event_iou": 0.5,
+        "per_class": {
+          "dropout": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "clipping": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "channel_imbalance": {
+            "tp": 4,
+            "fp": 4,
+            "fn": 8,
+            "precision": 0.5,
+            "recall": 0.3333333333333333,
+            "f1": 0.4
+          }
+        },
+        "clip_macro_f1": 0.13333333333333333,
+        "clip_micro": {
+          "tp": 4,
+          "fp": 4,
+          "fn": 32,
+          "precision": 0.5,
+          "recall": 0.1111111111111111,
+          "f1": 0.18181818181818182
+        },
+        "event_per_class": {
+          "dropout": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "clipping": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "channel_imbalance": {
+            "tp": 0,
+            "fp": 8,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "event_macro_f1": 0.0,
+        "event_micro": {
+          "tp": 0,
+          "fp": 8,
+          "fn": 36,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "by_kind": {
+          "normal": {
+            "examples": 3,
+            "exact_matches": 2,
+            "exact_set_accuracy": 0.6666666666666666
+          },
+          "single": {
+            "examples": 9,
+            "exact_matches": 1,
+            "exact_set_accuracy": 0.1111111111111111
+          },
+          "compound": {
+            "examples": 12,
+            "exact_matches": 0,
+            "exact_set_accuracy": 0.0
+          }
+        },
+        "normal_clips_with_false_alarm": 1,
+        "normal_clip_false_alarm_rate": 0.3333333333333333,
+        "normal_false_events_per_hour": 600.0,
+        "normal_seconds": 6.0
+      },
+      "always_positive_baseline_clip_macro_f1": 0.6666666666666666,
+      "llm": {
+        "examples": 24,
+        "threshold": 0.5,
+        "event_iou": 0.5,
+        "per_class": {
+          "dropout": {
+            "tp": 1,
+            "fp": 1,
+            "fn": 11,
+            "precision": 0.5,
+            "recall": 0.08333333333333333,
+            "f1": 0.14285714285714285
+          },
+          "clipping": {
+            "tp": 12,
+            "fp": 12,
+            "fn": 0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.6666666666666666
+          },
+          "channel_imbalance": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "clip_macro_f1": 0.2698412698412698,
+        "clip_micro": {
+          "tp": 13,
+          "fp": 13,
+          "fn": 23,
+          "precision": 0.5,
+          "recall": 0.3611111111111111,
+          "f1": 0.41935483870967744
+        },
+        "event_per_class": {
+          "dropout": {
+            "tp": 0,
+            "fp": 2,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "clipping": {
+            "tp": 5,
+            "fp": 19,
+            "fn": 7,
+            "precision": 0.20833333333333334,
+            "recall": 0.4166666666666667,
+            "f1": 0.2777777777777778
+          },
+          "channel_imbalance": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 12,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "event_macro_f1": 0.0925925925925926,
+        "event_micro": {
+          "tp": 5,
+          "fp": 21,
+          "fn": 31,
+          "precision": 0.19230769230769232,
+          "recall": 0.1388888888888889,
+          "f1": 0.16129032258064516
+        },
+        "by_kind": {
+          "normal": {
+            "examples": 3,
+            "exact_matches": 0,
+            "exact_set_accuracy": 0.0
+          },
+          "single": {
+            "examples": 9,
+            "exact_matches": 3,
+            "exact_set_accuracy": 0.3333333333333333
+          },
+          "compound": {
+            "examples": 12,
+            "exact_matches": 0,
+            "exact_set_accuracy": 0.0
+          }
+        },
+        "normal_clips_with_false_alarm": 3,
+        "normal_clip_false_alarm_rate": 1.0,
+        "normal_false_events_per_hour": 1800.0,
+        "normal_seconds": 6.0,
+        "invalid_generations": 0,
+        "invalid_normal_generations": 0
+      }
+    },
+    "transcription": {
+      "mean_loss": 4.180566690862179,
+      "examples": 32,
+      "nll": {
+        "audio": 3.974997217122959,
+        "silence": 4.163716668009542,
+        "wrong_audio": 3.9665286947724607
+      },
+      "controls": "silence: same length; wrong: same language, nearest length, center crop/right pad",
+      "token_limit_count": 0,
+      "generation": {
+        "utterances": 32,
+        "cer": 0.8174757281553398,
+        "character_edits": 1263,
+        "reference_characters": 1545,
+        "wer": 1.0,
+        "word_edits": 211,
+        "reference_words": 211,
+        "exact_match_rate": 0.0,
+        "raw_cer": 0.8174757281553398,
+        "by_language": {
+          "en": {
+            "utterances": 16,
+            "cer": 0.769927536231884,
+            "character_edits": 850,
+            "reference_characters": 1104,
+            "wer": 1.0,
+            "word_edits": 211,
+            "reference_words": 211,
+            "exact_match_rate": 0.0,
+            "raw_cer": 0.769927536231884
+          },
+          "ja": {
+            "utterances": 16,
+            "cer": 0.9365079365079365,
+            "character_edits": 413,
+            "reference_characters": 441,
+            "wer": null,
+            "word_edits": 0,
+            "reference_words": 0,
+            "exact_match_rate": 0.0,
+            "raw_cer": 0.9365079365079365
+          }
+        },
+        "normalization": "en: NFC, casefold, punctuation removal except apostrophe, whitespace; ja: NFC only"
+      }
+    },
+    "midi": {
+      "mean_loss": 1.76059883646667,
+      "examples": 32,
+      "nll": {
+        "audio": 1.6467122347655372,
+        "silence": 1.6718053598619125,
+        "wrong_audio": 1.6656031011879018
+      },
+      "controls": "silence: same length; wrong: same language, nearest length, center crop/right pad",
+      "token_limit_count": 0,
+      "generation": {
+        "examples": 32,
+        "valid_note_sequence_rate": 0.8125,
+        "exact_note_sequence_rate": 0.0,
+        "invalid_generations": 6,
+        "onset": {
+          "true_positive": 8,
+          "false_positive": 142,
+          "false_negative": 187,
+          "precision": 0.05333333333333334,
+          "recall": 0.041025641025641026,
+          "f1": 0.0463768115942029
+        },
+        "onset_offset": {
+          "true_positive": 0,
+          "false_positive": 150,
+          "false_negative": 195,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "silence_examples": 0,
+        "velocity": "measured key velocity; excluded from onset/offset F1"
+      }
+    }
+  },
+  "initial_probe_metrics": {
+    "ssl": {
+      "mean_loss": 0.004695428389823064,
+      "examples": 8,
+      "zero_prediction_baseline_loss": 0.003702552799950354
+    },
+    "caption": {
+      "mean_loss": 1.958604022860527,
+      "examples": 8,
+      "nll": {
+        "audio": 1.958604022860527,
+        "silence": 2.125181943178177,
+        "wrong_audio": 1.8073471039533615
+      },
+      "controls": "silence: same length; wrong: same language, nearest length, center crop/right pad",
+      "token_limit_count": 0,
+      "exact_match_rate": 0.0,
+      "teacher_kind": "weak instrument template, not human music caption",
+      "training_majority_baseline_accuracy": 0.375,
+      "per_class_exact_match_rate": {
+        "This is a bass recording.": 0.0,
+        "This is a guitar recording.": 0.0,
+        "This is a piano recording.": 0.0
+      }
+    },
+    "diagnosis": {
+      "mean_loss": 1.817336529493332,
+      "examples": 8,
+      "nll": {
+        "audio": 0.8486831364436791,
+        "silence": 0.8124194607043114,
+        "wrong_audio": 0.8664142787934114
+      },
+      "controls": "silence: same length; wrong: same language, nearest length, center crop/right pad",
+      "token_limit_count": 0,
+      "head": {
+        "examples": 8,
+        "threshold": 0.5,
+        "event_iou": 0.5,
+        "per_class": {
+          "dropout": {
+            "tp": 4,
+            "fp": 4,
+            "fn": 0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.6666666666666666
+          },
+          "clipping": {
+            "tp": 4,
+            "fp": 4,
+            "fn": 0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.6666666666666666
+          },
+          "channel_imbalance": {
+            "tp": 4,
+            "fp": 4,
+            "fn": 0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.6666666666666666
+          }
+        },
+        "clip_macro_f1": 0.6666666666666666,
+        "clip_micro": {
+          "tp": 12,
+          "fp": 12,
+          "fn": 0,
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1": 0.6666666666666666
+        },
+        "event_per_class": {
+          "dropout": {
+            "tp": 0,
+            "fp": 22,
+            "fn": 4,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "clipping": {
+            "tp": 0,
+            "fp": 25,
+            "fn": 4,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "channel_imbalance": {
+            "tp": 0,
+            "fp": 12,
+            "fn": 4,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "event_macro_f1": 0.0,
+        "event_micro": {
+          "tp": 0,
+          "fp": 59,
+          "fn": 12,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "by_kind": {
+          "normal": {
+            "examples": 1,
+            "exact_matches": 0,
+            "exact_set_accuracy": 0.0
+          },
+          "single": {
+            "examples": 3,
+            "exact_matches": 0,
+            "exact_set_accuracy": 0.0
+          },
+          "compound": {
+            "examples": 4,
+            "exact_matches": 1,
+            "exact_set_accuracy": 0.25
+          }
+        },
+        "normal_clips_with_false_alarm": 1,
+        "normal_clip_false_alarm_rate": 1.0,
+        "normal_false_events_per_hour": 12600.0,
+        "normal_seconds": 2.0
+      },
+      "always_positive_baseline_clip_macro_f1": 0.6666666666666666,
+      "llm": {
+        "examples": 8,
+        "threshold": 0.5,
+        "event_iou": 0.5,
+        "per_class": {
+          "dropout": {
+            "tp": 3,
+            "fp": 3,
+            "fn": 1,
+            "precision": 0.5,
+            "recall": 0.75,
+            "f1": 0.6
+          },
+          "clipping": {
+            "tp": 2,
+            "fp": 0,
+            "fn": 2,
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.6666666666666666
+          },
+          "channel_imbalance": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 4,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "clip_macro_f1": 0.4222222222222222,
+        "clip_micro": {
+          "tp": 5,
+          "fp": 3,
+          "fn": 7,
+          "precision": 0.625,
+          "recall": 0.4166666666666667,
+          "f1": 0.5
+        },
+        "event_per_class": {
+          "dropout": {
+            "tp": 0,
+            "fp": 6,
+            "fn": 4,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "clipping": {
+            "tp": 0,
+            "fp": 2,
+            "fn": 4,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "channel_imbalance": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 4,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "event_macro_f1": 0.0,
+        "event_micro": {
+          "tp": 0,
+          "fp": 8,
+          "fn": 12,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "by_kind": {
+          "normal": {
+            "examples": 1,
+            "exact_matches": 0,
+            "exact_set_accuracy": 0.0
+          },
+          "single": {
+            "examples": 3,
+            "exact_matches": 2,
+            "exact_set_accuracy": 0.6666666666666666
+          },
+          "compound": {
+            "examples": 4,
+            "exact_matches": 0,
+            "exact_set_accuracy": 0.0
+          }
+        },
+        "normal_clips_with_false_alarm": 1,
+        "normal_clip_false_alarm_rate": 1.0,
+        "normal_false_events_per_hour": 1800.0,
+        "normal_seconds": 2.0,
+        "invalid_generations": 0,
+        "invalid_normal_generations": 0
+      }
+    },
+    "transcription": {
+      "mean_loss": 7.484012424945831,
+      "examples": 8,
+      "nll": {
+        "audio": 7.0675130151212215,
+        "silence": 7.010864246636629,
+        "wrong_audio": 7.245329461991787
+      },
+      "controls": "silence: same length; wrong: same language, nearest length, center crop/right pad",
+      "token_limit_count": 0,
+      "generation": {
+        "utterances": 8,
+        "cer": 0.9296875,
+        "character_edits": 238,
+        "reference_characters": 256,
+        "wer": 0.95,
+        "word_edits": 19,
+        "reference_words": 20,
+        "exact_match_rate": 0.0,
+        "raw_cer": 0.9296875,
+        "by_language": {
+          "en": {
+            "utterances": 2,
+            "cer": 0.8317757009345794,
+            "character_edits": 89,
+            "reference_characters": 107,
+            "wer": 0.95,
+            "word_edits": 19,
+            "reference_words": 20,
+            "exact_match_rate": 0.0,
+            "raw_cer": 0.8317757009345794
+          },
+          "ja": {
+            "utterances": 6,
+            "cer": 1.0,
+            "character_edits": 149,
+            "reference_characters": 149,
+            "wer": null,
+            "word_edits": 0,
+            "reference_words": 0,
+            "exact_match_rate": 0.0,
+            "raw_cer": 1.0
+          }
+        },
+        "normalization": "en: NFC, casefold, punctuation removal except apostrophe, whitespace; ja: NFC only"
+      }
+    },
+    "midi": {
+      "mean_loss": 3.8368603885173798,
+      "examples": 8,
+      "nll": {
+        "audio": 3.764797952001458,
+        "silence": 3.975713543544542,
+        "wrong_audio": 4.0348999192383115
+      },
+      "controls": "silence: same length; wrong: same language, nearest length, center crop/right pad",
+      "token_limit_count": 0,
+      "generation": {
+        "examples": 8,
+        "valid_note_sequence_rate": 0.375,
+        "exact_note_sequence_rate": 0.0,
+        "invalid_generations": 5,
+        "onset": {
+          "true_positive": 0,
+          "false_positive": 6,
+          "false_negative": 69,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "onset_offset": {
+          "true_positive": 0,
+          "false_positive": 6,
+          "false_negative": 69,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "silence_examples": 0,
+        "velocity": "measured key velocity; excluded from onset/offset F1"
+      }
+    }
+  },
+  "final_probe_metrics": {
+    "ssl": {
+      "mean_loss": 0.0032940937526291236,
+      "examples": 8,
+      "zero_prediction_baseline_loss": 0.003702552799950354
+    },
+    "caption": {
+      "mean_loss": 0.08508416739641689,
+      "examples": 8,
+      "nll": {
+        "audio": 0.08508416739641689,
+        "silence": 0.2351378807798028,
+        "wrong_audio": 0.6915870308876038
+      },
+      "controls": "silence: same length; wrong: same language, nearest length, center crop/right pad",
+      "token_limit_count": 0,
+      "exact_match_rate": 0.75,
+      "teacher_kind": "weak instrument template, not human music caption",
+      "training_majority_baseline_accuracy": 0.375,
+      "per_class_exact_match_rate": {
+        "This is a bass recording.": 1.0,
+        "This is a guitar recording.": 0.6666666666666666,
+        "This is a piano recording.": 0.6666666666666666
+      }
+    },
+    "diagnosis": {
+      "mean_loss": 1.0108598992228508,
+      "examples": 8,
+      "nll": {
+        "audio": 0.17834724142001226,
+        "silence": 0.19488755212380335,
+        "wrong_audio": 0.17934092258413634
+      },
+      "controls": "silence: same length; wrong: same language, nearest length, center crop/right pad",
+      "token_limit_count": 0,
+      "head": {
+        "examples": 8,
+        "threshold": 0.5,
+        "event_iou": 0.5,
+        "per_class": {
+          "dropout": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 4,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "clipping": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 4,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "channel_imbalance": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 3,
+            "precision": 1.0,
+            "recall": 0.25,
+            "f1": 0.4
+          }
+        },
+        "clip_macro_f1": 0.13333333333333333,
+        "clip_micro": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 11,
+          "precision": 1.0,
+          "recall": 0.08333333333333333,
+          "f1": 0.15384615384615385
+        },
+        "event_per_class": {
+          "dropout": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 4,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "clipping": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 4,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "channel_imbalance": {
+            "tp": 0,
+            "fp": 1,
+            "fn": 4,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "event_macro_f1": 0.0,
+        "event_micro": {
+          "tp": 0,
+          "fp": 1,
+          "fn": 12,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "by_kind": {
+          "normal": {
+            "examples": 1,
+            "exact_matches": 1,
+            "exact_set_accuracy": 1.0
+          },
+          "single": {
+            "examples": 3,
+            "exact_matches": 0,
+            "exact_set_accuracy": 0.0
+          },
+          "compound": {
+            "examples": 4,
+            "exact_matches": 0,
+            "exact_set_accuracy": 0.0
+          }
+        },
+        "normal_clips_with_false_alarm": 0,
+        "normal_clip_false_alarm_rate": 0.0,
+        "normal_false_events_per_hour": 0.0,
+        "normal_seconds": 2.0
+      },
+      "always_positive_baseline_clip_macro_f1": 0.6666666666666666,
+      "llm": {
+        "examples": 8,
+        "threshold": 0.5,
+        "event_iou": 0.5,
+        "per_class": {
+          "dropout": {
+            "tp": 3,
+            "fp": 2,
+            "fn": 1,
+            "precision": 0.6,
+            "recall": 0.75,
+            "f1": 0.6666666666666666
+          },
+          "clipping": {
+            "tp": 4,
+            "fp": 4,
+            "fn": 0,
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.6666666666666666
+          },
+          "channel_imbalance": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 4,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "clip_macro_f1": 0.4444444444444444,
+        "clip_micro": {
+          "tp": 7,
+          "fp": 6,
+          "fn": 5,
+          "precision": 0.5384615384615384,
+          "recall": 0.5833333333333334,
+          "f1": 0.56
+        },
+        "event_per_class": {
+          "dropout": {
+            "tp": 3,
+            "fp": 2,
+            "fn": 1,
+            "precision": 0.6,
+            "recall": 0.75,
+            "f1": 0.6666666666666666
+          },
+          "clipping": {
+            "tp": 2,
+            "fp": 6,
+            "fn": 2,
+            "precision": 0.25,
+            "recall": 0.5,
+            "f1": 0.3333333333333333
+          },
+          "channel_imbalance": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 4,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "event_macro_f1": 0.3333333333333333,
+        "event_micro": {
+          "tp": 5,
+          "fp": 8,
+          "fn": 7,
+          "precision": 0.38461538461538464,
+          "recall": 0.4166666666666667,
+          "f1": 0.4
+        },
+        "by_kind": {
+          "normal": {
+            "examples": 1,
+            "exact_matches": 0,
+            "exact_set_accuracy": 0.0
+          },
+          "single": {
+            "examples": 3,
+            "exact_matches": 1,
+            "exact_set_accuracy": 0.3333333333333333
+          },
+          "compound": {
+            "examples": 4,
+            "exact_matches": 1,
+            "exact_set_accuracy": 0.25
+          }
+        },
+        "normal_clips_with_false_alarm": 1,
+        "normal_clip_false_alarm_rate": 1.0,
+        "normal_false_events_per_hour": 3600.0,
+        "normal_seconds": 2.0,
+        "invalid_generations": 0,
+        "invalid_normal_generations": 0
+      }
+    },
+    "transcription": {
+      "mean_loss": 3.704699397087097,
+      "examples": 8,
+      "nll": {
+        "audio": 3.38118539750576,
+        "silence": 3.6081962436437607,
+        "wrong_audio": 3.4205215768888593
+      },
+      "controls": "silence: same length; wrong: same language, nearest length, center crop/right pad",
+      "token_limit_count": 0,
+      "generation": {
+        "utterances": 8,
+        "cer": 0.82421875,
+        "character_edits": 211,
+        "reference_characters": 256,
+        "wer": 0.95,
+        "word_edits": 19,
+        "reference_words": 20,
+        "exact_match_rate": 0.0,
+        "raw_cer": 0.82421875,
+        "by_language": {
+          "en": {
+            "utterances": 2,
+            "cer": 0.8037383177570093,
+            "character_edits": 86,
+            "reference_characters": 107,
+            "wer": 0.95,
+            "word_edits": 19,
+            "reference_words": 20,
+            "exact_match_rate": 0.0,
+            "raw_cer": 0.8037383177570093
+          },
+          "ja": {
+            "utterances": 6,
+            "cer": 0.8389261744966443,
+            "character_edits": 125,
+            "reference_characters": 149,
+            "wer": null,
+            "word_edits": 0,
+            "reference_words": 0,
+            "exact_match_rate": 0.0,
+            "raw_cer": 0.8389261744966443
+          }
+        },
+        "normalization": "en: NFC, casefold, punctuation removal except apostrophe, whitespace; ja: NFC only"
+      }
+    },
+    "midi": {
+      "mean_loss": 1.2224160768091679,
+      "examples": 8,
+      "nll": {
+        "audio": 1.1920926989309046,
+        "silence": 1.240991832010004,
+        "wrong_audio": 1.2768598567965805
+      },
+      "controls": "silence: same length; wrong: same language, nearest length, center crop/right pad",
+      "token_limit_count": 0,
+      "generation": {
+        "examples": 8,
+        "valid_note_sequence_rate": 0.875,
+        "exact_note_sequence_rate": 0.0,
+        "invalid_generations": 1,
+        "onset": {
+          "true_positive": 6,
+          "false_positive": 45,
+          "false_negative": 63,
+          "precision": 0.11764705882352941,
+          "recall": 0.08695652173913043,
+          "f1": 0.1
+        },
+        "onset_offset": {
+          "true_positive": 4,
+          "false_positive": 47,
+          "false_negative": 65,
+          "precision": 0.0784313725490196,
+          "recall": 0.057971014492753624,
+          "f1": 0.06666666666666667
+        },
+        "silence_examples": 0,
+        "velocity": "measured key velocity; excluded from onset/offset F1"
+      }
+    }
+  },
+  "elapsed_seconds_this_session": 1169.8015846660128,
+  "peak_allocated_bytes": 3711368704,
+  "peak_reserved_bytes": 4060086272,
+  "audit": {
+    "source_files_match_training_commit": true,
+    "inference_source_files_match_training_commit": true,
+    "data_files_match": true,
+    "parent_weights_match_initial": true,
+    "all_optimizer_steps_verified": true,
+    "optimizer_step_counts_by_group": {
+      "ssl_head": [
+        1000,
+        5000
+      ],
+      "encoder": [
+        5000
+      ],
+      "lora": [
+        4000
+      ],
+      "projector": [
+        4000
+      ],
+      "diagnosis_head": [
+        1000
+      ]
+    },
+    "mask_token_optimizer_steps": 5000,
+    "training_coverage": {
+      "ssl": {
+        "updates": 1000,
+        "presentations": 2000,
+        "unique_examples_seen": 512,
+        "training_examples": 512,
+        "presented_audio_seconds": 5037.4186666666665,
+        "supervised_tokens": 0
+      },
+      "caption": {
+        "updates": 1000,
+        "presentations": 2000,
+        "unique_examples_seen": 600,
+        "training_examples": 600,
+        "presented_audio_seconds": 4000.0,
+        "supervised_tokens": 14000
+      },
+      "diagnosis": {
+        "updates": 1000,
+        "presentations": 2000,
+        "unique_examples_seen": 736,
+        "training_examples": 736,
+        "presented_audio_seconds": 4000.0,
+        "supervised_tokens": 77333
+      },
+      "transcription": {
+        "updates": 1000,
+        "presentations": 2000,
+        "unique_examples_seen": 892,
+        "training_examples": 892,
+        "presented_audio_seconds": 9593.077354166666,
+        "supervised_tokens": 38443
+      },
+      "midi": {
+        "updates": 1000,
+        "presentations": 2000,
+        "unique_examples_seen": 800,
+        "training_examples": 800,
+        "presented_audio_seconds": 2979.1,
+        "supervised_tokens": 125269
+      }
+    },
+    "midi_comparison_images_verified": 14,
+    "generation_controls": {
+      "correct_responses_reproduced_exactly": 22,
+      "selection_seed": 20271002,
+      "metrics": {
+        "transcription": {
+          "audio": {
+            "utterances": 8,
+            "cer": 0.7700534759358288,
+            "character_edits": 288,
+            "reference_characters": 374,
+            "wer": 0.9444444444444444,
+            "word_edits": 51,
+            "reference_words": 54,
+            "exact_match_rate": 0.0,
+            "raw_cer": 0.7700534759358288,
+            "by_language": {
+              "en": {
+                "utterances": 4,
+                "cer": 0.7340425531914894,
+                "character_edits": 207,
+                "reference_characters": 282,
+                "wer": 0.9444444444444444,
+                "word_edits": 51,
+                "reference_words": 54,
+                "exact_match_rate": 0.0,
+                "raw_cer": 0.7340425531914894
+              },
+              "ja": {
+                "utterances": 4,
+                "cer": 0.8804347826086957,
+                "character_edits": 81,
+                "reference_characters": 92,
+                "wer": null,
+                "word_edits": 0,
+                "reference_words": 0,
+                "exact_match_rate": 0.0,
+                "raw_cer": 0.8804347826086957
+              }
+            },
+            "normalization": "en: NFC, casefold, punctuation removal except apostrophe, whitespace; ja: NFC only",
+            "response_unchanged_from_audio_rate": 1.0
+          },
+          "silence": {
+            "utterances": 8,
+            "cer": 1.0026737967914439,
+            "character_edits": 375,
+            "reference_characters": 374,
+            "wer": 1.0185185185185186,
+            "word_edits": 55,
+            "reference_words": 54,
+            "exact_match_rate": 0.0,
+            "raw_cer": 1.0026737967914439,
+            "by_language": {
+              "en": {
+                "utterances": 4,
+                "cer": 0.7411347517730497,
+                "character_edits": 209,
+                "reference_characters": 282,
+                "wer": 1.0185185185185186,
+                "word_edits": 55,
+                "reference_words": 54,
+                "exact_match_rate": 0.0,
+                "raw_cer": 0.7411347517730497
+              },
+              "ja": {
+                "utterances": 4,
+                "cer": 1.8043478260869565,
+                "character_edits": 166,
+                "reference_characters": 92,
+                "wer": null,
+                "word_edits": 0,
+                "reference_words": 0,
+                "exact_match_rate": 0.0,
+                "raw_cer": 1.8043478260869565
+              }
+            },
+            "normalization": "en: NFC, casefold, punctuation removal except apostrophe, whitespace; ja: NFC only",
+            "response_unchanged_from_audio_rate": 0.125
+          },
+          "wrong_audio": {
+            "utterances": 8,
+            "cer": 0.8315508021390374,
+            "character_edits": 311,
+            "reference_characters": 374,
+            "wer": 0.9444444444444444,
+            "word_edits": 51,
+            "reference_words": 54,
+            "exact_match_rate": 0.0,
+            "raw_cer": 0.8315508021390374,
+            "by_language": {
+              "en": {
+                "utterances": 4,
+                "cer": 0.8156028368794326,
+                "character_edits": 230,
+                "reference_characters": 282,
+                "wer": 0.9444444444444444,
+                "word_edits": 51,
+                "reference_words": 54,
+                "exact_match_rate": 0.0,
+                "raw_cer": 0.8156028368794326
+              },
+              "ja": {
+                "utterances": 4,
+                "cer": 0.8804347826086957,
+                "character_edits": 81,
+                "reference_characters": 92,
+                "wer": null,
+                "word_edits": 0,
+                "reference_words": 0,
+                "exact_match_rate": 0.0,
+                "raw_cer": 0.8804347826086957
+              }
+            },
+            "normalization": "en: NFC, casefold, punctuation removal except apostrophe, whitespace; ja: NFC only",
+            "response_unchanged_from_audio_rate": 0.5
+          }
+        },
+        "midi": {
+          "audio": {
+            "examples": 8,
+            "valid_note_sequence_rate": 0.875,
+            "exact_note_sequence_rate": 0.0,
+            "invalid_generations": 1,
+            "onset": {
+              "true_positive": 1,
+              "false_positive": 40,
+              "false_negative": 49,
+              "precision": 0.024390243902439025,
+              "recall": 0.02,
+              "f1": 0.02197802197802198
+            },
+            "onset_offset": {
+              "true_positive": 0,
+              "false_positive": 41,
+              "false_negative": 50,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "silence_examples": 0,
+            "velocity": "measured key velocity; excluded from onset/offset F1",
+            "response_unchanged_from_audio_rate": 1.0
+          },
+          "silence": {
+            "examples": 8,
+            "valid_note_sequence_rate": 1.0,
+            "exact_note_sequence_rate": 0.0,
+            "invalid_generations": 0,
+            "onset": {
+              "true_positive": 1,
+              "false_positive": 45,
+              "false_negative": 49,
+              "precision": 0.021739130434782608,
+              "recall": 0.02,
+              "f1": 0.020833333333333332
+            },
+            "onset_offset": {
+              "true_positive": 0,
+              "false_positive": 46,
+              "false_negative": 50,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "silence_examples": 0,
+            "velocity": "measured key velocity; excluded from onset/offset F1",
+            "response_unchanged_from_audio_rate": 0.0
+          },
+          "wrong_audio": {
+            "examples": 8,
+            "valid_note_sequence_rate": 1.0,
+            "exact_note_sequence_rate": 0.0,
+            "invalid_generations": 0,
+            "onset": {
+              "true_positive": 0,
+              "false_positive": 47,
+              "false_negative": 50,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "onset_offset": {
+              "true_positive": 0,
+              "false_positive": 47,
+              "false_negative": 50,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "silence_examples": 0,
+            "velocity": "measured key velocity; excluded from onset/offset F1",
+            "response_unchanged_from_audio_rate": 0.0
+          }
+        },
+        "caption": {
+          "audio": {
+            "examples": 6,
+            "exact_match_rate": 1.0,
+            "response_unchanged_from_audio_rate": 1.0
+          },
+          "silence": {
+            "examples": 6,
+            "exact_match_rate": 0.3333333333333333,
+            "response_unchanged_from_audio_rate": 0.3333333333333333
+          },
+          "wrong_audio": {
+            "examples": 6,
+            "exact_match_rate": 0.5,
+            "response_unchanged_from_audio_rate": 0.5
+          }
+        }
+      },
+      "frozen_backbone_matches": true
+    },
+    "tensorboard": {
+      "last_optimizer_step": 5000,
+      "audio_tags": 102,
+      "image_tags": 30,
+      "text_tags": 237
+    },
+    "script_sha256": "f2d1359d66c2a9356925ee5e473e220d0d0f8127d6b84753442fc3263cd52c1d"
+  },
+  "collected_data": {
+    "mini_librispeech": {
+      "waveform_files": 2608,
+      "waveform_bytes": 479301954,
+      "formats": {
+        "16000Hz/1ch": 2608
+      }
+    },
+    "jsut": {
+      "waveform_files": 1024,
+      "waveform_bytes": 481316046,
+      "formats": {
+        "48000Hz/1ch": 1024
+      }
+    },
+    "babyslakh": {
+      "waveform_files": 229,
+      "waveform_bytes": 1800205484,
+      "formats": {
+        "16000Hz/1ch": 229
+      }
+    },
+    "train": {
+      "english_speakers": 27,
+      "music_original_midis": 14
+    },
+    "validation": {
+      "english_speakers": 8,
+      "music_original_midis": 3
+    },
+    "test": {
+      "english_speakers": 6,
+      "music_original_midis": 3
+    }
+  },
+  "dataset_policy": {
+    "usage": "non-commercial research/personal; JSUT included; no source redistribution",
+    "speech_en": "original transcript lowercased; no utterance cropping",
+    "speech_ja": "NFC; original complete transcript; same JSUT speaker across splits",
+    "split": "English speaker / JSUT utterance / Slakh original MIDI UUID",
+    "music_caption": "weak instrument metadata template; not human free-form caption",
+    "midi": "piano key-release events; no crossing notes; no fabricated silence",
+    "preprocess": "scipy resample_poly to 48k; mono duplicated; per-crop peak 0.25",
+    "ssl_max_frequency_hz": 8000
+  }
+}
