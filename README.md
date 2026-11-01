@@ -20,6 +20,8 @@ RTX 3070で20更新と別プロセスからの21更新目への再開を確認�
 
 採譜の[実測報告](docs/audio-midi-smoke-report.ja.md)に、CPU/GPUでの実更新・再開、MIDI変換の確認と、現在の生成品質の未達を記録している。
 
+[LFM3の5タスク混合学習](docs/audio-multitask-lfm3.ja.md)は、事前学習済みLFM3-1.7Bへencoder・projector・LoRAを接続し、SSL・caption・正常/複合診断・発話書き起こし・MIDIを交互に学習する。TensorBoardで入力音声、正解、LLM応答と、MIDI楽譜の比較画像を確認できる。
+
 [開発と学習の実行計画](docs/implementation-plan.ja.md)に、Aurisでの既存実験、2段階学習、評価条件、実装順序、計算予算をまとめている。
 
 最初の実用成果は、時刻と対象を添えた音声講評。制作ツールでの編集と再観測を段階的に統合する。初回は音声・音楽を対象とし、動画学習は後続とする。

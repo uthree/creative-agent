@@ -12,6 +12,15 @@ from creative_agent.training import run_smoke
 def main() -> None:
     parser = argparse.ArgumentParser(description="Creative agent training recipes")
     commands = parser.add_subparsers(dest="command", required=True)
+    mixed = commands.add_parser("train-audio-multitask")
+    mixed.add_argument("--config", type=Path, required=True)
+    mixed.add_argument("--output", type=Path, required=True)
+    mixed.add_argument("--data-root", type=Path, required=True)
+    mixed.add_argument("--model-dir", type=Path)
+    mixed.add_argument("--encoder-checkpoint", type=Path)
+    mixed.add_argument("--steps", type=int, default=5000)
+    mixed.add_argument("--device", default="cuda")
+    mixed.add_argument("--resume", action="store_true")
     for name in (
         "prepare-audio-fixtures",
         "smoke-audio-ssl",
@@ -53,6 +62,22 @@ def main() -> None:
             ):
                 command.add_argument("--encoder-checkpoint", type=Path)
     args = parser.parse_args()
+    if args.command == "train-audio-multitask":
+        from creative_agent.multitask_data import MultitaskConfig
+        from creative_agent.multitask_training import run_multitask_training
+
+        report = run_multitask_training(
+            MultitaskConfig.load(args.config),
+            args.output,
+            data_root=args.data_root,
+            model_dir=args.model_dir,
+            encoder_checkpoint=args.encoder_checkpoint,
+            steps=args.steps,
+            device=args.device,
+            resume=args.resume,
+        )
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+        return
     if args.command in ("prepare-midi-fixtures", "smoke-audio-midi", "transcribe-audio-midi"):
         from creative_agent.midi_data import MidiConfig, prepare_midi_fixtures
         from creative_agent.midi_training import run_midi_smoke, transcribe_audio_to_midi
