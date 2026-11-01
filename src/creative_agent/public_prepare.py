@@ -66,7 +66,7 @@ def speech_sources(root, seed):
     val_speakers = set(dev_speakers[::2])
     candidates = []
     for path in sorted(libri.rglob("*.trans.txt")):
-        for line in path.read_text().splitlines():
+        for line in path.read_text(encoding="utf-8").splitlines():
             name, text = line.split(" ", 1)
             speaker = name.split("-")[0]
             split = (
@@ -94,7 +94,7 @@ def speech_sources(root, seed):
             )
     jsut = root / "sources/jsut/jsut_ver1.1/basic5000"
     japanese = []
-    for line in (jsut / "transcript_utf8.txt").read_text().splitlines():
+    for line in (jsut / "transcript_utf8.txt").read_text(encoding="utf-8").splitlines():
         name, text = line.split(":", 1)
         path = jsut / "wav" / (name + ".wav")
         if path.exists():
@@ -232,7 +232,7 @@ def music_sources(root, seed):
     metas = sorted((root / "sources/babyslakh").rglob("metadata.yaml"))
     if len(metas) != 20:
         raise ValueError("expected all 20 official BabySlakh tracks")
-    documents = [(p, yaml.safe_load(p.read_text())) for p in metas]
+    documents = [(p, yaml.safe_load(p.read_text(encoding="utf-8"))) for p in metas]
     groups = sorted({str(d["UUID"]) for _, d in documents}, key=lambda x: order(x, seed))
     if len(groups) < 12:
         raise ValueError("insufficient distinct BabySlakh original MIDIs")
@@ -493,7 +493,9 @@ def prepare_public_manifest(root, *, seed=20261101):
     used = {r["source_id"] for r in records}
     document["sources"] = [s for s in sources if s["id"] in used]
     document["summary"] = summarize_sources(document["sources"], records)
-    temporary.write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n")
+    temporary.write_text(
+        json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
     data = PublicData(temporary)
     for dataset in data.datasets.values():
         for index in dataset.splits["validation"] + dataset.splits["test"]:

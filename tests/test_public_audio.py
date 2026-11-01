@@ -3,6 +3,7 @@ import json
 import tarfile
 import zipfile
 from dataclasses import asdict
+from pathlib import Path
 
 import mido
 import numpy as np
@@ -26,6 +27,18 @@ from creative_agent.public_prepare import (
     read_key_notes,
     speech_sources,
 )
+
+
+@pytest.fixture
+def cp1252_text_default(monkeypatch):
+    original = Path.open
+
+    def open_with_windows_default(path, mode="r", *args, **kwargs):
+        if "b" not in mode and kwargs.get("encoding") in (None, "locale"):
+            kwargs["encoding"] = "cp1252"
+        return original(path, mode, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "open", open_with_windows_default)
 
 
 @pytest.fixture
@@ -282,7 +295,9 @@ def test_scores_do_not_reward_invalid_or_normalize_japanese_as_english():
     assert midi["valid_note_sequence_rate"] == 0
 
 
-def test_public_training_warm_start_resets_optimizer_and_retains_media(public_manifest, tmp_path):
+def test_public_training_warm_start_resets_optimizer_and_retains_media(
+    public_manifest, tmp_path, cp1252_text_default
+):
     config = MultitaskConfig(
         audio=AudioSSLConfig(
             stem_width=4,
@@ -329,3 +344,15 @@ def test_public_training_warm_start_resets_optimizer_and_retains_media(public_ma
     payload["prediction"].retain_grad()
     loss.backward()
     assert payload["prediction"].grad[..., 81:, :].count_nonzero() == 0
+
+
+def test_public_japanese_manifest_survives_non_utf8_system_default(
+    public_manifest, cp1252_text_default
+):
+    document = json.loads(public_manifest.read_text(encoding="utf-8"))
+    for row in document["records"]:
+        if row["task"] == "transcription":
+            row["target"], row["language"] = "日本語の発話。" + row["split"], "ja"
+    public_manifest.write_text(json.dumps(document, ensure_ascii=False), encoding="utf-8")
+    data = PublicData(public_manifest)
+    assert data.record("transcription", 0)[2] == "日本語の発話。train"

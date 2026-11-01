@@ -30,6 +30,8 @@ BabySlakhには`audio_rendered: false`・`midi_saved: false`でも実ファイ�
 
 既存スモーク用loaderの32原音上限は維持し、公開データは`PublicData`の別経路を使う。manifestは完成後に上書きしない。
 
+日本語のmanifest、元の書き起こし、生成応答のJSONはUTF-8で読み書きし、Windowsの既定文字コードにも依存しない。共有波形の検査テストは同じファイルを複製し、FLOAT WAVのPEAK日時によるファイルhashの差を避ける。
+
 今回固定した集合は次のとおり。ASRの訓練は英語252・日本語640発話、合計約71.3分。MIDIの訓練は約19.8分である。複数課題が原音を共有するため、課題別の時間を独立した収録時間として足し合わせない。
 
 | 課題 | train | validation | test |

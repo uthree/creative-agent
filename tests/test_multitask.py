@@ -1,5 +1,6 @@
 import json
 from dataclasses import replace
+from shutil import copyfile
 
 import numpy as np
 import pytest
@@ -7,7 +8,7 @@ import torch
 from PIL import Image
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 
-from creative_agent.audio import prepare_fixtures
+from creative_agent.audio import file_hash, prepare_fixtures
 from creative_agent.midi import Note
 from creative_agent.multitask_data import (
     TASKS,
@@ -51,6 +52,10 @@ def data_root(tmp_path, config, monkeypatch):
         document = json.loads(path.read_text(encoding="utf-8"))
         document.update(task="speech_transcription", transcript_rights={"origin": "unit test"})
         for i, asset in enumerate(document["assets"]):
+            # The test intentionally shares exact files across tasks. FLOAT WAV PEAK
+            # timestamps can otherwise make identical samples have different hashes.
+            copyfile(root.parent / "caption" / asset["path"], root / asset["path"])
+            asset["sha256"] = file_hash(root / asset["path"])
             asset.update(
                 transcript=f"test sentence {i}",
                 language="en",

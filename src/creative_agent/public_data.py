@@ -68,7 +68,7 @@ class PublicData:
         self.manifest = Path(manifest).resolve()
         self.root = self.manifest.parent
         self.signature = file_hash(self.manifest)
-        document = json.loads(self.manifest.read_text())
+        document = json.loads(self.manifest.read_text(encoding="utf-8"))
         if document.get("schema_version") != "public_audio_v1":
             raise ValueError("unsupported public manifest")
         self.sources = {s["id"]: s for s in document["sources"]}

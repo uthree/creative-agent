@@ -126,7 +126,8 @@ def evaluate_public(model, data, output, step, writer, *, include_test):
                         ensure_ascii=False,
                         indent=2,
                     )
-                    + "\n"
+                    + "\n",
+                    encoding="utf-8",
                 )
                 print(
                     json.dumps(

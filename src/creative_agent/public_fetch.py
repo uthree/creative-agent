@@ -247,7 +247,7 @@ def fetch_public_corpora(root, cache):
             **extract(archive, root / directory),
         }
         records.append(record)
-        manifest.write_text(json.dumps(records, indent=2) + "\n")
+        manifest.write_text(json.dumps(records, indent=2) + "\n", encoding="utf-8")
         print(json.dumps({"event": "verified", **record}), flush=True)
     return records
 
@@ -306,5 +306,5 @@ def fetch_jsut_subset(root, *, count=1024, seed=20261101):
         "license_file": "jsut_ver1.1/LICENCE.txt",
         "members": records,
     }
-    (root / "downloads.json").write_text(json.dumps(result, indent=2) + "\n")
+    (root / "downloads.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     return result
