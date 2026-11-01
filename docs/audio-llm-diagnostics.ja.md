@@ -11,7 +11,7 @@
 - 両LLMのLoRAとprojectorは新規初期化。既存LFMの学習済み接続は流用しない。音声条件はprojectorとLLMのq/v rank 8 LoRAのみ更新。テキスト条件はLoRAのみ更新し、通常のtoken embeddingへ入力する。
 - テキストの正解情報条件：ASRは正解文を渡して転記。MIDIはvelocity,pitch,offset,onsetのCSVからN1へ並べ替え・変換。これはoracle対照であり、認識の評価ではない。音声条件と同じ出力教師を使うが、入力の長さ・難しさは異なる。
 - 各条件1,000更新、batch 1、LR 3e-4、warmup 50更新、その後一定。言語／長さを交互に提示する専用乱数の順序を固定する。訓練提示数を揃え、token数と時間は別に記録する。1 seedで初期切り分けを行う。
-- ASR生成上限192、MIDI 4096、文脈8192。教師と入力を切り詰めず事前検査。teacher NLLだけでなく、訓練集合全例・validation・testの自由生成を採点する。testは最終重みだけを評価しcheckpoint選択に使わない。
+- ASR生成上限192、MIDI 6144、文脈12288。Qwen tokenizerでは同じ240音の教師が約4300 tokenとなる事前検査を踏まえ、両モデルの上限を同時に拡張した。既存checkpointのpenalty比較は元の上限を維持する。教師と入力を切り詰めず事前検査。teacher NLLだけでなく、訓練集合全例・validation・testの自由生成を採点する。testは最終重みだけを評価しcheckpoint選択に使わない。
 - 既存モデルのpenalty 1.1 / 1.0比較は同じ固定test subsetを使い、各保存checkpoint自身のencoderで特徴を再計算する。凍結共通encoderのcacheへ置き換えない。
 
 ## 判断と追加条件

@@ -5,7 +5,7 @@ from dataclasses import replace
 import pytest
 import torch
 
-from creative_agent.llm_diagnostics import balanced_schedule, oracle_input, tensor_hash
+from creative_agent.llm_diagnostics import balanced_schedule, configure, oracle_input, tensor_hash
 from creative_agent.multitask_data import MultitaskConfig
 from creative_agent.multitask_model import MARKER, MultitaskModel, install_lora
 
@@ -90,3 +90,12 @@ def test_lfm_named_mlp_and_conv_projections_receive_wide_lora():
     assert set(install_lora(module, 32, WIDE_TARGETS)) == set(module.keys())
     config = small_config(lora_rank=32, lora_targets=WIDE_TARGETS)
     assert MultitaskConfig.from_dict(config.to_dict()) == config
+
+
+def test_diagnostic_budget_accommodates_different_numeric_tokenizers():
+    cache = {"config": small_config().to_dict()}
+    for backbone in ("lfm3", "qwen3"):
+        config = configure(cache, backbone, "midi")
+        assert config.max_new_tokens == 6144
+        assert config.max_positions == 12288
+        assert MultitaskConfig.from_dict(config.to_dict()) == config

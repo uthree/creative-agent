@@ -99,7 +99,7 @@ class MultitaskConfig:
         ):
             if type(getattr(self, key)) is not int or getattr(self, key) <= 0:
                 raise ValueError(f"{key} must be a positive integer")
-        if self.max_positions > 8192 or self.max_new_tokens > 4096 or self.generation_examples > 8:
+        if self.max_positions > 16384 or self.max_new_tokens > 8192 or self.generation_examples > 8:
             raise ValueError("multitask pilot context/evaluation budget exceeded")
         if self.tiny_width % 8:
             raise ValueError("tiny_width must be divisible by 8")
