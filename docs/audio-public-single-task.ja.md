@@ -1,5 +1,7 @@
 # 公開音声の単独課題比較
 
+2026年11月1日に全6条件を実行した。[結果と再現監査](audio-public-single-task-report.ja.md)を参照。
+
 前回の混合学習は追加5,000更新、5課題が各1,000更新だった。今回はSSL、楽器短文、正常・複合問題の診断、英日ASR、ピアノ採譜を**独立した重み・optimizerで各1,000更新**する。全条件を前回と同じ合成データcheckpointからwarm startし、公開データで混合学習した最終重みからの追加学習にはしない。
 
 `recipes/audio-public-single-task-lfm3.json`を使い、`train-audio-multitask --task ssl`などで対象を選ぶ。対象の課題だけを学習・評価し、非対象のheadやLoRAは勾配がなければ更新しない。保存再開時は対象課題も含めて設定を照合する。原音・作品のsplit、短区間manifest、batch 2、学習率、seedと各課題の更新数を前回に揃える。ただし共有optimizerの履歴、課題ごとのwarmup進行、サンプルの提示順は混合学習と異なるため、干渉の原因を一つに特定する実験とはしない。
