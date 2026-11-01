@@ -12,11 +12,11 @@ from creative_agent.training import run_smoke
 def main() -> None:
     parser = argparse.ArgumentParser(description="Creative agent training recipes")
     commands = parser.add_subparsers(dest="command", required=True)
-    for name in ("prepare-audio-fixtures", "smoke-audio-ssl"):
+    for name in ("prepare-audio-fixtures", "smoke-audio-ssl", "smoke-audio-caption"):
         command = commands.add_parser(name)
         command.add_argument("--config", type=Path)
         command.add_argument("--output", type=Path, required=True)
-        if name == "smoke-audio-ssl":
+        if name.startswith("smoke-"):
             command.add_argument("--device", default="auto")
             command.add_argument("--steps", type=int, default=20, help="total successful updates")
             command.add_argument(
@@ -25,7 +25,27 @@ def main() -> None:
             command.add_argument("--backend", choices=("auto", "math", "flash"), default="auto")
             command.add_argument("--manifest", type=Path)
             command.add_argument("--resume", action="store_true")
+            if name == "smoke-audio-caption":
+                command.add_argument("--encoder-checkpoint", type=Path)
     args = parser.parse_args()
+    if args.command == "smoke-audio-caption":
+        from creative_agent.caption import CaptionConfig
+        from creative_agent.caption_training import run_caption_smoke
+
+        config = CaptionConfig.load(args.config) if args.config else CaptionConfig()
+        report = run_caption_smoke(
+            config,
+            args.output,
+            steps=args.steps,
+            device=args.device,
+            precision=args.precision,
+            backend=args.backend,
+            resume=args.resume,
+            manifest=args.manifest,
+            encoder_checkpoint=args.encoder_checkpoint,
+        )
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+        return
     config = AudioSSLConfig.load(args.config) if args.config else AudioSSLConfig()
     if args.command == "prepare-audio-fixtures":
         print(prepare_fixtures(args.output, config))

@@ -28,14 +28,14 @@ from creative_agent.config import AudioSSLConfig
 from creative_agent.model import AudioSSLModel, gradient_norms, masked_loss
 
 
-def log_stereo_audio(writer, waveform, sample_rate, step):
+def log_stereo_audio(writer, waveform, sample_rate, step, tag="validation/input"):
     """SummaryWriter.add_audio only accepts mono; retain both channels explicitly."""
     stream = io.BytesIO()
     sf.write(stream, waveform.T.numpy(), sample_rate, format="WAV", subtype="PCM_16")
     summary = Summary(
         value=[
             Summary.Value(
-                tag="validation/input",
+                tag=tag,
                 audio=Summary.Audio(
                     sample_rate=sample_rate,
                     num_channels=2,

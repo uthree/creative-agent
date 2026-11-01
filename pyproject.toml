@@ -13,6 +13,7 @@ dependencies = [
     "soundfile>=0.13,<0.14",
     "tensorboard>=2.20,<3",
     "torch==2.14.1",
+    "transformers>=4.57,<5",
 ]
 
 [project.scripts]
