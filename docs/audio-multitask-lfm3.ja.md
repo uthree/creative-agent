@@ -56,6 +56,8 @@ uv run --no-sync tensorboard \
   --logdir runs/multitask-001/tensorboard --host 127.0.0.1 --port 6006
 ```
 
+同じLANの別マシンから見る場合は、`--host` を実行ホストのLAN IPv4へ置き換える。接続URLは `http://<そのLAN IPv4>:6006`。今回の実行もLAN側のアドレスで待ち受け、HTTP応答を確認した。実際のIPとサーバーPIDはGit対象外のrun内 `tensorboard-server.json` に記録する。
+
 SCALARSで `train/loss`、`train/<task>/loss`、勾配、タスクごとのvalidation lossと正しい音声・無音・別音声の参照NLLを見る。診断headとLLM応答はそれぞれ別に採点する。ASRはCER/WER、MIDIは形式率と音符F1を記録する。
 
 TEXTとAUDIOは `examples/<task>/<sample_id>/` で対応付ける。入力音声 `input`、教師文 `reference`、実生成 `llm_response`、EOS/生成上限の状態が同じサンプルIDとstepで比較できる。caption・ASR・MIDIはvalidation各4件、診断は正常・単一・複合の代表各1件を生成する。診断のhead評価はvalidation全36 viewであり、生成3例のLLM評価と分母が異なる。

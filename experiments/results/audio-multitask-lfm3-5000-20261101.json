@@ -1,0 +1,2162 @@
+{
+  "date_jst": "2026-11-01",
+  "scope": "5000 shared-model updates on small synthetic datasets; not a real-world quality benchmark",
+  "verified_implementation_commit": "88b077ec5593a68c7c6fb719f3b7b7af909ff9ef",
+  "report": {
+    "status": "completed",
+    "optimizer_steps": 5000,
+    "task_updates": {
+      "ssl": 1000,
+      "caption": 1000,
+      "diagnosis": 1000,
+      "transcription": 1000,
+      "midi": 1000
+    },
+    "session_optimizer_steps": 4995,
+    "resumed_from_step": 5,
+    "config": {
+      "audio": {
+        "sample_rate": 48000,
+        "hop_samples": 480,
+        "stem_width": 32,
+        "width": 128,
+        "layers": 2,
+        "heads": 4,
+        "ffn_width": 352,
+        "qk_norm": true,
+        "rope_time_scale": 100.0,
+        "mask_ratio": 0.5,
+        "mask_span": 5,
+        "learning_rate": 0.001,
+        "batch_size": 2,
+        "seed": 20261101,
+        "num_threads": 2,
+        "fixture_count": 16,
+        "duration_seconds": 2.0
+      },
+      "backbone": "lfm3",
+      "lora_rank": 8,
+      "pool_frames": 5,
+      "learning_rate": 0.0003,
+      "warmup_steps": 100,
+      "checkpoint_every": 250,
+      "evaluate_every": 500,
+      "max_positions": 1024,
+      "max_new_tokens": 160,
+      "generation_examples": 4,
+      "diagnostic_weight": 1.0,
+      "tiny_width": 32
+    },
+    "data": {
+      "ssl": {
+        "train": 12,
+        "validation": 4
+      },
+      "caption": {
+        "train": 12,
+        "validation": 4
+      },
+      "diagnosis": {
+        "train": 108,
+        "validation": 36
+      },
+      "transcription": {
+        "train": 12,
+        "validation": 4
+      },
+      "midi": {
+        "train": 12,
+        "validation": 4
+      }
+    },
+    "signatures": {
+      "ssl": "e6ec7139648eb8740ba360770064911ebb1d648e782c03a46e6bcd5bef5ba37d",
+      "caption": "e6ec7139648eb8740ba360770064911ebb1d648e782c03a46e6bcd5bef5ba37d",
+      "diagnosis": "592626b834157b20339500610295c724bc9d2e7be6d7992253349cf62c8a0852",
+      "transcription": "b9bd795ec079be43ddcd9a8c7b8da4efa74f657bbc9e2a0621d801a66dd2f8f0",
+      "midi": "e2f512a70b7db8844debe197f4a23c9a2445dc43de86fb70775c0e0313cc76ce"
+    },
+    "backbone": "lfm3",
+    "backbone_identity": {
+      "model.safetensors": "135922caef64e81e52af88ede8b7c3ddaa9d6da220a9737fb3065275dbfb4330",
+      "config.json": "8c6ae8b8f6d88c87cfb98cf4b5e34e943d0ee07e24215c4121b3159a46e1399d",
+      "tokenizer.json": "7e226e34bface23ccf6e495d157bf77186c1c30a7659880e1a8994db528c3701",
+      "tokenizer_config.json": "bf028f813efc6137bc07ed045cafe71820df9a5e26a38e39954706ed1e30a457",
+      "special_tokens_map.json": "7946f864cbfb62a1b041bda937244210a1a87f4a6cab3a48b791131b2cd57f88",
+      "generation_config.json": "0095ba7158e938b1e2d3082d412f00d8be85e42cbbd7608b63866f7a081cf270",
+      "chat_template.jinja": "f45005c50cd2a97329722bf3a2dee9f16c04cdf825a589b280fb7e99e6827818",
+      "modeling_lfm3.py": "e8cd5254ea99ce6bd731b57b10908c2e8b5010ce8315341f895a38484885eeab",
+      "configuration_lfm3.py": "176cced35657aedfea7d7002221360582d1c05fcaca882c21508bc3a73b282e5",
+      "lfm3_conv.py": "80d4a985382a22774212759248a6b4c737bfbf9c2a47b3dd7f797dda748e4bb4"
+    },
+    "frozen_backbone_unchanged": true,
+    "trainable_parameters": 1474508,
+    "parameter_group_changes_l2": {
+      "ssl_head": 3.798079955358999,
+      "encoder": 12.675793223309261,
+      "lora": 11.346509853897436,
+      "projector": 6.387343424540872,
+      "diagnosis_head": 0.9400428330825141
+    },
+    "initial_metrics": {
+      "ssl": {
+        "mean_loss": 0.017238680738955736,
+        "validation_examples": 4
+      },
+      "caption": {
+        "mean_loss": 3.9742125868797302,
+        "validation_examples": 4,
+        "mean_response_token_nll": {
+          "audio": 3.9741135999268176,
+          "silence": 3.977757171088574,
+          "wrong_audio": 3.9794139324450026
+        },
+        "generated_examples": 4,
+        "generation_token_limit_count": 0
+      },
+      "diagnosis": {
+        "mean_loss": 3.2862083117167153,
+        "validation_examples": 36,
+        "mean_response_token_nll": {
+          "audio": 1.6702668126283833,
+          "silence": 1.6689494931487363,
+          "wrong_audio": 1.6704436990269498
+        },
+        "generated_examples": 3,
+        "generation_token_limit_count": 0,
+        "head_metrics": {
+          "examples": 36,
+          "threshold": 0.5,
+          "event_iou": 0.5,
+          "per_class": {
+            "dropout": {
+              "tp": 16,
+              "fp": 20,
+              "fn": 0,
+              "precision": 0.4444444444444444,
+              "recall": 1.0,
+              "f1": 0.6153846153846154
+            },
+            "clipping": {
+              "tp": 16,
+              "fp": 20,
+              "fn": 0,
+              "precision": 0.4444444444444444,
+              "recall": 1.0,
+              "f1": 0.6153846153846154
+            },
+            "channel_imbalance": {
+              "tp": 16,
+              "fp": 20,
+              "fn": 0,
+              "precision": 0.4444444444444444,
+              "recall": 1.0,
+              "f1": 0.6153846153846154
+            }
+          },
+          "clip_macro_f1": 0.6153846153846154,
+          "clip_micro": {
+            "tp": 48,
+            "fp": 60,
+            "fn": 0,
+            "precision": 0.4444444444444444,
+            "recall": 1.0,
+            "f1": 0.6153846153846154
+          },
+          "event_per_class": {
+            "dropout": {
+              "tp": 0,
+              "fp": 72,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "clipping": {
+              "tp": 0,
+              "fp": 36,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "channel_imbalance": {
+              "tp": 0,
+              "fp": 36,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            }
+          },
+          "event_macro_f1": 0.0,
+          "event_micro": {
+            "tp": 0,
+            "fp": 144,
+            "fn": 48,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "by_kind": {
+            "normal": {
+              "examples": 8,
+              "exact_matches": 0,
+              "exact_set_accuracy": 0.0
+            },
+            "single": {
+              "examples": 12,
+              "exact_matches": 0,
+              "exact_set_accuracy": 0.0
+            },
+            "compound": {
+              "examples": 16,
+              "exact_matches": 4,
+              "exact_set_accuracy": 0.25
+            }
+          },
+          "normal_clips_with_false_alarm": 8,
+          "normal_clip_false_alarm_rate": 1.0,
+          "normal_false_events_per_hour": 8317.714553894566,
+          "normal_seconds": 13.849958333333333
+        },
+        "llm_metrics": {
+          "examples": 3,
+          "threshold": 0.5,
+          "event_iou": 0.5,
+          "per_class": {
+            "dropout": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "clipping": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "channel_imbalance": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            }
+          },
+          "clip_macro_f1": 0.0,
+          "clip_micro": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "event_per_class": {
+            "dropout": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "clipping": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "channel_imbalance": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            }
+          },
+          "event_macro_f1": 0.0,
+          "event_micro": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "by_kind": {
+            "normal": {
+              "examples": 1,
+              "exact_matches": 0,
+              "exact_set_accuracy": 0.0
+            },
+            "single": {
+              "examples": 1,
+              "exact_matches": 0,
+              "exact_set_accuracy": 0.0
+            },
+            "compound": {
+              "examples": 1,
+              "exact_matches": 0,
+              "exact_set_accuracy": 0.0
+            }
+          },
+          "normal_clips_with_false_alarm": 0,
+          "normal_clip_false_alarm_rate": 0.0,
+          "normal_false_events_per_hour": 0.0,
+          "normal_seconds": 1.7957916666666667,
+          "invalid_generations": 3,
+          "invalid_normal_generations": 1
+        }
+      },
+      "transcription": {
+        "mean_loss": 10.009747505187988,
+        "validation_examples": 4,
+        "mean_response_token_nll": {
+          "audio": 9.937878975501427,
+          "silence": 9.935262313255897,
+          "wrong_audio": 9.951048117417555
+        },
+        "generated_examples": 4,
+        "generation_token_limit_count": 0,
+        "generation_metrics": {
+          "normalization": "Unicode NFC only; CER includes spaces and punctuation",
+          "cer": 13.875,
+          "character_edits": 666,
+          "reference_characters": 48,
+          "wer": 15.875,
+          "word_edits": 127,
+          "reference_words": 8,
+          "wer_scope": "English utterances only, whitespace-delimited; no Japanese WER",
+          "exact_match_rate": 0.0,
+          "utterances": 4,
+          "generation_token_limit_count": 0,
+          "generation_eos_count": 4
+        }
+      },
+      "midi": {
+        "mean_loss": 3.939328908920288,
+        "validation_examples": 4,
+        "mean_response_token_nll": {
+          "audio": 3.7525001129546722,
+          "silence": 3.7510662233674683,
+          "wrong_audio": 3.760357057893431
+        },
+        "generated_examples": 4,
+        "generation_token_limit_count": 0,
+        "generation_metrics": {
+          "valid_note_sequence_rate": 0.0,
+          "invalid_generations": 4,
+          "exact_note_sequence_rate": 0.0,
+          "onset": {
+            "true_positive": 0,
+            "false_positive": 0,
+            "false_negative": 7,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "onset_offset": {
+            "true_positive": 0,
+            "false_positive": 0,
+            "false_negative": 7,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "silence_examples": 1,
+          "silence_correct": 0,
+          "silence_false_alarm": 0,
+          "silence_invalid": 1,
+          "generation_token_limit_count": 0,
+          "note_matching": "exact pitch; onset <=50ms; offset <=max(50ms,20% reference duration)",
+          "velocity_scoring": "included in exact sequence match; excluded from note F1"
+        }
+      }
+    },
+    "final_metrics": {
+      "ssl": {
+        "mean_loss": 0.005042409989982843,
+        "validation_examples": 4
+      },
+      "caption": {
+        "mean_loss": 0.6913924142718315,
+        "validation_examples": 4,
+        "mean_response_token_nll": {
+          "audio": 0.6928635972972009,
+          "silence": 0.6672169688869926,
+          "wrong_audio": 0.8605012046355828
+        },
+        "generated_examples": 4,
+        "generation_token_limit_count": 0
+      },
+      "diagnosis": {
+        "mean_loss": 1.177461966044373,
+        "validation_examples": 36,
+        "mean_response_token_nll": {
+          "audio": 0.42043284843429135,
+          "silence": 0.44803124986720505,
+          "wrong_audio": 0.4162835284565272
+        },
+        "generated_examples": 3,
+        "generation_token_limit_count": 0,
+        "head_metrics": {
+          "examples": 36,
+          "threshold": 0.5,
+          "event_iou": 0.5,
+          "per_class": {
+            "dropout": {
+              "tp": 6,
+              "fp": 1,
+              "fn": 10,
+              "precision": 0.8571428571428571,
+              "recall": 0.375,
+              "f1": 0.5217391304347826
+            },
+            "clipping": {
+              "tp": 6,
+              "fp": 5,
+              "fn": 10,
+              "precision": 0.5454545454545454,
+              "recall": 0.375,
+              "f1": 0.4444444444444444
+            },
+            "channel_imbalance": {
+              "tp": 11,
+              "fp": 3,
+              "fn": 5,
+              "precision": 0.7857142857142857,
+              "recall": 0.6875,
+              "f1": 0.7333333333333333
+            }
+          },
+          "clip_macro_f1": 0.5665056360708535,
+          "clip_micro": {
+            "tp": 23,
+            "fp": 9,
+            "fn": 25,
+            "precision": 0.71875,
+            "recall": 0.4791666666666667,
+            "f1": 0.575
+          },
+          "event_per_class": {
+            "dropout": {
+              "tp": 0,
+              "fp": 7,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "clipping": {
+              "tp": 0,
+              "fp": 12,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "channel_imbalance": {
+              "tp": 0,
+              "fp": 26,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            }
+          },
+          "event_macro_f1": 0.0,
+          "event_micro": {
+            "tp": 0,
+            "fp": 45,
+            "fn": 48,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "by_kind": {
+            "normal": {
+              "examples": 8,
+              "exact_matches": 7,
+              "exact_set_accuracy": 0.875
+            },
+            "single": {
+              "examples": 12,
+              "exact_matches": 2,
+              "exact_set_accuracy": 0.16666666666666666
+            },
+            "compound": {
+              "examples": 16,
+              "exact_matches": 5,
+              "exact_set_accuracy": 0.3125
+            }
+          },
+          "normal_clips_with_false_alarm": 1,
+          "normal_clip_false_alarm_rate": 0.125,
+          "normal_false_events_per_hour": 779.7857394276157,
+          "normal_seconds": 13.849958333333333
+        },
+        "llm_metrics": {
+          "examples": 3,
+          "threshold": 0.5,
+          "event_iou": 0.5,
+          "per_class": {
+            "dropout": {
+              "tp": 1,
+              "fp": 1,
+              "fn": 1,
+              "precision": 0.5,
+              "recall": 0.5,
+              "f1": 0.5
+            },
+            "clipping": {
+              "tp": 0,
+              "fp": 1,
+              "fn": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "channel_imbalance": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            }
+          },
+          "clip_macro_f1": 0.16666666666666666,
+          "clip_micro": {
+            "tp": 1,
+            "fp": 2,
+            "fn": 2,
+            "precision": 0.3333333333333333,
+            "recall": 0.3333333333333333,
+            "f1": 0.3333333333333333
+          },
+          "event_per_class": {
+            "dropout": {
+              "tp": 0,
+              "fp": 2,
+              "fn": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "clipping": {
+              "tp": 0,
+              "fp": 1,
+              "fn": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "channel_imbalance": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            }
+          },
+          "event_macro_f1": 0.0,
+          "event_micro": {
+            "tp": 0,
+            "fp": 3,
+            "fn": 3,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "by_kind": {
+            "normal": {
+              "examples": 1,
+              "exact_matches": 0,
+              "exact_set_accuracy": 0.0
+            },
+            "single": {
+              "examples": 1,
+              "exact_matches": 0,
+              "exact_set_accuracy": 0.0
+            },
+            "compound": {
+              "examples": 1,
+              "exact_matches": 0,
+              "exact_set_accuracy": 0.0
+            }
+          },
+          "normal_clips_with_false_alarm": 1,
+          "normal_clip_false_alarm_rate": 1.0,
+          "normal_false_events_per_hour": 2004.6868836863964,
+          "normal_seconds": 1.7957916666666667,
+          "invalid_generations": 0,
+          "invalid_normal_generations": 0
+        }
+      },
+      "transcription": {
+        "mean_loss": 6.686203837394714,
+        "validation_examples": 4,
+        "mean_response_token_nll": {
+          "audio": 6.539671090932993,
+          "silence": 6.612239782626812,
+          "wrong_audio": 5.748256683349609
+        },
+        "generated_examples": 4,
+        "generation_token_limit_count": 0,
+        "generation_metrics": {
+          "normalization": "Unicode NFC only; CER includes spaces and punctuation",
+          "cer": 0.9583333333333334,
+          "character_edits": 46,
+          "reference_characters": 48,
+          "wer": 1.5,
+          "word_edits": 12,
+          "reference_words": 8,
+          "wer_scope": "English utterances only, whitespace-delimited; no Japanese WER",
+          "exact_match_rate": 0.0,
+          "utterances": 4,
+          "generation_token_limit_count": 0,
+          "generation_eos_count": 4
+        }
+      },
+      "midi": {
+        "mean_loss": 1.6917288798867958,
+        "validation_examples": 4,
+        "mean_response_token_nll": {
+          "audio": 2.1408721265086736,
+          "silence": 2.40318891390638,
+          "wrong_audio": 2.3500842769424635
+        },
+        "generated_examples": 4,
+        "generation_token_limit_count": 0,
+        "generation_metrics": {
+          "valid_note_sequence_rate": 1.0,
+          "invalid_generations": 0,
+          "exact_note_sequence_rate": 0.25,
+          "onset": {
+            "true_positive": 1,
+            "false_positive": 3,
+            "false_negative": 6,
+            "precision": 0.25,
+            "recall": 0.14285714285714285,
+            "f1": 0.18181818181818182
+          },
+          "onset_offset": {
+            "true_positive": 0,
+            "false_positive": 4,
+            "false_negative": 7,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "silence_examples": 1,
+          "silence_correct": 1,
+          "silence_false_alarm": 0,
+          "silence_invalid": 0,
+          "generation_token_limit_count": 0,
+          "note_matching": "exact pitch; onset <=50ms; offset <=max(50ms,20% reference duration)",
+          "velocity_scoring": "included in exact sequence match; excluded from note F1"
+        }
+      }
+    },
+    "evaluated_steps": [
+      0,
+      5,
+      500,
+      1000,
+      1500,
+      2000,
+      2500,
+      3000,
+      3500,
+      4000,
+      4500,
+      5000
+    ],
+    "source": {
+      "file_sha256": {
+        "src/creative_agent/__init__.py": "506c3f2af75db592b115074ef68d9acffd640b70fb4670102c62b31ed6a319b9",
+        "src/creative_agent/audio.py": "270c420cbce81460792d0ea2c271d6c5497eea56df83c9343417cd9ba2a47d90",
+        "src/creative_agent/caption.py": "dc0612b2abb8dd58a9da3497aa383863d6b70cc77a91b35c1f9e8d3032736e46",
+        "src/creative_agent/caption_training.py": "7d8ce7237a4fce4638a846d310344f3b40b434b12b635be46fc1feb2d14150fc",
+        "src/creative_agent/cli.py": "91b94caa3eb03c3aeb7b40d856b18fa13fcaaa090419577a32ecc32c1b26f368",
+        "src/creative_agent/config.py": "9a85d1b6bb9781f811086cfb30a7c07633f9c69443a488a1c2229c3f242e996f",
+        "src/creative_agent/diagnosis.py": "ab0baf892064b55fda5e31642a6f6c6f47d06c2da0c49dca9121134ca147a15d",
+        "src/creative_agent/diagnosis_data.py": "db573ea7f265aaa75b7af01aa5d62b4aaae4ec71d462970d83404332306d4d73",
+        "src/creative_agent/diagnosis_training.py": "f4f71662e969c3da4f5982ee0c5387a680aae1d7018d73f64721f02387b141a6",
+        "src/creative_agent/midi.py": "e7c3f6f69294156fa1b015c662a90eee2054ab561f02151816ece4c820a815da",
+        "src/creative_agent/midi_data.py": "70aecfa791934b4114634a3fb653e100ccd7218265ebed3d4abb3c450690399b",
+        "src/creative_agent/midi_training.py": "dafbb22ec35ea287239ee18a219a3ecaa80e6bf4069e562b241e85e289daadca",
+        "src/creative_agent/model.py": "b958800dd819fd4625ee1f5c5c02c47cc1e023e9e4e6ba916b8cf0c61ced476b",
+        "src/creative_agent/multitask_data.py": "7bffcd189f8b9b54abd3aa393ff31e33d2d2f9524a4f8199088d2682780e3d0e",
+        "src/creative_agent/multitask_evaluation.py": "cb86e3dd1da71c1ba5d13f01a9399a3249da8cd22c8ddee6a1c38126381fd16c",
+        "src/creative_agent/multitask_model.py": "6af6084cbd371bdc750dec9fb24bd36296639db9372504299a6f7dc46081910e",
+        "src/creative_agent/multitask_objectives.py": "35e97f45dd4a8074146259cf7e74c773ccf90fb3384d55f8d9d851379af82734",
+        "src/creative_agent/multitask_training.py": "468dbefb4130a7220569ef76c7d8c0bb26339e9aa8ae8db2077840d699f65f0d",
+        "src/creative_agent/multitask_visuals.py": "dcad52278299a66462f9441d213761a5ca2cdf20d49c2d779fe370e919f72989",
+        "src/creative_agent/training.py": "a31d44b490b872805abc4d0fabfe32772785459be2f9b2752925f25f2eca2651",
+        "src/creative_agent/transcription.py": "f1f08753597b9457f63bbd2f17d86568dfe6801514148646658cd7dd1faa3442",
+        "pyproject.toml": "9a5cfc090f8a6055bbdc0dea3007d389211c210e86e9cd41d178f772eabc152f",
+        "uv.lock": "d8563d1d617a68e0aff72b0811214d8e129aa3f0bfc69dc5688cc1485e75a6e0"
+      },
+      "commit": "88b077ec5593a68c7c6fb719f3b7b7af909ff9ef",
+      "dirty": false
+    },
+    "elapsed_seconds_this_session": 839.4302549079875,
+    "peak_allocated_bytes": 3595397120,
+    "peak_reserved_bytes": 3653238784
+  },
+  "checkpoint_sha256": "7b5c96498eae853f20b64fa1e1243d9c8cc946fba2cbcd74cc065673b5360c7b",
+  "train_loss_bands": {
+    "ssl": {
+      "first_100_updates_mean_loss": 0.013291009501554072,
+      "last_100_updates_mean_loss": 0.004294849685393274
+    },
+    "caption": {
+      "first_100_updates_mean_loss": 0.5962636759877205,
+      "last_100_updates_mean_loss": 0.0010160682210698724
+    },
+    "diagnosis": {
+      "first_100_updates_mean_loss": 1.529085122346878,
+      "last_100_updates_mean_loss": 0.6341061770915986
+    },
+    "transcription": {
+      "first_100_updates_mean_loss": 1.7964794677495957,
+      "last_100_updates_mean_loss": 0.024041369671285794
+    },
+    "midi": {
+      "first_100_updates_mean_loss": 0.9663157471641898,
+      "last_100_updates_mean_loss": 0.049246997058908164
+    }
+  },
+  "training_fit_probe": {
+    "caption": {
+      "examples": 4,
+      "split": "train",
+      "selection": "first examples; MIDI/diagnosis one per case",
+      "exact": 4
+    },
+    "diagnosis": {
+      "examples": 3,
+      "split": "train",
+      "selection": "first examples; MIDI/diagnosis one per case",
+      "valid_json": 3,
+      "exact_event_sequences": 0
+    },
+    "transcription": {
+      "examples": 4,
+      "split": "train",
+      "selection": "first examples; MIDI/diagnosis one per case",
+      "cer": 0.0,
+      "wer": 0.0,
+      "exact": 4
+    },
+    "midi": {
+      "examples": 4,
+      "split": "train",
+      "selection": "first examples; MIDI/diagnosis one per case",
+      "valid_sequences": 4,
+      "exact_sequences": 4,
+      "onset_offset": {
+        "true_positive": 7,
+        "false_positive": 0,
+        "false_negative": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      }
+    }
+  },
+  "evaluation_curve": [
+    {
+      "step": 0,
+      "tasks": {
+        "ssl": {
+          "loss": 0.017238680738955736
+        },
+        "caption": {
+          "loss": 3.9742125868797302,
+          "nll": {
+            "audio": 3.9741135999268176,
+            "silence": 3.977757171088574,
+            "wrong_audio": 3.9794139324450026
+          }
+        },
+        "diagnosis": {
+          "loss": 3.2862083117167153,
+          "nll": {
+            "audio": 1.6702668126283833,
+            "silence": 1.6689494931487363,
+            "wrong_audio": 1.6704436990269498
+          },
+          "head_clip_f1": 0.6153846153846154,
+          "head_event_f1": 0.0,
+          "llm_clip_f1": 0.0,
+          "llm_event_f1": 0.0,
+          "llm_invalid": 3
+        },
+        "transcription": {
+          "loss": 10.009747505187988,
+          "nll": {
+            "audio": 9.937878975501427,
+            "silence": 9.935262313255897,
+            "wrong_audio": 9.951048117417555
+          },
+          "cer": 13.875,
+          "wer": 15.875,
+          "exact_match_rate": 0.0
+        },
+        "midi": {
+          "loss": 3.939328908920288,
+          "nll": {
+            "audio": 3.7525001129546722,
+            "silence": 3.7510662233674683,
+            "wrong_audio": 3.760357057893431
+          },
+          "valid_rate": 0.0,
+          "exact_rate": 0.0,
+          "onset_f1": 0.0,
+          "onset_offset_f1": 0.0
+        }
+      }
+    },
+    {
+      "step": 5,
+      "tasks": {
+        "ssl": {
+          "loss": 0.017105487175285816
+        },
+        "caption": {
+          "loss": 3.947644829750061,
+          "nll": {
+            "audio": 3.947338662895502,
+            "silence": 3.9364078068265727,
+            "wrong_audio": 3.949483221652461
+          }
+        },
+        "diagnosis": {
+          "loss": 3.2708071801397534,
+          "nll": {
+            "audio": 1.660868301150504,
+            "silence": 1.660702414535596,
+            "wrong_audio": 1.6605314844875427
+          },
+          "head_clip_f1": 0.6153846153846154,
+          "head_event_f1": 0.0,
+          "llm_clip_f1": 0.2222222222222222,
+          "llm_event_f1": 0.0,
+          "llm_invalid": 2
+        },
+        "transcription": {
+          "loss": 10.001692533493042,
+          "nll": {
+            "audio": 9.927060053898739,
+            "silence": 9.902665578402006,
+            "wrong_audio": 9.905545748197115
+          },
+          "cer": 14.5,
+          "wer": 16.375,
+          "exact_match_rate": 0.0
+        },
+        "midi": {
+          "loss": 3.9094144105911255,
+          "nll": {
+            "audio": 3.7362747440090427,
+            "silence": 3.7322102676738393,
+            "wrong_audio": 3.745328234387683
+          },
+          "valid_rate": 0.0,
+          "exact_rate": 0.0,
+          "onset_f1": 0.0,
+          "onset_offset_f1": 0.0
+        }
+      }
+    },
+    {
+      "step": 500,
+      "tasks": {
+        "ssl": {
+          "loss": 0.011095514753833413
+        },
+        "caption": {
+          "loss": 0.4521472156047821,
+          "nll": {
+            "audio": 0.45122416259026993,
+            "silence": 0.4600004267458822,
+            "wrong_audio": 0.4619646680121328
+          }
+        },
+        "diagnosis": {
+          "loss": 1.3320029344823625,
+          "nll": {
+            "audio": 0.3219870471217659,
+            "silence": 0.3245047208035356,
+            "wrong_audio": 0.32284190887241454
+          },
+          "head_clip_f1": 0.0,
+          "head_event_f1": 0.0,
+          "llm_clip_f1": 0.26666666666666666,
+          "llm_event_f1": 0.13333333333333333,
+          "llm_invalid": 0
+        },
+        "transcription": {
+          "loss": 4.10735011100769,
+          "nll": {
+            "audio": 4.038938448979304,
+            "silence": 3.921596196981577,
+            "wrong_audio": 4.04066724043626
+          },
+          "cer": 1.1458333333333333,
+          "wer": 1.5,
+          "exact_match_rate": 0.0
+        },
+        "midi": {
+          "loss": 1.3976933732628822,
+          "nll": {
+            "audio": 1.7104043000704283,
+            "silence": 1.701318784193559,
+            "wrong_audio": 1.7108894733639506
+          },
+          "valid_rate": 1.0,
+          "exact_rate": 0.25,
+          "onset_f1": 0.0,
+          "onset_offset_f1": 0.0
+        }
+      }
+    },
+    {
+      "step": 1000,
+      "tasks": {
+        "ssl": {
+          "loss": 0.007694963365793228
+        },
+        "caption": {
+          "loss": 0.5401856005191803,
+          "nll": {
+            "audio": 0.5390662451585134,
+            "silence": 0.6393517109693265,
+            "wrong_audio": 0.5838632303125718
+          }
+        },
+        "diagnosis": {
+          "loss": 1.2381988796922896,
+          "nll": {
+            "audio": 0.3854114296031371,
+            "silence": 0.37682477769592887,
+            "wrong_audio": 0.3882305295988439
+          },
+          "head_clip_f1": 0.0,
+          "head_event_f1": 0.0,
+          "llm_clip_f1": 0.0,
+          "llm_event_f1": 0.0,
+          "llm_invalid": 0
+        },
+        "transcription": {
+          "loss": 5.128465533256531,
+          "nll": {
+            "audio": 4.9863921495584345,
+            "silence": 4.3219536451193,
+            "wrong_audio": 4.369441490906936
+          },
+          "cer": 0.875,
+          "wer": 1.25,
+          "exact_match_rate": 0.0
+        },
+        "midi": {
+          "loss": 1.54489716142416,
+          "nll": {
+            "audio": 1.8711652337730704,
+            "silence": 1.903054224980342,
+            "wrong_audio": 1.9053085887586916
+          },
+          "valid_rate": 1.0,
+          "exact_rate": 0.0,
+          "onset_f1": 0.0,
+          "onset_offset_f1": 0.0
+        }
+      }
+    },
+    {
+      "step": 1500,
+      "tasks": {
+        "ssl": {
+          "loss": 0.006082835956476629
+        },
+        "caption": {
+          "loss": 0.5987850800156593,
+          "nll": {
+            "audio": 0.5995941544864692,
+            "silence": 0.6720793615369236,
+            "wrong_audio": 0.7495101474079431
+          }
+        },
+        "diagnosis": {
+          "loss": 1.2037373317612543,
+          "nll": {
+            "audio": 0.3562102842101316,
+            "silence": 0.36456792654520437,
+            "wrong_audio": 0.3643388882949111
+          },
+          "head_clip_f1": 0.2322472848788638,
+          "head_event_f1": 0.0,
+          "llm_clip_f1": 0.16666666666666666,
+          "llm_event_f1": 0.0,
+          "llm_invalid": 0
+        },
+        "transcription": {
+          "loss": 6.292688965797424,
+          "nll": {
+            "audio": 6.11643754518949,
+            "silence": 6.218088993659387,
+            "wrong_audio": 6.071840543013352
+          },
+          "cer": 0.75,
+          "wer": 1.125,
+          "exact_match_rate": 0.0
+        },
+        "midi": {
+          "loss": 1.5302946268348023,
+          "nll": {
+            "audio": 1.9292184516739148,
+            "silence": 2.114667719036534,
+            "wrong_audio": 2.1263442720685686
+          },
+          "valid_rate": 1.0,
+          "exact_rate": 0.25,
+          "onset_f1": 0.0,
+          "onset_offset_f1": 0.0
+        }
+      }
+    },
+    {
+      "step": 2000,
+      "tasks": {
+        "ssl": {
+          "loss": 0.005689110257662833
+        },
+        "caption": {
+          "loss": 0.6653653681278229,
+          "nll": {
+            "audio": 0.6669580521536809,
+            "silence": 0.6808061932816225,
+            "wrong_audio": 0.7778546126449809
+          }
+        },
+        "diagnosis": {
+          "loss": 1.1209188020891614,
+          "nll": {
+            "audio": 0.40265167438773436,
+            "silence": 0.3915492310809094,
+            "wrong_audio": 0.4117260148111928
+          },
+          "head_clip_f1": 0.3433583959899749,
+          "head_event_f1": 0.0,
+          "llm_clip_f1": 0.0,
+          "llm_event_f1": 0.0,
+          "llm_invalid": 0
+        },
+        "transcription": {
+          "loss": 6.2524720430374146,
+          "nll": {
+            "audio": 6.028894571157602,
+            "silence": 6.225329765906701,
+            "wrong_audio": 6.652263311239389
+          },
+          "cer": 1.0,
+          "wer": 1.5,
+          "exact_match_rate": 0.0
+        },
+        "midi": {
+          "loss": 1.5491248733305838,
+          "nll": {
+            "audio": 1.9572123519580376,
+            "silence": 2.1667795411746513,
+            "wrong_audio": 2.1191479153447337
+          },
+          "valid_rate": 1.0,
+          "exact_rate": 0.25,
+          "onset_f1": 0.0,
+          "onset_offset_f1": 0.0
+        }
+      }
+    },
+    {
+      "step": 2500,
+      "tasks": {
+        "ssl": {
+          "loss": 0.007015220122411847
+        },
+        "caption": {
+          "loss": 0.6231154128909111,
+          "nll": {
+            "audio": 0.6210839432828567,
+            "silence": 0.6580709312476364,
+            "wrong_audio": 0.7290186367782892
+          }
+        },
+        "diagnosis": {
+          "loss": 1.2065643005900912,
+          "nll": {
+            "audio": 0.38478253976730437,
+            "silence": 0.39472755996650905,
+            "wrong_audio": 0.38645788255845753
+          },
+          "head_clip_f1": 0.5254480286738351,
+          "head_event_f1": 0.0,
+          "llm_clip_f1": 0.16666666666666666,
+          "llm_event_f1": 0.0,
+          "llm_invalid": 0
+        },
+        "transcription": {
+          "loss": 6.285052537918091,
+          "nll": {
+            "audio": 6.167643290299636,
+            "silence": 6.171304115882287,
+            "wrong_audio": 7.0185950719393215
+          },
+          "cer": 1.0,
+          "wer": 1.5,
+          "exact_match_rate": 0.0
+        },
+        "midi": {
+          "loss": 1.6271848665473954,
+          "nll": {
+            "audio": 2.083469887560025,
+            "silence": 2.398874378551097,
+            "wrong_audio": 2.2642684710490237
+          },
+          "valid_rate": 1.0,
+          "exact_rate": 0.25,
+          "onset_f1": 0.18181818181818182,
+          "onset_offset_f1": 0.0
+        }
+      }
+    },
+    {
+      "step": 3000,
+      "tasks": {
+        "ssl": {
+          "loss": 0.004201339790597558
+        },
+        "caption": {
+          "loss": 0.5805465951561928,
+          "nll": {
+            "audio": 0.580914637037352,
+            "silence": 0.6717741588751475,
+            "wrong_audio": 0.7323051837145114
+          }
+        },
+        "diagnosis": {
+          "loss": 1.136012390255928,
+          "nll": {
+            "audio": 0.3785534356249852,
+            "silence": 0.4068450525426941,
+            "wrong_audio": 0.38450396850250695
+          },
+          "head_clip_f1": 0.37606837606837606,
+          "head_event_f1": 0.0,
+          "llm_clip_f1": 0.26666666666666666,
+          "llm_event_f1": 0.13333333333333333,
+          "llm_invalid": 0
+        },
+        "transcription": {
+          "loss": 6.659928202629089,
+          "nll": {
+            "audio": 6.517931718092698,
+            "silence": 6.720852026572595,
+            "wrong_audio": 6.527280514056866
+          },
+          "cer": 0.7708333333333334,
+          "wer": 1.0,
+          "exact_match_rate": 0.0
+        },
+        "midi": {
+          "loss": 1.6759995299325965,
+          "nll": {
+            "audio": 2.1125248268620087,
+            "silence": 2.397536328917387,
+            "wrong_audio": 2.3390782018760583
+          },
+          "valid_rate": 1.0,
+          "exact_rate": 0.25,
+          "onset_f1": 0.18181818181818182,
+          "onset_offset_f1": 0.0
+        }
+      }
+    },
+    {
+      "step": 3500,
+      "tasks": {
+        "ssl": {
+          "loss": 0.004060748848132789
+        },
+        "caption": {
+          "loss": 0.5176488682627678,
+          "nll": {
+            "audio": 0.5179605559975493,
+            "silence": 0.6658052474844689,
+            "wrong_audio": 0.7183231588672189
+          }
+        },
+        "diagnosis": {
+          "loss": 1.1583506183491812,
+          "nll": {
+            "audio": 0.36586887232755966,
+            "silence": 0.3756485968876038,
+            "wrong_audio": 0.3751963140565549
+          },
+          "head_clip_f1": 0.5083938294010889,
+          "head_event_f1": 0.0,
+          "llm_clip_f1": 0.16666666666666666,
+          "llm_event_f1": 0.0,
+          "llm_invalid": 0
+        },
+        "transcription": {
+          "loss": 6.11344975233078,
+          "nll": {
+            "audio": 5.8915264423076925,
+            "silence": 5.919438582200271,
+            "wrong_audio": 5.581828337449294
+          },
+          "cer": 0.8541666666666666,
+          "wer": 1.375,
+          "exact_match_rate": 0.0
+        },
+        "midi": {
+          "loss": 1.6296690099461557,
+          "nll": {
+            "audio": 2.0610725429259067,
+            "silence": 2.3580414349490675,
+            "wrong_audio": 2.3959324979162835
+          },
+          "valid_rate": 1.0,
+          "exact_rate": 0.25,
+          "onset_f1": 0.18181818181818182,
+          "onset_offset_f1": 0.0
+        }
+      }
+    },
+    {
+      "step": 4000,
+      "tasks": {
+        "ssl": {
+          "loss": 0.0043587335385382175
+        },
+        "caption": {
+          "loss": 0.6605370342731476,
+          "nll": {
+            "audio": 0.6616101375981873,
+            "silence": 0.6644123184914682,
+            "wrong_audio": 0.8134889585130355
+          }
+        },
+        "diagnosis": {
+          "loss": 1.22898431122303,
+          "nll": {
+            "audio": 0.4297577761962747,
+            "silence": 0.3970171314324843,
+            "wrong_audio": 0.4306336141297561
+          },
+          "head_clip_f1": 0.406516290726817,
+          "head_event_f1": 0.0,
+          "llm_clip_f1": 0.16666666666666666,
+          "llm_event_f1": 0.0,
+          "llm_invalid": 0
+        },
+        "transcription": {
+          "loss": 6.203035116195679,
+          "nll": {
+            "audio": 5.982234184558575,
+            "silence": 7.167795107914851,
+            "wrong_audio": 5.545166419102595
+          },
+          "cer": 1.0208333333333333,
+          "wer": 1.5,
+          "exact_match_rate": 0.0
+        },
+        "midi": {
+          "loss": 1.571358702623911,
+          "nll": {
+            "audio": 1.961201294581935,
+            "silence": 2.3432537502115562,
+            "wrong_audio": 2.3193073737156857
+          },
+          "valid_rate": 1.0,
+          "exact_rate": 0.25,
+          "onset_f1": 0.18181818181818182,
+          "onset_offset_f1": 0.0
+        }
+      }
+    },
+    {
+      "step": 4500,
+      "tasks": {
+        "ssl": {
+          "loss": 0.004574224818497896
+        },
+        "caption": {
+          "loss": 0.7208092510700226,
+          "nll": {
+            "audio": 0.7230124228140887,
+            "silence": 0.626600098084001,
+            "wrong_audio": 0.8085767094995461
+          }
+        },
+        "diagnosis": {
+          "loss": 1.0832129584418402,
+          "nll": {
+            "audio": 0.3825253371274873,
+            "silence": 0.3979052267071715,
+            "wrong_audio": 0.3887067585824772
+          },
+          "head_clip_f1": 0.6331569664902998,
+          "head_event_f1": 0.0,
+          "llm_clip_f1": 0.3333333333333333,
+          "llm_event_f1": 0.0,
+          "llm_invalid": 0
+        },
+        "transcription": {
+          "loss": 6.237270474433899,
+          "nll": {
+            "audio": 6.157623034257155,
+            "silence": 7.165919248874371,
+            "wrong_audio": 5.737783835484431
+          },
+          "cer": 0.9166666666666666,
+          "wer": 1.25,
+          "exact_match_rate": 0.0
+        },
+        "midi": {
+          "loss": 1.5622538921752493,
+          "nll": {
+            "audio": 1.9405769480775221,
+            "silence": 2.4557448857278312,
+            "wrong_audio": 2.4415239668511726
+          },
+          "valid_rate": 1.0,
+          "exact_rate": 0.25,
+          "onset_f1": 0.18181818181818182,
+          "onset_offset_f1": 0.0
+        }
+      }
+    },
+    {
+      "step": 5000,
+      "tasks": {
+        "ssl": {
+          "loss": 0.005042409989982843
+        },
+        "caption": {
+          "loss": 0.6913924142718315,
+          "nll": {
+            "audio": 0.6928635972972009,
+            "silence": 0.6672169688869926,
+            "wrong_audio": 0.8605012046355828
+          }
+        },
+        "diagnosis": {
+          "loss": 1.177461966044373,
+          "nll": {
+            "audio": 0.42043284843429135,
+            "silence": 0.44803124986720505,
+            "wrong_audio": 0.4162835284565272
+          },
+          "head_clip_f1": 0.5665056360708535,
+          "head_event_f1": 0.0,
+          "llm_clip_f1": 0.16666666666666666,
+          "llm_event_f1": 0.0,
+          "llm_invalid": 0
+        },
+        "transcription": {
+          "loss": 6.686203837394714,
+          "nll": {
+            "audio": 6.539671090932993,
+            "silence": 6.612239782626812,
+            "wrong_audio": 5.748256683349609
+          },
+          "cer": 0.9583333333333334,
+          "wer": 1.5,
+          "exact_match_rate": 0.0
+        },
+        "midi": {
+          "loss": 1.6917288798867958,
+          "nll": {
+            "audio": 2.1408721265086736,
+            "silence": 2.40318891390638,
+            "wrong_audio": 2.3500842769424635
+          },
+          "valid_rate": 1.0,
+          "exact_rate": 0.25,
+          "onset_f1": 0.18181818181818182,
+          "onset_offset_f1": 0.0
+        }
+      }
+    }
+  ],
+  "preflight": {
+    "status": "completed",
+    "optimizer_steps": 5,
+    "task_updates": {
+      "ssl": 1,
+      "caption": 1,
+      "diagnosis": 1,
+      "transcription": 1,
+      "midi": 1
+    },
+    "session_optimizer_steps": 5,
+    "resumed_from_step": null,
+    "config": {
+      "audio": {
+        "sample_rate": 48000,
+        "hop_samples": 480,
+        "stem_width": 32,
+        "width": 128,
+        "layers": 2,
+        "heads": 4,
+        "ffn_width": 352,
+        "qk_norm": true,
+        "rope_time_scale": 100.0,
+        "mask_ratio": 0.5,
+        "mask_span": 5,
+        "learning_rate": 0.001,
+        "batch_size": 2,
+        "seed": 20261101,
+        "num_threads": 2,
+        "fixture_count": 16,
+        "duration_seconds": 2.0
+      },
+      "backbone": "lfm3",
+      "lora_rank": 8,
+      "pool_frames": 5,
+      "learning_rate": 0.0003,
+      "warmup_steps": 100,
+      "checkpoint_every": 250,
+      "evaluate_every": 500,
+      "max_positions": 1024,
+      "max_new_tokens": 160,
+      "generation_examples": 4,
+      "diagnostic_weight": 1.0,
+      "tiny_width": 32
+    },
+    "data": {
+      "ssl": {
+        "train": 12,
+        "validation": 4
+      },
+      "caption": {
+        "train": 12,
+        "validation": 4
+      },
+      "diagnosis": {
+        "train": 108,
+        "validation": 36
+      },
+      "transcription": {
+        "train": 12,
+        "validation": 4
+      },
+      "midi": {
+        "train": 12,
+        "validation": 4
+      }
+    },
+    "signatures": {
+      "ssl": "e6ec7139648eb8740ba360770064911ebb1d648e782c03a46e6bcd5bef5ba37d",
+      "caption": "e6ec7139648eb8740ba360770064911ebb1d648e782c03a46e6bcd5bef5ba37d",
+      "diagnosis": "592626b834157b20339500610295c724bc9d2e7be6d7992253349cf62c8a0852",
+      "transcription": "b9bd795ec079be43ddcd9a8c7b8da4efa74f657bbc9e2a0621d801a66dd2f8f0",
+      "midi": "e2f512a70b7db8844debe197f4a23c9a2445dc43de86fb70775c0e0313cc76ce"
+    },
+    "backbone": "lfm3",
+    "backbone_identity": {
+      "model.safetensors": "135922caef64e81e52af88ede8b7c3ddaa9d6da220a9737fb3065275dbfb4330",
+      "config.json": "8c6ae8b8f6d88c87cfb98cf4b5e34e943d0ee07e24215c4121b3159a46e1399d",
+      "tokenizer.json": "7e226e34bface23ccf6e495d157bf77186c1c30a7659880e1a8994db528c3701",
+      "tokenizer_config.json": "bf028f813efc6137bc07ed045cafe71820df9a5e26a38e39954706ed1e30a457",
+      "special_tokens_map.json": "7946f864cbfb62a1b041bda937244210a1a87f4a6cab3a48b791131b2cd57f88",
+      "generation_config.json": "0095ba7158e938b1e2d3082d412f00d8be85e42cbbd7608b63866f7a081cf270",
+      "chat_template.jinja": "f45005c50cd2a97329722bf3a2dee9f16c04cdf825a589b280fb7e99e6827818",
+      "modeling_lfm3.py": "e8cd5254ea99ce6bd731b57b10908c2e8b5010ce8315341f895a38484885eeab",
+      "configuration_lfm3.py": "176cced35657aedfea7d7002221360582d1c05fcaca882c21508bc3a73b282e5",
+      "lfm3_conv.py": "80d4a985382a22774212759248a6b4c737bfbf9c2a47b3dd7f797dda748e4bb4"
+    },
+    "frozen_backbone_unchanged": true,
+    "trainable_parameters": 1474508,
+    "parameter_group_changes_l2": {
+      "ssl_head": 0.0013184063232102728,
+      "encoder": 0.013837152123228873,
+      "lora": 0.015328355058813534,
+      "projector": 0.011669683499188573,
+      "diagnosis_head": 0.0002503806932966297
+    },
+    "initial_metrics": {
+      "ssl": {
+        "mean_loss": 0.017238680738955736,
+        "validation_examples": 4
+      },
+      "caption": {
+        "mean_loss": 3.9742125868797302,
+        "validation_examples": 4,
+        "mean_response_token_nll": {
+          "audio": 3.9741135999268176,
+          "silence": 3.977757171088574,
+          "wrong_audio": 3.9794139324450026
+        },
+        "generated_examples": 4,
+        "generation_token_limit_count": 0
+      },
+      "diagnosis": {
+        "mean_loss": 3.2862083117167153,
+        "validation_examples": 36,
+        "mean_response_token_nll": {
+          "audio": 1.6702668126283833,
+          "silence": 1.6689494931487363,
+          "wrong_audio": 1.6704436990269498
+        },
+        "generated_examples": 3,
+        "generation_token_limit_count": 0,
+        "head_metrics": {
+          "examples": 36,
+          "threshold": 0.5,
+          "event_iou": 0.5,
+          "per_class": {
+            "dropout": {
+              "tp": 16,
+              "fp": 20,
+              "fn": 0,
+              "precision": 0.4444444444444444,
+              "recall": 1.0,
+              "f1": 0.6153846153846154
+            },
+            "clipping": {
+              "tp": 16,
+              "fp": 20,
+              "fn": 0,
+              "precision": 0.4444444444444444,
+              "recall": 1.0,
+              "f1": 0.6153846153846154
+            },
+            "channel_imbalance": {
+              "tp": 16,
+              "fp": 20,
+              "fn": 0,
+              "precision": 0.4444444444444444,
+              "recall": 1.0,
+              "f1": 0.6153846153846154
+            }
+          },
+          "clip_macro_f1": 0.6153846153846154,
+          "clip_micro": {
+            "tp": 48,
+            "fp": 60,
+            "fn": 0,
+            "precision": 0.4444444444444444,
+            "recall": 1.0,
+            "f1": 0.6153846153846154
+          },
+          "event_per_class": {
+            "dropout": {
+              "tp": 0,
+              "fp": 72,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "clipping": {
+              "tp": 0,
+              "fp": 36,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "channel_imbalance": {
+              "tp": 0,
+              "fp": 36,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            }
+          },
+          "event_macro_f1": 0.0,
+          "event_micro": {
+            "tp": 0,
+            "fp": 144,
+            "fn": 48,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "by_kind": {
+            "normal": {
+              "examples": 8,
+              "exact_matches": 0,
+              "exact_set_accuracy": 0.0
+            },
+            "single": {
+              "examples": 12,
+              "exact_matches": 0,
+              "exact_set_accuracy": 0.0
+            },
+            "compound": {
+              "examples": 16,
+              "exact_matches": 4,
+              "exact_set_accuracy": 0.25
+            }
+          },
+          "normal_clips_with_false_alarm": 8,
+          "normal_clip_false_alarm_rate": 1.0,
+          "normal_false_events_per_hour": 8317.714553894566,
+          "normal_seconds": 13.849958333333333
+        },
+        "llm_metrics": {
+          "examples": 3,
+          "threshold": 0.5,
+          "event_iou": 0.5,
+          "per_class": {
+            "dropout": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "clipping": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "channel_imbalance": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            }
+          },
+          "clip_macro_f1": 0.0,
+          "clip_micro": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "event_per_class": {
+            "dropout": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "clipping": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "channel_imbalance": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            }
+          },
+          "event_macro_f1": 0.0,
+          "event_micro": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "by_kind": {
+            "normal": {
+              "examples": 1,
+              "exact_matches": 0,
+              "exact_set_accuracy": 0.0
+            },
+            "single": {
+              "examples": 1,
+              "exact_matches": 0,
+              "exact_set_accuracy": 0.0
+            },
+            "compound": {
+              "examples": 1,
+              "exact_matches": 0,
+              "exact_set_accuracy": 0.0
+            }
+          },
+          "normal_clips_with_false_alarm": 0,
+          "normal_clip_false_alarm_rate": 0.0,
+          "normal_false_events_per_hour": 0.0,
+          "normal_seconds": 1.7957916666666667,
+          "invalid_generations": 3,
+          "invalid_normal_generations": 1
+        }
+      },
+      "transcription": {
+        "mean_loss": 10.009747505187988,
+        "validation_examples": 4,
+        "mean_response_token_nll": {
+          "audio": 9.937878975501427,
+          "silence": 9.935262313255897,
+          "wrong_audio": 9.951048117417555
+        },
+        "generated_examples": 4,
+        "generation_token_limit_count": 0,
+        "generation_metrics": {
+          "normalization": "Unicode NFC only; CER includes spaces and punctuation",
+          "cer": 13.875,
+          "character_edits": 666,
+          "reference_characters": 48,
+          "wer": 15.875,
+          "word_edits": 127,
+          "reference_words": 8,
+          "wer_scope": "English utterances only, whitespace-delimited; no Japanese WER",
+          "exact_match_rate": 0.0,
+          "utterances": 4,
+          "generation_token_limit_count": 0,
+          "generation_eos_count": 4
+        }
+      },
+      "midi": {
+        "mean_loss": 3.939328908920288,
+        "validation_examples": 4,
+        "mean_response_token_nll": {
+          "audio": 3.7525001129546722,
+          "silence": 3.7510662233674683,
+          "wrong_audio": 3.760357057893431
+        },
+        "generated_examples": 4,
+        "generation_token_limit_count": 0,
+        "generation_metrics": {
+          "valid_note_sequence_rate": 0.0,
+          "invalid_generations": 4,
+          "exact_note_sequence_rate": 0.0,
+          "onset": {
+            "true_positive": 0,
+            "false_positive": 0,
+            "false_negative": 7,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "onset_offset": {
+            "true_positive": 0,
+            "false_positive": 0,
+            "false_negative": 7,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "silence_examples": 1,
+          "silence_correct": 0,
+          "silence_false_alarm": 0,
+          "silence_invalid": 1,
+          "generation_token_limit_count": 0,
+          "note_matching": "exact pitch; onset <=50ms; offset <=max(50ms,20% reference duration)",
+          "velocity_scoring": "included in exact sequence match; excluded from note F1"
+        }
+      }
+    },
+    "final_metrics": {
+      "ssl": {
+        "mean_loss": 0.017105487175285816,
+        "validation_examples": 4
+      },
+      "caption": {
+        "mean_loss": 3.947644829750061,
+        "validation_examples": 4,
+        "mean_response_token_nll": {
+          "audio": 3.947338662895502,
+          "silence": 3.9364078068265727,
+          "wrong_audio": 3.949483221652461
+        },
+        "generated_examples": 4,
+        "generation_token_limit_count": 0
+      },
+      "diagnosis": {
+        "mean_loss": 3.2708071801397534,
+        "validation_examples": 36,
+        "mean_response_token_nll": {
+          "audio": 1.660868301150504,
+          "silence": 1.660702414535596,
+          "wrong_audio": 1.6605314844875427
+        },
+        "generated_examples": 3,
+        "generation_token_limit_count": 0,
+        "head_metrics": {
+          "examples": 36,
+          "threshold": 0.5,
+          "event_iou": 0.5,
+          "per_class": {
+            "dropout": {
+              "tp": 16,
+              "fp": 20,
+              "fn": 0,
+              "precision": 0.4444444444444444,
+              "recall": 1.0,
+              "f1": 0.6153846153846154
+            },
+            "clipping": {
+              "tp": 16,
+              "fp": 20,
+              "fn": 0,
+              "precision": 0.4444444444444444,
+              "recall": 1.0,
+              "f1": 0.6153846153846154
+            },
+            "channel_imbalance": {
+              "tp": 16,
+              "fp": 20,
+              "fn": 0,
+              "precision": 0.4444444444444444,
+              "recall": 1.0,
+              "f1": 0.6153846153846154
+            }
+          },
+          "clip_macro_f1": 0.6153846153846154,
+          "clip_micro": {
+            "tp": 48,
+            "fp": 60,
+            "fn": 0,
+            "precision": 0.4444444444444444,
+            "recall": 1.0,
+            "f1": 0.6153846153846154
+          },
+          "event_per_class": {
+            "dropout": {
+              "tp": 0,
+              "fp": 72,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "clipping": {
+              "tp": 0,
+              "fp": 36,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "channel_imbalance": {
+              "tp": 0,
+              "fp": 36,
+              "fn": 16,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            }
+          },
+          "event_macro_f1": 0.0,
+          "event_micro": {
+            "tp": 0,
+            "fp": 144,
+            "fn": 48,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "by_kind": {
+            "normal": {
+              "examples": 8,
+              "exact_matches": 0,
+              "exact_set_accuracy": 0.0
+            },
+            "single": {
+              "examples": 12,
+              "exact_matches": 0,
+              "exact_set_accuracy": 0.0
+            },
+            "compound": {
+              "examples": 16,
+              "exact_matches": 4,
+              "exact_set_accuracy": 0.25
+            }
+          },
+          "normal_clips_with_false_alarm": 8,
+          "normal_clip_false_alarm_rate": 1.0,
+          "normal_false_events_per_hour": 8317.714553894566,
+          "normal_seconds": 13.849958333333333
+        },
+        "llm_metrics": {
+          "examples": 3,
+          "threshold": 0.5,
+          "event_iou": 0.5,
+          "per_class": {
+            "dropout": {
+              "tp": 1,
+              "fp": 0,
+              "fn": 1,
+              "precision": 1.0,
+              "recall": 0.5,
+              "f1": 0.6666666666666666
+            },
+            "clipping": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "channel_imbalance": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            }
+          },
+          "clip_macro_f1": 0.2222222222222222,
+          "clip_micro": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 2,
+            "precision": 1.0,
+            "recall": 0.3333333333333333,
+            "f1": 0.5
+          },
+          "event_per_class": {
+            "dropout": {
+              "tp": 0,
+              "fp": 1,
+              "fn": 2,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "clipping": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 1,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "channel_imbalance": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 0,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            }
+          },
+          "event_macro_f1": 0.0,
+          "event_micro": {
+            "tp": 0,
+            "fp": 1,
+            "fn": 3,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "by_kind": {
+            "normal": {
+              "examples": 1,
+              "exact_matches": 0,
+              "exact_set_accuracy": 0.0
+            },
+            "single": {
+              "examples": 1,
+              "exact_matches": 0,
+              "exact_set_accuracy": 0.0
+            },
+            "compound": {
+              "examples": 1,
+              "exact_matches": 0,
+              "exact_set_accuracy": 0.0
+            }
+          },
+          "normal_clips_with_false_alarm": 0,
+          "normal_clip_false_alarm_rate": 0.0,
+          "normal_false_events_per_hour": 0.0,
+          "normal_seconds": 1.7957916666666667,
+          "invalid_generations": 2,
+          "invalid_normal_generations": 1
+        }
+      },
+      "transcription": {
+        "mean_loss": 10.001692533493042,
+        "validation_examples": 4,
+        "mean_response_token_nll": {
+          "audio": 9.927060053898739,
+          "silence": 9.902665578402006,
+          "wrong_audio": 9.905545748197115
+        },
+        "generated_examples": 4,
+        "generation_token_limit_count": 0,
+        "generation_metrics": {
+          "normalization": "Unicode NFC only; CER includes spaces and punctuation",
+          "cer": 14.5,
+          "character_edits": 696,
+          "reference_characters": 48,
+          "wer": 16.375,
+          "word_edits": 131,
+          "reference_words": 8,
+          "wer_scope": "English utterances only, whitespace-delimited; no Japanese WER",
+          "exact_match_rate": 0.0,
+          "utterances": 4,
+          "generation_token_limit_count": 0,
+          "generation_eos_count": 4
+        }
+      },
+      "midi": {
+        "mean_loss": 3.9094144105911255,
+        "validation_examples": 4,
+        "mean_response_token_nll": {
+          "audio": 3.7362747440090427,
+          "silence": 3.7322102676738393,
+          "wrong_audio": 3.745328234387683
+        },
+        "generated_examples": 4,
+        "generation_token_limit_count": 0,
+        "generation_metrics": {
+          "valid_note_sequence_rate": 0.0,
+          "invalid_generations": 4,
+          "exact_note_sequence_rate": 0.0,
+          "onset": {
+            "true_positive": 0,
+            "false_positive": 0,
+            "false_negative": 7,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "onset_offset": {
+            "true_positive": 0,
+            "false_positive": 0,
+            "false_negative": 7,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "silence_examples": 1,
+          "silence_correct": 0,
+          "silence_false_alarm": 0,
+          "silence_invalid": 1,
+          "generation_token_limit_count": 0,
+          "note_matching": "exact pitch; onset <=50ms; offset <=max(50ms,20% reference duration)",
+          "velocity_scoring": "included in exact sequence match; excluded from note F1"
+        }
+      }
+    },
+    "evaluated_steps": [
+      0,
+      5
+    ],
+    "source": {
+      "file_sha256": {
+        "src/creative_agent/__init__.py": "506c3f2af75db592b115074ef68d9acffd640b70fb4670102c62b31ed6a319b9",
+        "src/creative_agent/audio.py": "270c420cbce81460792d0ea2c271d6c5497eea56df83c9343417cd9ba2a47d90",
+        "src/creative_agent/caption.py": "dc0612b2abb8dd58a9da3497aa383863d6b70cc77a91b35c1f9e8d3032736e46",
+        "src/creative_agent/caption_training.py": "7d8ce7237a4fce4638a846d310344f3b40b434b12b635be46fc1feb2d14150fc",
+        "src/creative_agent/cli.py": "91b94caa3eb03c3aeb7b40d856b18fa13fcaaa090419577a32ecc32c1b26f368",
+        "src/creative_agent/config.py": "9a85d1b6bb9781f811086cfb30a7c07633f9c69443a488a1c2229c3f242e996f",
+        "src/creative_agent/diagnosis.py": "ab0baf892064b55fda5e31642a6f6c6f47d06c2da0c49dca9121134ca147a15d",
+        "src/creative_agent/diagnosis_data.py": "db573ea7f265aaa75b7af01aa5d62b4aaae4ec71d462970d83404332306d4d73",
+        "src/creative_agent/diagnosis_training.py": "f4f71662e969c3da4f5982ee0c5387a680aae1d7018d73f64721f02387b141a6",
+        "src/creative_agent/midi.py": "e7c3f6f69294156fa1b015c662a90eee2054ab561f02151816ece4c820a815da",
+        "src/creative_agent/midi_data.py": "70aecfa791934b4114634a3fb653e100ccd7218265ebed3d4abb3c450690399b",
+        "src/creative_agent/midi_training.py": "dafbb22ec35ea287239ee18a219a3ecaa80e6bf4069e562b241e85e289daadca",
+        "src/creative_agent/model.py": "b958800dd819fd4625ee1f5c5c02c47cc1e023e9e4e6ba916b8cf0c61ced476b",
+        "src/creative_agent/multitask_data.py": "7bffcd189f8b9b54abd3aa393ff31e33d2d2f9524a4f8199088d2682780e3d0e",
+        "src/creative_agent/multitask_evaluation.py": "cb86e3dd1da71c1ba5d13f01a9399a3249da8cd22c8ddee6a1c38126381fd16c",
+        "src/creative_agent/multitask_model.py": "6af6084cbd371bdc750dec9fb24bd36296639db9372504299a6f7dc46081910e",
+        "src/creative_agent/multitask_objectives.py": "35e97f45dd4a8074146259cf7e74c773ccf90fb3384d55f8d9d851379af82734",
+        "src/creative_agent/multitask_training.py": "468dbefb4130a7220569ef76c7d8c0bb26339e9aa8ae8db2077840d699f65f0d",
+        "src/creative_agent/multitask_visuals.py": "dcad52278299a66462f9441d213761a5ca2cdf20d49c2d779fe370e919f72989",
+        "src/creative_agent/training.py": "a31d44b490b872805abc4d0fabfe32772785459be2f9b2752925f25f2eca2651",
+        "src/creative_agent/transcription.py": "f1f08753597b9457f63bbd2f17d86568dfe6801514148646658cd7dd1faa3442",
+        "pyproject.toml": "9a5cfc090f8a6055bbdc0dea3007d389211c210e86e9cd41d178f772eabc152f",
+        "uv.lock": "d8563d1d617a68e0aff72b0811214d8e129aa3f0bfc69dc5688cc1485e75a6e0"
+      },
+      "commit": "3fcb863d7a83ab96603684070ea8db8a12ffb760",
+      "dirty": true
+    },
+    "elapsed_seconds_this_session": 84.40712855497259,
+    "peak_allocated_bytes": 3594395136,
+    "peak_reserved_bytes": 3663724544
+  },
+  "audit": {
+    "source_and_lock_match_commit": true,
+    "balanced_5000_actual_updates": true,
+    "only_training_split_seen_in_update_history": true,
+    "conditional_optimizer_step_counts": {
+      "ssl_head": [
+        1000,
+        5000
+      ],
+      "encoder": [
+        5000
+      ],
+      "lora": [
+        4000
+      ],
+      "projector": [
+        4000
+      ],
+      "diagnosis_head": [
+        1000
+      ]
+    },
+    "mask_token_optimizer_step_note": "5000: zero-valued mask branch is present for text tasks; SSL reconstruction head has 1000 steps",
+    "frozen_pretrained_backbone_hash_unchanged": true,
+    "reloaded_metrics_and_generated_responses_exact_match": true,
+    "tensorboard_steps_complete_and_unique": true,
+    "paired_tensorboard_audio_reference_llm_examples": 15,
+    "tensorboard_midi_images_match_exported_midi_and_reference": true,
+    "audio_sample_rate": 48000,
+    "audio_channels": 2
+  },
+  "tests": {
+    "cuda_environment_passed": 98,
+    "cpu_environment_passed": 90,
+    "cpu_cuda_skipped": 8,
+    "lint_format_lock": "passed"
+  },
+  "additional_validation_checks": {
+    "caption_exact_matches": 0,
+    "caption_examples": 4
+  },
+  "ci": {
+    "url": "https://github.com/uthree/creative-agent/actions/runs/41283305294",
+    "conclusion": "success",
+    "platforms": [
+      "ubuntu-latest",
+      "windows-latest"
+    ],
+    "implementation_commit": "88b077ec5593a68c7c6fb719f3b7b7af909ff9ef"
+  }
+}
