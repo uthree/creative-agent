@@ -1,0 +1,482 @@
+{
+  "date_utc": "2026-11-01",
+  "scope": "LLM audio-to-MIDI wiring smoke; note generation quality not achieved",
+  "verified_implementation_commit": "e501ee0a52df04ca20a147dfcbc8abb631eb11d4",
+  "recipe_sha256": "a66e719474ee5b0c54fd82c1b695ced4bbf2ab28178314387f3a9ac14f94758f",
+  "tests": {
+    "cuda_environment": {
+      "passed": 88,
+      "skipped": 0
+    },
+    "cpu_only_environment": {
+      "passed": 80,
+      "skipped": 8,
+      "reason": "CUDA required"
+    },
+    "external_tts_absent_cpu_ci_expected": {
+      "passed": 79,
+      "skipped": 9
+    },
+    "lint_format_and_lock": "passed"
+  },
+  "runs": {
+    "cpu": {
+      "report": {
+        "status": "passed",
+        "scope": "projector-only midi CE wiring; no recognition-quality claim",
+        "task": "midi",
+        "config": {
+          "audio": {
+            "sample_rate": 48000,
+            "hop_samples": 480,
+            "stem_width": 32,
+            "width": 128,
+            "layers": 2,
+            "heads": 4,
+            "ffn_width": 352,
+            "qk_norm": true,
+            "rope_time_scale": 100.0,
+            "mask_ratio": 0.5,
+            "mask_span": 5,
+            "learning_rate": 0.001,
+            "batch_size": 2,
+            "seed": 20261101,
+            "num_threads": 2,
+            "fixture_count": 16,
+            "duration_seconds": 2.0
+          },
+          "lm_width": 64,
+          "lm_layers": 2,
+          "lm_heads": 4,
+          "lm_ffn_width": 176,
+          "max_positions": 512,
+          "max_prompt_bytes": 128,
+          "max_new_tokens": 64,
+          "learning_rate": 0.003,
+          "max_notes": 16,
+          "max_note_bytes": 256
+        },
+        "encoder_origin": {
+          "kind": "stage1_ssl_checkpoint",
+          "step": 11,
+          "sha256": "7c363c6b36ebf8702671e4f97c4b5014e858a60c116ebb98dbb009b147dbdf52"
+        },
+        "llm": "random tiny Qwen3, no pretrained weights",
+        "tokenizer": "utf8-bytes-plus-three-specials-v1",
+        "trainable_parameters": 8256,
+        "total_parameters": 765958,
+        "optimizer_steps": 11,
+        "session_optimizer_steps": 1,
+        "resumed_from_step": 10,
+        "skipped_updates": 0,
+        "frozen_unchanged": {
+          "encoder": true,
+          "llm": true
+        },
+        "projector_changed": true,
+        "initial_hashes": {
+          "encoder": "c62492e738a96bbc5e485b722f2ea61e7c4fa70430e317feb338d7bf02d992e3",
+          "llm": "d81c3ac27b256067c40d4405725b5cbd4d92805e2cb0a0a36b2352c84f1702d4",
+          "projector": "73805979a4d21ae5071a8483df4bd794cdc1bfc5b90be21d18bd448b2041d68e"
+        },
+        "data_signature": "1a0eaad61f461f089e4f66484cd3ac6a58ae6dee2e631825b638991a35d35c16",
+        "train_works": 12,
+        "validation_works": 4,
+        "max_sequence_positions": 301,
+        "initial_validation": {
+          "mean_response_token_nll": {
+            "audio": 5.599450231600208,
+            "silence": 5.599407180016782,
+            "wrong_audio": 5.599635364628639
+          },
+          "supervised_token_counts": {
+            "audio": 119,
+            "silence": 119,
+            "wrong_audio": 119
+          }
+        },
+        "final_validation": {
+          "mean_response_token_nll": {
+            "audio": 5.376779199648304,
+            "silence": 5.37678717364784,
+            "wrong_audio": 5.376875348451759
+          },
+          "supervised_token_counts": {
+            "audio": 119,
+            "silence": 119,
+            "wrong_audio": 119
+          },
+          "midi_metrics": {
+            "valid_note_sequence_rate": 0.0,
+            "invalid_generations": 4,
+            "exact_note_sequence_rate": 0.0,
+            "onset": {
+              "true_positive": 0,
+              "false_positive": 0,
+              "false_negative": 7,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "onset_offset": {
+              "true_positive": 0,
+              "false_positive": 0,
+              "false_negative": 7,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "silence_examples": 1,
+            "silence_correct": 0,
+            "silence_false_alarm": 0,
+            "silence_invalid": 1,
+            "generation_token_limit_count": 4,
+            "note_matching": "exact pitch; onset <=50ms; offset <=max(50ms,20% reference duration)",
+            "velocity_scoring": "included in exact sequence match; excluded from note F1"
+          },
+          "midi_exports": {
+            "reference_files": 4,
+            "generated_files": 0,
+            "invalid_predictions_not_exported": 4,
+            "roundtrip": "passed"
+          }
+        },
+        "last_training": {
+          "step": 11,
+          "epoch": 2,
+          "response_ce": 5.413271427154541,
+          "projector_gradient_norm": 0.10043584555387497,
+          "supervised_tokens": 98,
+          "sequence_positions": 301,
+          "sample_ids": [
+            "note-work-0005",
+            "note-work-0015"
+          ]
+        },
+        "device": "cpu",
+        "precision": "float32",
+        "encoder_attention_backend": "math",
+        "lm_attention_backend": "math_sdpa",
+        "torch": "2.14.1+cpu",
+        "transformers": "4.57.6",
+        "gpu": null,
+        "peak_allocated_bytes": null,
+        "peak_reserved_bytes": null,
+        "elapsed_seconds_this_session": 1.1079299410048407,
+        "source": {
+          "file_sha256": {
+            "src/creative_agent/__init__.py": "506c3f2af75db592b115074ef68d9acffd640b70fb4670102c62b31ed6a319b9",
+            "src/creative_agent/audio.py": "270c420cbce81460792d0ea2c271d6c5497eea56df83c9343417cd9ba2a47d90",
+            "src/creative_agent/caption.py": "dc0612b2abb8dd58a9da3497aa383863d6b70cc77a91b35c1f9e8d3032736e46",
+            "src/creative_agent/caption_training.py": "7d8ce7237a4fce4638a846d310344f3b40b434b12b635be46fc1feb2d14150fc",
+            "src/creative_agent/cli.py": "c9fdb86af57e44c7ee31792e5385edd0172b72e3330482c0126236118fdd39e1",
+            "src/creative_agent/config.py": "9a85d1b6bb9781f811086cfb30a7c07633f9c69443a488a1c2229c3f242e996f",
+            "src/creative_agent/diagnosis.py": "ab0baf892064b55fda5e31642a6f6c6f47d06c2da0c49dca9121134ca147a15d",
+            "src/creative_agent/diagnosis_data.py": "db573ea7f265aaa75b7af01aa5d62b4aaae4ec71d462970d83404332306d4d73",
+            "src/creative_agent/diagnosis_training.py": "f4f71662e969c3da4f5982ee0c5387a680aae1d7018d73f64721f02387b141a6",
+            "src/creative_agent/midi.py": "e7c3f6f69294156fa1b015c662a90eee2054ab561f02151816ece4c820a815da",
+            "src/creative_agent/midi_data.py": "70aecfa791934b4114634a3fb653e100ccd7218265ebed3d4abb3c450690399b",
+            "src/creative_agent/midi_training.py": "dafbb22ec35ea287239ee18a219a3ecaa80e6bf4069e562b241e85e289daadca",
+            "src/creative_agent/model.py": "b958800dd819fd4625ee1f5c5c02c47cc1e023e9e4e6ba916b8cf0c61ced476b",
+            "src/creative_agent/training.py": "a31d44b490b872805abc4d0fabfe32772785459be2f9b2752925f25f2eca2651",
+            "src/creative_agent/transcription.py": "f1f08753597b9457f63bbd2f17d86568dfe6801514148646658cd7dd1faa3442",
+            "pyproject.toml": "91b15efae38aaebead8ec651c9c22fe6a6674808ccec758d4d20b58651049618",
+            "uv.lock": "6f9d8489159150bde7382626708c17a6597681b637ddd4d58a3ad35cd750e62c"
+          },
+          "commit": "f19be2f52ea9c9715a1d4a6d4697881e54e73e42",
+          "dirty": true,
+          "verified_against_commit": "e501ee0a52df04ca20a147dfcbc8abb631eb11d4"
+        },
+        "midi_data": {
+          "generator": "additive-note-pairs-v1",
+          "annotation": "Signal/key boundaries coincide; no pedal, room reverb or release tail",
+          "format": "N1: pitch onset_ms offset_ms velocity, absolute milliseconds",
+          "splits": {
+            "train": {
+              "melody": 3,
+              "chord": 3,
+              "repeated": 3,
+              "silence": 3
+            },
+            "validation": {
+              "silence": 1,
+              "melody": 1,
+              "chord": 1,
+              "repeated": 1
+            }
+          },
+          "reference_notes": {
+            "train": 21,
+            "validation": 7
+          },
+          "nonempty_scores_and_source_works_disjoint": true,
+          "silence_targets_may_repeat": true
+        }
+      },
+      "before_resume": {
+        "optimizer_steps": 10,
+        "elapsed_seconds_this_session": 1.3734909330087248,
+        "final_mean_response_token_nll": {
+          "audio": 5.378215881956725,
+          "silence": 5.378222737993513,
+          "wrong_audio": 5.37830250603812
+        }
+      },
+      "checkpoint_sha256": "e8ceacb2b76c906b6d893a1ed8e9a1908ae1a419299df11a446bf31b7280eab6",
+      "audit": {
+        "source_and_lock_match_implementation_commit": true,
+        "optimizer_steps_match_history_and_log": true,
+        "only_train_split_in_update_history": true,
+        "encoder_exactly_matches_ssl_parent": true,
+        "frozen_llm_hash_unchanged": true,
+        "projector_hash_changed": true,
+        "reloaded_validation_losses_generations_and_metrics_exact_match": true,
+        "tensorboard_update_steps_complete_and_unique": true,
+        "tensorboard_audio_reference_and_generation_pairs_match": true,
+        "tensorboard_audio_rate": 48000,
+        "tensorboard_audio_channels": 2,
+        "reference_midi_roundtrips_match_note_targets": true,
+        "invalid_model_generations_have_no_midi_files": true,
+        "invalid_outputs_not_counted_as_correct_silence": true
+      }
+    },
+    "cuda": {
+      "report": {
+        "status": "passed",
+        "scope": "projector-only midi CE wiring; no recognition-quality claim",
+        "task": "midi",
+        "config": {
+          "audio": {
+            "sample_rate": 48000,
+            "hop_samples": 480,
+            "stem_width": 32,
+            "width": 128,
+            "layers": 2,
+            "heads": 4,
+            "ffn_width": 352,
+            "qk_norm": true,
+            "rope_time_scale": 100.0,
+            "mask_ratio": 0.5,
+            "mask_span": 5,
+            "learning_rate": 0.001,
+            "batch_size": 2,
+            "seed": 20261101,
+            "num_threads": 2,
+            "fixture_count": 16,
+            "duration_seconds": 2.0
+          },
+          "lm_width": 64,
+          "lm_layers": 2,
+          "lm_heads": 4,
+          "lm_ffn_width": 176,
+          "max_positions": 512,
+          "max_prompt_bytes": 128,
+          "max_new_tokens": 64,
+          "learning_rate": 0.003,
+          "max_notes": 16,
+          "max_note_bytes": 256
+        },
+        "encoder_origin": {
+          "kind": "stage1_ssl_checkpoint",
+          "step": 21,
+          "sha256": "25579db3c62145d37707e69bcffd331a58deb3106033dd9c4aa7d0cce66be132"
+        },
+        "llm": "random tiny Qwen3, no pretrained weights",
+        "tokenizer": "utf8-bytes-plus-three-specials-v1",
+        "trainable_parameters": 8256,
+        "total_parameters": 765958,
+        "optimizer_steps": 21,
+        "session_optimizer_steps": 1,
+        "resumed_from_step": 20,
+        "skipped_updates": 0,
+        "frozen_unchanged": {
+          "encoder": true,
+          "llm": true
+        },
+        "projector_changed": true,
+        "initial_hashes": {
+          "encoder": "0e5603caf418441d9b93b9c5584756e2442d343fa92284fa6a7ebf8f322a8467",
+          "llm": "d81c3ac27b256067c40d4405725b5cbd4d92805e2cb0a0a36b2352c84f1702d4",
+          "projector": "73805979a4d21ae5071a8483df4bd794cdc1bfc5b90be21d18bd448b2041d68e"
+        },
+        "data_signature": "1a0eaad61f461f089e4f66484cd3ac6a58ae6dee2e631825b638991a35d35c16",
+        "train_works": 12,
+        "validation_works": 4,
+        "max_sequence_positions": 301,
+        "initial_validation": {
+          "mean_response_token_nll": {
+            "audio": 5.598376438397319,
+            "silence": 5.59832939580709,
+            "wrong_audio": 5.598575844484217
+          },
+          "supervised_token_counts": {
+            "audio": 119,
+            "silence": 119,
+            "wrong_audio": 119
+          }
+        },
+        "final_validation": {
+          "mean_response_token_nll": {
+            "audio": 5.370646753231017,
+            "silence": 5.370652483290985,
+            "wrong_audio": 5.3706965726964615
+          },
+          "supervised_token_counts": {
+            "audio": 119,
+            "silence": 119,
+            "wrong_audio": 119
+          },
+          "midi_metrics": {
+            "valid_note_sequence_rate": 0.0,
+            "invalid_generations": 4,
+            "exact_note_sequence_rate": 0.0,
+            "onset": {
+              "true_positive": 0,
+              "false_positive": 0,
+              "false_negative": 7,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "onset_offset": {
+              "true_positive": 0,
+              "false_positive": 0,
+              "false_negative": 7,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0
+            },
+            "silence_examples": 1,
+            "silence_correct": 0,
+            "silence_false_alarm": 0,
+            "silence_invalid": 1,
+            "generation_token_limit_count": 4,
+            "note_matching": "exact pitch; onset <=50ms; offset <=max(50ms,20% reference duration)",
+            "velocity_scoring": "included in exact sequence match; excluded from note F1"
+          },
+          "midi_exports": {
+            "reference_files": 4,
+            "generated_files": 0,
+            "invalid_predictions_not_exported": 4,
+            "roundtrip": "passed"
+          }
+        },
+        "last_training": {
+          "step": 21,
+          "epoch": 4,
+          "response_ce": 5.394145488739014,
+          "projector_gradient_norm": 0.05532751604914665,
+          "supervised_tokens": 82,
+          "sequence_positions": 300,
+          "sample_ids": [
+            "note-work-0006",
+            "note-work-0005"
+          ]
+        },
+        "device": "cuda:0",
+        "precision": "float16",
+        "encoder_attention_backend": "flash",
+        "lm_attention_backend": "math_sdpa",
+        "torch": "2.14.1+cu126",
+        "transformers": "4.57.6",
+        "gpu": "NVIDIA GeForce RTX 3070",
+        "peak_allocated_bytes": 38595072,
+        "peak_reserved_bytes": 52428800,
+        "elapsed_seconds_this_session": 2.442820767988451,
+        "source": {
+          "file_sha256": {
+            "src/creative_agent/__init__.py": "506c3f2af75db592b115074ef68d9acffd640b70fb4670102c62b31ed6a319b9",
+            "src/creative_agent/audio.py": "270c420cbce81460792d0ea2c271d6c5497eea56df83c9343417cd9ba2a47d90",
+            "src/creative_agent/caption.py": "dc0612b2abb8dd58a9da3497aa383863d6b70cc77a91b35c1f9e8d3032736e46",
+            "src/creative_agent/caption_training.py": "7d8ce7237a4fce4638a846d310344f3b40b434b12b635be46fc1feb2d14150fc",
+            "src/creative_agent/cli.py": "c9fdb86af57e44c7ee31792e5385edd0172b72e3330482c0126236118fdd39e1",
+            "src/creative_agent/config.py": "9a85d1b6bb9781f811086cfb30a7c07633f9c69443a488a1c2229c3f242e996f",
+            "src/creative_agent/diagnosis.py": "ab0baf892064b55fda5e31642a6f6c6f47d06c2da0c49dca9121134ca147a15d",
+            "src/creative_agent/diagnosis_data.py": "db573ea7f265aaa75b7af01aa5d62b4aaae4ec71d462970d83404332306d4d73",
+            "src/creative_agent/diagnosis_training.py": "f4f71662e969c3da4f5982ee0c5387a680aae1d7018d73f64721f02387b141a6",
+            "src/creative_agent/midi.py": "e7c3f6f69294156fa1b015c662a90eee2054ab561f02151816ece4c820a815da",
+            "src/creative_agent/midi_data.py": "70aecfa791934b4114634a3fb653e100ccd7218265ebed3d4abb3c450690399b",
+            "src/creative_agent/midi_training.py": "dafbb22ec35ea287239ee18a219a3ecaa80e6bf4069e562b241e85e289daadca",
+            "src/creative_agent/model.py": "b958800dd819fd4625ee1f5c5c02c47cc1e023e9e4e6ba916b8cf0c61ced476b",
+            "src/creative_agent/training.py": "a31d44b490b872805abc4d0fabfe32772785459be2f9b2752925f25f2eca2651",
+            "src/creative_agent/transcription.py": "f1f08753597b9457f63bbd2f17d86568dfe6801514148646658cd7dd1faa3442",
+            "pyproject.toml": "91b15efae38aaebead8ec651c9c22fe6a6674808ccec758d4d20b58651049618",
+            "uv.lock": "6f9d8489159150bde7382626708c17a6597681b637ddd4d58a3ad35cd750e62c"
+          },
+          "commit": "f19be2f52ea9c9715a1d4a6d4697881e54e73e42",
+          "dirty": true,
+          "verified_against_commit": "e501ee0a52df04ca20a147dfcbc8abb631eb11d4"
+        },
+        "midi_data": {
+          "generator": "additive-note-pairs-v1",
+          "annotation": "Signal/key boundaries coincide; no pedal, room reverb or release tail",
+          "format": "N1: pitch onset_ms offset_ms velocity, absolute milliseconds",
+          "splits": {
+            "train": {
+              "melody": 3,
+              "chord": 3,
+              "repeated": 3,
+              "silence": 3
+            },
+            "validation": {
+              "silence": 1,
+              "melody": 1,
+              "chord": 1,
+              "repeated": 1
+            }
+          },
+          "reference_notes": {
+            "train": 21,
+            "validation": 7
+          },
+          "nonempty_scores_and_source_works_disjoint": true,
+          "silence_targets_may_repeat": true
+        }
+      },
+      "before_resume": {
+        "optimizer_steps": 20,
+        "elapsed_seconds_this_session": 2.9570287720125634,
+        "final_mean_response_token_nll": {
+          "audio": 5.370812644477652,
+          "silence": 5.37080159307528,
+          "wrong_audio": 5.370847926420324
+        }
+      },
+      "checkpoint_sha256": "729fbdb16d9435c35004729ff9087038861404ceb7fe8a5dba20d950a790a05f",
+      "audit": {
+        "source_and_lock_match_implementation_commit": true,
+        "optimizer_steps_match_history_and_log": true,
+        "only_train_split_in_update_history": true,
+        "encoder_exactly_matches_ssl_parent": true,
+        "frozen_llm_hash_unchanged": true,
+        "projector_hash_changed": true,
+        "reloaded_validation_losses_generations_and_metrics_exact_match": true,
+        "tensorboard_update_steps_complete_and_unique": true,
+        "tensorboard_audio_reference_and_generation_pairs_match": true,
+        "tensorboard_audio_rate": 48000,
+        "tensorboard_audio_channels": 2,
+        "reference_midi_roundtrips_match_note_targets": true,
+        "invalid_model_generations_have_no_midi_files": true,
+        "invalid_outputs_not_counted_as_correct_silence": true
+      }
+    }
+  },
+  "inference_check": {
+    "device": "cuda",
+    "status": "invalid_generation",
+    "cli_exit_code": 2,
+    "teacher_and_manifest_not_supplied": true,
+    "generation_matches_reloaded_validation_example": true,
+    "invalid_generation_has_no_midi_file": true
+  },
+  "mido_version": "1.3.3",
+  "ci": {
+    "url": "https://github.com/uthree/creative-agent/actions/runs/41282121514",
+    "conclusion": "success",
+    "platforms": [
+      "ubuntu-latest",
+      "windows-latest"
+    ],
+    "implementation_commit": "e501ee0a52df04ca20a147dfcbc8abb631eb11d4"
+  }
+}
