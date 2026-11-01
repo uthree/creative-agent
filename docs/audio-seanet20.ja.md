@@ -2,6 +2,8 @@
 
 48 kHzステレオ波形を5段の残差CNNで20 FPSへ落とし、幅128・4 heads・2層の双方向Transformerへ渡す`seanet20`を追加した。時間方向の平均プーリング、フレームの明示的な連結、LSTMは使わない。
 
+[ELUでの6 run・6,000更新の比較結果](audio-seanet20-report.ja.md)を参照。動作検証は通ったが、今回の小型構成は音声入力への依存が弱く、対照の`early_concat`を上回らなかった。
+
 [EnCodecのSEANet encoder](https://github.com/facebookresearch/encodec/blob/main/encodec/modules/seanet.py)の残差ブロックと段階的なstrided convolutionを参考にした独立実装で、事前学習済みEnCodecの重みは使わない。元実装の4段・320倍圧縮に対して5段・2,400倍とし、ゼロpadding・恒等残差・末尾kernel 1の投影を使う。公式48 kHz版と同じ構成や性能を主張するものではない。
 
 ## 構成

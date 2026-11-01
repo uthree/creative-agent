@@ -41,6 +41,7 @@ RTX 3070で20更新と別プロセスからの21更新目への再開を確認�
 [20 FPS CNNと浅いTransformerのSSL比較](docs/audio-representation-comparison.ja.md)では、音楽・英語・日本語を使い、固定の離散教師に対するmask予測と混合音声のdenoisingを学習する。100 FPSで文脈処理する対照、先に連結する対照、Conformerを参考にしたCNNを同じ条件で比較する。 [実測報告](docs/audio-representation-comparison-report.ja.md)では9 run・9,000更新を監査し、先行連結20 FPSの近い集計CEと長音声の高速化、今回のdepthwise CNN案の精度未達を記録している。
 
 [段階的な残差CNN → 20 FPS → Transformer](docs/audio-seanet20.ja.md)は、EnCodecのSEANetを参考にしたLSTMなしの前段を追加する。`seanet20`と`early_concat`を同じSSL経路で比較できる。
+[ELU構成の比較結果](docs/audio-seanet20-report.ja.md)では各1,000更新・3 seedを実行し、新CNNの入力依存の弱さと対照に対する精度未達を記録した。
 
 [開発と学習の実行計画](docs/implementation-plan.ja.md)に、Aurisでの既存実験、2段階学習、評価条件、実装順序、計算予算をまとめている。
 
