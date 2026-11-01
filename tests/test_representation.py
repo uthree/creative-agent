@@ -69,11 +69,47 @@ def test_paired_initialization_and_physical_time_resolution(config):
     for variant in VARIANTS:
         torch.manual_seed(19)
         models.append(RepresentationEncoder(config, variant))
-    for name in ("stem.0.weight", "blocks.0.qkv.weight", "head.weight"):
+    for name in ("blocks.0.qkv.weight", "head.weight"):
         assert all(torch.equal(models[0].state_dict()[name], m.state_dict()[name]) for m in models)
+    assert all(
+        torch.equal(models[0].state_dict()["stem.0.weight"], m.state_dict()["stem.0.weight"])
+        for m in models[:3]
+    )
     wave = torch.randn(1, 2, HOP * 10)
     lengths = torch.tensor([len(wave[0, 0])])
-    assert [m.context_inputs(wave, lengths)[0].shape[1] for m in models] == [50, 10, 10]
+    assert [m.context_inputs(wave, lengths)[0].shape[1] for m in models] == [50, 10, 10, 10]
+
+
+@pytest.mark.parametrize("position", [0, 1, 5, 10, 11])
+def test_seanet_mask_guard_covers_receptive_field_at_recording_boundaries(config, position):
+    model = RepresentationEncoder(config, "seanet20").eval()
+    wave = torch.randn(1, 2, HOP * 12)
+    lengths = torch.tensor([wave.shape[-1]])
+    mask = torch.zeros(1, 12, dtype=torch.bool)
+    mask[0, position] = True
+    changed = wave.clone()
+    changed[:, :, position * HOP : (position + 1) * HOP] += 10
+    torch.testing.assert_close(
+        model.context_inputs(wave, lengths, mask)[0],
+        model.context_inputs(changed, lengths, mask)[0],
+        rtol=0,
+        atol=0,
+    )
+
+
+def test_seanet_ignores_padding_at_each_stage_and_keeps_short_audio_independent(config):
+    model = RepresentationEncoder(config, "seanet20").eval()
+    short = torch.randn(1, 2, HOP * 3)
+    length = torch.tensor([HOP * 2 + 137])
+    batched = torch.randn(2, 2, HOP * 12)
+    batched[0, :, : short.shape[-1]] = short[0]
+    # Deliberately nonzero tails must not alter valid outputs at any convolution stage.
+    batched[0, :, int(length[0]) :] = 100
+    first = model.encode(short, length)
+    together = model.encode(batched, torch.tensor([int(length[0]), HOP * 12]))
+    torch.testing.assert_close(first[0], together[0, :3], rtol=1e-5, atol=1e-5)
+    assert (together[0, 3:] == 0).all()
+    assert not any(isinstance(m, (torch.nn.AvgPool1d, torch.nn.LSTM)) for m in model.modules())
 
 
 def test_clean_discrete_teacher_is_fixed_and_labels_are_not_augmented(config):
@@ -99,7 +135,8 @@ def test_masking_is_repeatable_and_leaves_context(config):
         replace(config, batch_size=3)
 
 
-def test_paired_training_resume_and_saved_condition_targets(config, tmp_path, monkeypatch):
+@pytest.mark.parametrize("variant", ["cnn20", "seanet20"])
+def test_paired_training_resume_and_saved_condition_targets(config, tmp_path, monkeypatch, variant):
     from types import SimpleNamespace
 
     from creative_agent.audio import file_hash
@@ -143,6 +180,7 @@ def test_paired_training_resume_and_saved_condition_targets(config, tmp_path, mo
                 "config": config.to_dict(),
                 "steps": 4,
                 "seeds": [17],
+                "variants": [variant],
                 "manifest_sha256": Data.data.signature,
                 "source": source_identity(),
                 "codebook_sha256": file_hash(root / "codebook.pt"),
@@ -152,15 +190,16 @@ def test_paired_training_resume_and_saved_condition_targets(config, tmp_path, mo
             },
         )
     device = torch.device("cpu")
-    train_comparison(None, roots[0], "cnn20", 17, device)
-    assert train_comparison(None, roots[1], "cnn20", 17, device, stop_after=2)["step"] == 2
-    assert not (roots[1] / "cnn20-seed-17/test.pt").exists()
-    train_comparison(None, roots[1], "cnn20", 17, device)
-    states = [torch.load(r / "cnn20-seed-17/checkpoint.pt", weights_only=True) for r in roots]
+    run_name = f"{variant}-seed-17"
+    train_comparison(None, roots[0], variant, 17, device)
+    assert train_comparison(None, roots[1], variant, 17, device, stop_after=2)["step"] == 2
+    assert not (roots[1] / run_name / "test.pt").exists()
+    train_comparison(None, roots[1], variant, 17, device)
+    states = [torch.load(r / run_name / "checkpoint.pt", weights_only=True) for r in roots]
     assert states[0]["history"] == states[1]["history"]
     for name, value in states[0]["model"].items():
         torch.testing.assert_close(value, states[1]["model"][name], rtol=0, atol=0)
-    saved = torch.load(roots[1] / "cnn20-seed-17/test.pt", weights_only=True)
+    saved = torch.load(roots[1] / run_name / "test.pt", weights_only=True)
     for mode in ("mixed", "silence"):
         assert all(
             torch.equal(a["target"], b["target"])

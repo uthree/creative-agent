@@ -14,8 +14,8 @@ from tensorboard.backend.event_processing.event_accumulator import EventAccumula
 from creative_agent.audio import file_hash
 from creative_agent.llm_diagnostics import tensor_hash
 from creative_agent.representation import (
+    COMPARISON_VARIANTS,
     HOP,
-    VARIANTS,
     CleanTargetFeatures,
     RepresentationConfig,
     RepresentationEncoder,
@@ -144,7 +144,7 @@ def main():
     }
     total_frames = 0
     source_cache = {}
-    for variant in VARIANTS:
+    for variant in plan.get("variants", COMPARISON_VARIANTS):
         for seed in plan["seeds"]:
             name = f"{variant}-seed-{seed}"
             directory = args.suite / name

@@ -14,7 +14,9 @@ from torch.utils.tensorboard import SummaryWriter
 from creative_agent.audio import file_hash
 from creative_agent.llm_diagnostics import tensor_hash
 from creative_agent.representation import (
+    COMPARISON_VARIANTS,
     HOP,
+    VARIANTS,
     CleanTargetFeatures,
     RepresentationConfig,
     RepresentationEncoder,
@@ -46,9 +48,13 @@ def amp(device):
     return torch.autocast("cuda", dtype=torch.bfloat16) if device.type == "cuda" else nullcontext()
 
 
-def prepare_comparison(manifest, output, config, steps, seeds, device):
+def prepare_comparison(
+    manifest, output, config, steps, seeds, device, *, variants=COMPARISON_VARIANTS
+):
     if output.exists():
         raise ValueError("comparison directory already exists")
+    if not variants or len(set(variants)) != len(variants) or set(variants) - set(VARIANTS):
+        raise ValueError("distinct supported variants required")
     torch.set_num_threads(2)
     data = RepresentationData(manifest, config.crop_seconds)
     output.mkdir(parents=True)
@@ -82,6 +88,7 @@ def prepare_comparison(manifest, output, config, steps, seeds, device):
         "config": config.to_dict(),
         "steps": steps,
         "seeds": seeds,
+        "variants": list(variants),
         "manifest_sha256": data.data.signature,
         "data": data.description(),
         "codebook_sha256": file_hash(output / "codebook.pt"),
@@ -227,6 +234,8 @@ def scalar_metrics(writer, prefix, value, step):
 def train_comparison(manifest, suite, variant, seed, device, *, stop_after=None):
     torch.set_num_threads(2)
     plan = load_json(suite / "plan.json")
+    if variant not in plan.get("variants", COMPARISON_VARIANTS):
+        raise ValueError("variant is not part of this comparison plan")
     config = RepresentationConfig(**plan["config"])
     codebook_path = suite / "codebook.pt"
     assert file_hash(codebook_path) == plan["codebook_sha256"]

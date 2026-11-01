@@ -8,8 +8,10 @@ from torch.nn import functional as F
 
 from creative_agent.config import AudioSSLConfig
 from creative_agent.model import BidirectionalBlock
+from creative_agent.seanet import ProgressiveDownsampler, conv, valid_samples
 
-VARIANTS = ("late_concat", "early_concat", "cnn20")
+COMPARISON_VARIANTS = ("late_concat", "early_concat", "cnn20")
+VARIANTS = (*COMPARISON_VARIANTS, "seanet20")
 HOP = 2400  # 48 kHz / 20 FPS; also the non-overlapping teacher window.
 
 
@@ -29,6 +31,7 @@ class RepresentationConfig:
     learning_rate: float = 0.0003
     warmup_steps: int = 50
     batch_size: int = 8
+    seanet_base_width: int = 4
 
     def __post_init__(self):
         for name in (
@@ -42,6 +45,7 @@ class RepresentationConfig:
             "mask_span",
             "warmup_steps",
             "batch_size",
+            "seanet_base_width",
         ):
             if type(getattr(self, name)) is not int or getattr(self, name) <= 0:
                 raise ValueError(f"{name} must be a positive integer")
@@ -117,11 +121,16 @@ class RepresentationEncoder(nn.Module):
         self.norm = nn.RMSNorm(config.width)
         self.output_norm = nn.RMSNorm(config.width)
         self.head = nn.Linear(config.width, config.clusters)
-        self.reducer = (
-            ConvolutionSubsampler(config.width)
-            if variant == "cnn20"
-            else nn.Linear(5 * config.width, config.width)
-        )
+        if variant == "seanet20":
+            # Keep paired Transformer/head initialization identical to the existing controls.
+            self.stem = conv(2, config.seanet_base_width, 7, padding=3)
+            self.reducer = ProgressiveDownsampler(config.seanet_base_width, config.width)
+        else:
+            self.reducer = (
+                ConvolutionSubsampler(config.width)
+                if variant == "cnn20"
+                else nn.Linear(5 * config.width, config.width)
+            )
 
     def context_inputs(self, waves, lengths, mask=None):
         if waves.ndim != 3 or waves.shape[1] != 2 or waves.shape[-1] % HOP:
@@ -134,11 +143,18 @@ class RepresentationEncoder(nn.Module):
             mask = torch.zeros_like(valid20)
         if mask.shape != valid20.shape or (mask & ~valid20).any():
             raise ValueError("invalid 20 Hz mask")
-        hidden = self.stem(waves).transpose(1, 2)
+        if self.variant == "seanet20":
+            waves = valid_samples(waves, lengths)
+            hidden = self.reducer(self.stem(waves), lengths).transpose(1, 2)
+        else:
+            hidden = self.stem(waves).transpose(1, 2)
         valid100 = frame_valid(lengths, count * 5, hop=480)
-        hidden = hidden.masked_fill(~valid100[:, :, None], 0)
+        if self.variant != "seanet20":
+            hidden = hidden.masked_fill(~valid100[:, :, None], 0)
         guarded = guard_mask(mask) & valid20
-        if self.variant == "cnn20":
+        if self.variant == "seanet20":
+            valid, hidden_mask = valid20, guarded
+        elif self.variant == "cnn20":
             hidden, valid, hidden_mask = self.reducer(hidden), valid20, guarded
         elif self.variant == "early_concat":
             hidden, valid, hidden_mask = self.reducer(concatenate(hidden)), valid20, guarded
