@@ -54,7 +54,20 @@ class MultitaskConfig:
             "tiny",
         ):
             raise ValueError("expected audio configuration and lfm3/qwen3/tiny backbone")
-        supported = {"q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"}
+        supported = {
+            "q_proj",
+            "k_proj",
+            "v_proj",
+            "o_proj",
+            "gate_proj",
+            "up_proj",
+            "down_proj",
+            "w1",
+            "w2",
+            "w3",
+            "in_proj",
+            "out_proj",
+        }
         if (
             not isinstance(self.lora_targets, tuple)
             or not self.lora_targets

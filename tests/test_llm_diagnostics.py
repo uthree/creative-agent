@@ -7,7 +7,7 @@ import torch
 
 from creative_agent.llm_diagnostics import balanced_schedule, oracle_input, tensor_hash
 from creative_agent.multitask_data import MultitaskConfig
-from creative_agent.multitask_model import MARKER, MultitaskModel
+from creative_agent.multitask_model import MARKER, MultitaskModel, install_lora
 
 
 def small_config(**kwargs):
@@ -79,3 +79,14 @@ def test_frozen_feature_loss_updates_bridge_only_and_hash_tracks_values():
     assert tensor_hash(model.encoder.state_dict()) == encoder_hash
     assert not torch.equal(bridge, model.projector.weight)
     assert all(p.grad is None for p in model.encoder.parameters())
+
+
+def test_lfm_named_mlp_and_conv_projections_receive_wide_lora():
+    from creative_agent.llm_diagnostics import WIDE_TARGETS
+
+    module = torch.nn.ModuleDict(
+        {name: torch.nn.Linear(8, 8) for name in ("w1", "w2", "w3", "in_proj", "out_proj")}
+    )
+    assert set(install_lora(module, 32, WIDE_TARGETS)) == set(module.keys())
+    config = small_config(lora_rank=32, lora_targets=WIDE_TARGETS)
+    assert MultitaskConfig.from_dict(config.to_dict()) == config

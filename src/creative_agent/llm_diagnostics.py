@@ -27,7 +27,20 @@ from creative_agent.public_evaluation import scalar_tree, score_asr, score_midi
 from creative_agent.training import atomic_checkpoint, log_stereo_audio, source_identity
 
 SEED = 20261101
-WIDE_TARGETS = ("q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj")
+WIDE_TARGETS = (
+    "q_proj",
+    "k_proj",
+    "v_proj",
+    "o_proj",
+    "gate_proj",
+    "up_proj",
+    "down_proj",
+    "w1",
+    "w2",
+    "w3",
+    "in_proj",
+    "out_proj",
+)
 
 
 def read(path):
