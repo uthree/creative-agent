@@ -32,12 +32,25 @@ def task_loss(model, data, task, indices, *, generator=None):
             batch.valid.to(model.device),
             mask.to(model.device),
         )
-        losses = masked_loss(prediction, targets, mask.to(model.device))
+        limit = getattr(data, "policy", {}).get("ssl_max_frequency_hz")
+        bins = (
+            prediction.shape[-2]
+            if limit is None
+            else (int(limit * audio_config.hop_samples / audio_config.sample_rate) + 1)
+        )
+        losses = masked_loss(
+            prediction[..., :bins, :], targets[..., :bins, :], mask.to(model.device)
+        )
+        zero_baseline = masked_loss(
+            torch.zeros_like(targets[..., :bins, :]), targets[..., :bins, :], mask.to(model.device)
+        )["total"]
         return (
             losses["total"],
             {
                 "ssl_reconstruction": float(losses["total"].detach()),
                 "positions": batch.valid.shape[1],
+                "supervised_frequency_bins": bins,
+                "ssl_zero_baseline": float(zero_baseline),
             },
             {"prediction": prediction, "reference": targets, "mask": mask},
         )

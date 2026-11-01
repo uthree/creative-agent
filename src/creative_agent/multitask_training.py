@@ -37,6 +37,8 @@ def run_multitask_training(
     model_dir=None,
     encoder_checkpoint=None,
     resume=False,
+    public_manifest=None,
+    warm_checkpoint=None,
 ):
     if type(steps) is not int or not 1 <= steps <= 100000:
         raise ValueError("steps must be in [1, 100000]")
@@ -45,7 +47,12 @@ def run_multitask_training(
         raise ValueError("use CUDA for pretrained LFM3, CPU/CUDA for offline tests")
     output = output.resolve()
     state = None
-    data = MultitaskData(data_root, config)
+    if public_manifest is None:
+        data = MultitaskData(data_root, config)
+    else:
+        from creative_agent.public_data import PublicData
+
+        data = PublicData(public_manifest)
     source = source_identity()
     identity = (
         snapshot_identity(model_dir)
@@ -53,6 +60,8 @@ def run_multitask_training(
         else {"kind": "offline_tiny_fixture"}
     )
     if resume:
+        if warm_checkpoint is not None:
+            raise ValueError("resume and warm start are mutually exclusive")
         if encoder_checkpoint is not None:
             raise ValueError("resume restores encoder; omit encoder_checkpoint")
         state = torch.load(output / "checkpoint.pt", map_location="cpu", weights_only=True)
@@ -80,13 +89,24 @@ def run_multitask_training(
             state,
             source,
             identity,
+            warm_checkpoint,
         )
     finally:
         torch.set_num_threads(previous_threads)
 
 
 def _train(
-    config, output, data, steps, device, model_dir, encoder_checkpoint, state, source, identity
+    config,
+    output,
+    data,
+    steps,
+    device,
+    model_dir,
+    encoder_checkpoint,
+    state,
+    source,
+    identity,
+    warm_checkpoint=None,
 ):
     started = time.perf_counter()
     random.seed(config.audio.seed)
@@ -96,6 +116,31 @@ def _train(
     model = MultitaskModel(
         config, device=device, model_dir=model_dir, encoder_checkpoint=encoder_checkpoint
     ).train()
+    warm_origin = None
+    if warm_checkpoint is not None:
+        if encoder_checkpoint is not None:
+            raise ValueError(
+                "warm start restores all trainable parameters; omit encoder checkpoint"
+            )
+        from creative_agent.audio import file_hash
+
+        warm = torch.load(warm_checkpoint, map_location="cpu", weights_only=True)
+        if warm.get("kind") != "audio_multitask_v1" or warm["backbone_identity"] != identity:
+            raise ValueError("warm start backbone identity mismatch")
+        parameters = {n: p for n, p in model.named_parameters() if p.requires_grad}
+        if parameters.keys() != warm["trainable"].keys() or any(
+            p.shape != warm["trainable"][n].shape for n, p in parameters.items()
+        ):
+            raise ValueError("warm start architecture mismatch")
+        if model.frozen_hash() != warm["frozen_hash"]:
+            raise ValueError("warm start frozen backbone mismatch")
+        model.load_trainable(warm["trainable"])
+        warm_origin = {
+            "sha256": file_hash(warm_checkpoint),
+            "step": warm["step"],
+            "optimizer_reset": True,
+        }
+        del warm
     active = {name: p for name, p in model.named_parameters() if p.requires_grad}
     optimizer = torch.optim.AdamW(active.values(), lr=config.learning_rate)
     scheduler = torch.optim.lr_scheduler.LambdaLR(
@@ -116,11 +161,48 @@ def _train(
         samplers, counts, step = state["samplers"], state["task_updates"], state["step"]
         history, evaluations = state["history"], state["evaluations"]
         initial = state["initial_trainable"]
+        warm_origin = state.get("warm_origin")
+
+    # Preflight every teacher and generation reserve, so no long-run target is silently truncated.
+    with torch.no_grad():
+        for task in TASKS[1:]:
+            dataset = data.datasets[task]
+            for index in range(len(dataset.waveforms)):
+                _, prompt, target = data.record(task, index)
+                if (
+                    hasattr(data, "policy")
+                    and len(model.tokenizer.encode(target, add_special_tokens=False)) + 1
+                    > config.max_new_tokens
+                ):
+                    raise ValueError("public teacher exceeds complete generation response budget")
+                frames = (
+                    dataset.assets[index]["frames"]
+                    if hasattr(data, "policy")
+                    else len(dataset.waveforms[index][0])
+                )
+                positions = (frames + config.audio.hop_samples - 1) // config.audio.hop_samples
+                pooled = (positions + config.pool_frames - 1) // config.pool_frames
+                fake = torch.zeros(pooled, config.audio.width, device=device)
+                with autocast(model):
+                    model.prepare([fake], [prompt], [target])
+                    model.prepare([fake], [prompt], reserve=config.max_new_tokens)
+
+    def evaluate(current_step):
+        if hasattr(data, "policy"):
+            from creative_agent.public_evaluation import evaluate_public
+
+            return evaluate_public(
+                model, data, output, current_step, writer, include_test=current_step in (0, steps)
+            )
+        return evaluate_multitask(model, data, output, current_step, writer)
+
     writer = SummaryWriter(str(output / "tensorboard"), purge_step=step + 1 if state else None)
     (output / "training.jsonl").write_text(
         "".join(json.dumps(row) + "\n" for row in history), encoding="utf-8"
     )
     writer.add_text("run/config", json.dumps(config.to_dict(), indent=2), step)
+    if hasattr(data, "policy"):
+        writer.add_text("run/public_data_policy", json.dumps(data.policy, indent=2), step)
     writer.add_text(
         "run/tasks",
         "Five tasks share encoder; caption, diagnosis, ASR and MIDI share projector and LFM3 LoRA",
@@ -132,21 +214,7 @@ def _train(
         if device.type == "cuda":
             torch.cuda.set_rng_state(state["cuda_rng"], device)
     else:
-        evaluations.append(evaluate_multitask(model, data, output, 0, writer))
-    # Preflight every teacher and generation reserve, so no long-run target is silently truncated.
-    with torch.no_grad():
-        for task in TASKS[1:]:
-            dataset = data.datasets[task]
-            for index in range(len(dataset.waveforms)):
-                _, prompt, target = data.record(task, index)
-                positions = (
-                    len(dataset.waveforms[index][0]) + config.audio.hop_samples - 1
-                ) // config.audio.hop_samples
-                pooled = (positions + config.pool_frames - 1) // config.pool_frames
-                fake = torch.zeros(pooled, config.audio.width, device=device)
-                with autocast(model):
-                    model.prepare([fake], [prompt], [target])
-                    model.prepare([fake], [prompt], reserve=config.max_new_tokens)
+        evaluations.append(evaluate(0))
     start_step = step
 
     def save():
@@ -176,6 +244,7 @@ def _train(
                 "data_root": str(data.root),
                 "model_dir": str(Path(model_dir).resolve()) if model_dir else None,
                 "encoder_origin": model.encoder_origin,
+                "warm_origin": warm_origin,
             },
         )
 
@@ -256,9 +325,11 @@ def _train(
                 if step % config.checkpoint_every == 0:
                     save()
                 if step % config.evaluate_every == 0 or step == steps:
-                    evaluations.append(evaluate_multitask(model, data, output, step, writer))
+                    evaluations.append(evaluate(step))
                     save()
             unchanged = model.frozen_hash() == frozen_hash
+            if hasattr(data, "policy"):
+                data.verify_unchanged(audio=True)
             if not unchanged:
                 raise RuntimeError("frozen pretrained backbone changed")
             changes = {}
@@ -285,6 +356,11 @@ def _train(
                 "final_metrics": evaluations[-1]["metrics"],
                 "evaluated_steps": [e["step"] for e in evaluations],
                 "source": source,
+                "warm_origin": warm_origin,
+                "initial_test_metrics": evaluations[0].get("test_metrics"),
+                "final_test_metrics": evaluations[-1].get("test_metrics"),
+                "initial_probe_metrics": evaluations[0].get("probe_metrics"),
+                "final_probe_metrics": evaluations[-1].get("probe_metrics"),
                 "elapsed_seconds_this_session": time.perf_counter() - started,
                 "peak_allocated_bytes": torch.cuda.max_memory_allocated(device)
                 if device.type == "cuda"

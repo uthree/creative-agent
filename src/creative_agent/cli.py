@@ -12,6 +12,13 @@ from creative_agent.training import run_smoke
 def main() -> None:
     parser = argparse.ArgumentParser(description="Creative agent training recipes")
     commands = parser.add_subparsers(dest="command", required=True)
+    fetch = commands.add_parser("fetch-public-audio")
+    fetch.add_argument("--output", type=Path, required=True)
+    fetch.add_argument("--cache", type=Path, required=True)
+    fetch.add_argument("--jsut-count", type=int, default=1024)
+    prepare = commands.add_parser("prepare-public-audio")
+    prepare.add_argument("--data-root", type=Path, required=True)
+    prepare.add_argument("--seed", type=int, default=20261101)
     mixed = commands.add_parser("train-audio-multitask")
     mixed.add_argument("--config", type=Path, required=True)
     mixed.add_argument("--output", type=Path, required=True)
@@ -21,6 +28,8 @@ def main() -> None:
     mixed.add_argument("--steps", type=int, default=5000)
     mixed.add_argument("--device", default="cuda")
     mixed.add_argument("--resume", action="store_true")
+    mixed.add_argument("--public-manifest", type=Path)
+    mixed.add_argument("--warm-checkpoint", type=Path)
     for name in (
         "prepare-audio-fixtures",
         "smoke-audio-ssl",
@@ -62,6 +71,17 @@ def main() -> None:
             ):
                 command.add_argument("--encoder-checkpoint", type=Path)
     args = parser.parse_args()
+    if args.command == "fetch-public-audio":
+        from creative_agent.public_fetch import fetch_jsut_subset, fetch_public_corpora
+
+        fetch_public_corpora(args.output, args.cache)
+        fetch_jsut_subset(args.output / "jsut", count=args.jsut_count)
+        return
+    if args.command == "prepare-public-audio":
+        from creative_agent.public_prepare import prepare_public_manifest
+
+        print(prepare_public_manifest(args.data_root, seed=args.seed))
+        return
     if args.command == "train-audio-multitask":
         from creative_agent.multitask_data import MultitaskConfig
         from creative_agent.multitask_training import run_multitask_training
@@ -75,6 +95,8 @@ def main() -> None:
             steps=args.steps,
             device=args.device,
             resume=args.resume,
+            public_manifest=args.public_manifest,
+            warm_checkpoint=args.warm_checkpoint,
         )
         print(json.dumps(report, ensure_ascii=False, indent=2))
         return
