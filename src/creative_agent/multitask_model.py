@@ -46,10 +46,10 @@ class LoRALinear(nn.Module):
         return self.base(values) + (2 * update).to(values.dtype)
 
 
-def install_lora(backbone, rank):
+def install_lora(backbone, rank, targets=("q_proj", "v_proj")):
     names = []
     for name, module in list(backbone.named_modules()):
-        if isinstance(module, nn.Linear) and name.rsplit(".", 1)[-1] in ("q_proj", "v_proj"):
+        if isinstance(module, nn.Linear) and name.rsplit(".", 1)[-1] in targets:
             parent, _, child = name.rpartition(".")
             setattr(backbone.get_submodule(parent), child, LoRALinear(module, rank))
             names.append(name)
@@ -60,6 +60,15 @@ def install_lora(backbone, rank):
 
 def snapshot_identity(model_dir):
     path = Path(model_dir).resolve()
+    if not (path / "modeling_lfm3.py").exists():
+        names = ["config.json", "tokenizer.json", "tokenizer_config.json", "generation_config.json"]
+        shards = sorted(p.name for p in path.glob("*.safetensors"))
+        if not shards:
+            raise ValueError("local model snapshot has no safetensors weights")
+        names += shards
+        names += [p.name for p in path.glob("*.safetensors.index.json")]
+        names += [p.name for p in path.glob("*.jinja")]
+        return {name: file_hash(path / name) for name in sorted(names)}
     required = (
         "model.safetensors",
         "config.json",
@@ -125,7 +134,7 @@ class MultitaskModel(nn.Module):
             )
         else:
             if model_dir is None or torch.device(device).type != "cuda":
-                raise ValueError("LFM3 pilot requires a local model_dir and CUDA device")
+                raise ValueError("pretrained pilot requires a local model_dir and CUDA device")
             self.tokenizer = AutoTokenizer.from_pretrained(
                 model_dir, local_files_only=True, trust_remote_code=True
             )
@@ -137,8 +146,8 @@ class MultitaskModel(nn.Module):
                 attn_implementation="sdpa",
             )
         self.backbone.to(device).requires_grad_(False)
-        self.lora_names = install_lora(self.backbone, config.lora_rank)
-        if config.backbone == "lfm3":
+        self.lora_names = install_lora(self.backbone, config.lora_rank, config.lora_targets)
+        if config.backbone != "tiny":
             self.backbone.gradient_checkpointing_enable(
                 gradient_checkpointing_kwargs={"use_reentrant": False}
             )
@@ -174,10 +183,19 @@ class MultitaskModel(nn.Module):
         for feature, prompt, target in zip(features, prompts, targets, strict=True):
             if MARKER in prompt or target is not None and MARKER in target:
                 raise ValueError("reserved audio marker in text")
-            if feature.ndim != 2 or feature.shape[1] != self.config.audio.width or not len(feature):
-                raise ValueError("invalid unpadded audio features")
-            if not torch.isfinite(feature).all():
-                raise ValueError("nonfinite audio features")
+            # Oracle controls use ordinary token embeddings, bypassing encoder/projector.
+            if isinstance(feature, str):
+                if not feature or MARKER in feature:
+                    raise ValueError("invalid oracle text")
+            else:
+                if (
+                    feature.ndim != 2
+                    or feature.shape[1] != self.config.audio.width
+                    or not len(feature)
+                ):
+                    raise ValueError("invalid unpadded audio features")
+                if not torch.isfinite(feature).all():
+                    raise ValueError("nonfinite audio features")
             messages = [
                 {"role": "system", "content": "Follow the requested audio task and output format."},
                 {"role": "user", "content": prompt + "\n" + MARKER},
@@ -199,14 +217,18 @@ class MultitaskModel(nn.Module):
                 answer = self.tokenizer.encode(target, add_special_tokens=False) + [
                     self.tokenizer.eos_token_id
                 ]
-            prefix_length = len(left) + len(feature) + len(right)
-            if prefix_length + len(answer) + reserve > self.config.max_positions:
-                raise ValueError("complete audio/response exceeds context; no truncation")
 
             def text(ids):
                 return embed(torch.tensor(ids, device=self.device, dtype=torch.long))
 
-            projected = self.projector(feature.float()).to(embed.weight.dtype)
+            projected = (
+                text(self.tokenizer.encode(feature, add_special_tokens=False))
+                if isinstance(feature, str)
+                else self.projector(feature.float()).to(embed.weight.dtype)
+            )
+            prefix_length = len(left) + len(projected) + len(right)
+            if prefix_length + len(answer) + reserve > self.config.max_positions:
+                raise ValueError("complete audio/response exceeds context; no truncation")
             embeddings.append(torch.cat((text(left), projected, text(right), text(answer))))
             labels.append(torch.tensor([-100] * prefix_length + answer, device=self.device))
             prefix_lengths.append(prefix_length)
@@ -245,8 +267,9 @@ class MultitaskModel(nn.Module):
         }
 
     @torch.no_grad()
-    def generate(self, feature, prompt):
+    def generate(self, feature, prompt, *, repetition_penalty=None):
         inputs, _, mask, _ = self.prepare([feature], [prompt], reserve=self.config.max_new_tokens)
+        options = {} if repetition_penalty is None else {"repetition_penalty": repetition_penalty}
         ids = self.backbone.generate(
             inputs_embeds=inputs,
             attention_mask=mask.long(),
@@ -255,6 +278,7 @@ class MultitaskModel(nn.Module):
             max_new_tokens=self.config.max_new_tokens,
             eos_token_id=self.tokenizer.eos_token_id,
             pad_token_id=self.tokenizer.pad_token_id,
+            **options,
         )[0].tolist()
         return {
             "token_ids": ids,

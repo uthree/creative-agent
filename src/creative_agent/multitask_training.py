@@ -43,7 +43,7 @@ def run_multitask_training(
     if type(steps) is not int or not 1 <= steps <= 100000:
         raise ValueError("steps must be in [1, 100000]")
     device = torch.device(device)
-    if device.type not in ("cuda", "cpu") or config.backbone == "lfm3" and device.type != "cuda":
+    if device.type not in ("cuda", "cpu") or config.backbone != "tiny" and device.type != "cuda":
         raise ValueError("use CUDA for pretrained LFM3, CPU/CUDA for offline tests")
     if config.encoder_backend == "flash" and device.type != "cuda":
         raise ValueError("Flash encoder requires CUDA")
@@ -58,7 +58,7 @@ def run_multitask_training(
     source = source_identity()
     identity = (
         snapshot_identity(model_dir)
-        if config.backbone == "lfm3"
+        if config.backbone != "tiny"
         else {"kind": "offline_tiny_fixture"}
     )
     if resume:

@@ -35,6 +35,7 @@ class MultitaskConfig:
     initial_midi_generation: bool = True
     backbone: str = "lfm3"
     lora_rank: int = 8
+    lora_targets: tuple[str, ...] = ("q_proj", "v_proj")
     pool_frames: int = 5
     learning_rate: float = 0.0003
     warmup_steps: int = 100
@@ -47,8 +48,20 @@ class MultitaskConfig:
     tiny_width: int = 32
 
     def __post_init__(self):
-        if not isinstance(self.audio, AudioSSLConfig) or self.backbone not in ("lfm3", "tiny"):
-            raise ValueError("expected audio configuration and lfm3/tiny backbone")
+        if not isinstance(self.audio, AudioSSLConfig) or self.backbone not in (
+            "lfm3",
+            "qwen3",
+            "tiny",
+        ):
+            raise ValueError("expected audio configuration and lfm3/qwen3/tiny backbone")
+        supported = {"q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"}
+        if (
+            not isinstance(self.lora_targets, tuple)
+            or not self.lora_targets
+            or len(set(self.lora_targets)) != len(self.lora_targets)
+            or any(name not in supported for name in self.lora_targets)
+        ):
+            raise ValueError("invalid LoRA target modules")
         if (
             not isinstance(self.tasks, tuple)
             or not self.tasks
@@ -85,12 +98,13 @@ class MultitaskConfig:
             raise ValueError("learning rate must be below one")
 
     def to_dict(self):
-        return {**asdict(self), "tasks": list(self.tasks)}
+        return {**asdict(self), "tasks": list(self.tasks), "lora_targets": list(self.lora_targets)}
 
     @classmethod
     def from_dict(cls, values):
         values = dict(values)
         values["tasks"] = tuple(values.get("tasks", TASKS))
+        values["lora_targets"] = tuple(values.get("lora_targets", ("q_proj", "v_proj")))
         values["audio"] = AudioSSLConfig(**values.get("audio", {}))
         return cls(**values)
 
