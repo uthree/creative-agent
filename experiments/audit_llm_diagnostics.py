@@ -264,6 +264,9 @@ def main():
         assert schedule_digest == report["schedule_sha256"]
         assert schedule_by_task.setdefault(task, schedule_digest) == schedule_digest
         assert report["features_sha256"] == cache["features_sha256"]
+        assert report["cache_sha256"] == result["cache_sha256"]
+        assert report["manifest_sha256"] == data.signature
+        assert report["encoder_sha256"] == cache["encoder_sha256"]
         events = EventAccumulator(
             str(directory / "tensorboard"), size_guidance={"scalars": 0}
         ).Reload()
@@ -275,6 +278,9 @@ def main():
         for split, examples in rows.items():
             for condition, expected in report["generation"][split].items():
                 saved = read(directory / split / f"{condition}.json")
+                for cached, actual in zip(examples, saved["rows"], strict=True):
+                    for key in ("sample_id", "reference", "language", "duration_ms"):
+                        assert actual[key] == cached[key]
                 assert score(task, saved["rows"]) == expected == saved["metrics"]
                 if split != "train":
                     copies = sum(
