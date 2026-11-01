@@ -32,6 +32,7 @@ class MultitaskConfig:
     audio: AudioSSLConfig = field(default_factory=AudioSSLConfig)
     tasks: tuple[str, ...] = TASKS
     encoder_backend: str = "math"
+    initial_midi_generation: bool = True
     backbone: str = "lfm3"
     lora_rank: int = 8
     pool_frames: int = 5
@@ -57,6 +58,8 @@ class MultitaskConfig:
             raise ValueError("tasks must be a nonempty tuple of distinct supported tasks")
         if self.encoder_backend not in ("math", "flash"):
             raise ValueError("encoder_backend must be math or flash")
+        if type(self.initial_midi_generation) is not bool:
+            raise ValueError("initial_midi_generation must be boolean")
         for key in (
             "lora_rank",
             "pool_frames",

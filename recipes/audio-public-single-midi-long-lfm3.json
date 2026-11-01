@@ -33,5 +33,6 @@
   "tasks": [
     "midi"
   ],
-  "encoder_backend": "flash"
+  "encoder_backend": "flash",
+  "initial_midi_generation": false
 }

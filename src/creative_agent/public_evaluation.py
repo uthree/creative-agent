@@ -224,6 +224,8 @@ def _split(model, data, output, step, writer, split):
                     features, _, _ = model.audio_features([control])
                     control_loss, _ = model.text_loss(features, [prompt], [reference])
                 nll[condition] += float(control_loss) * count
+            if task == "midi" and step == 0 and not model.config.initial_midi_generation:
+                continue
             with autocast(model):
                 generated = model.generate(payload["features"][0], prompt)
             example = {
@@ -307,7 +309,10 @@ def _split(model, data, output, step, writer, split):
         if task == "transcription":
             summary["generation"] = score_asr(rows)
         elif task == "midi":
-            summary["generation"] = score_midi(rows)
+            summary["generation"] = score_midi(rows) if rows else None
+            if not rows:
+                summary["generation_skipped"] = True
+                summary["token_limit_count"] = None
         elif task == "caption":
             summary["exact_match_rate"] = sum(
                 r["reference"].casefold() == r["generated"]["text"].strip().casefold() for r in rows

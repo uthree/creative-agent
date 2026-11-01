@@ -374,6 +374,7 @@ def test_single_task_updates_only_selected_objective(public_manifest, tmp_path, 
         backbone="tiny",
         tiny_width=16,
         tasks=(task,),
+        initial_midi_generation=task != "midi",
         max_new_tokens=192,
         evaluate_every=10,
         checkpoint_every=10,
@@ -391,6 +392,11 @@ def test_single_task_updates_only_selected_objective(public_manifest, tmp_path, 
     )
     assert report["task_updates"] == {t: 3 if t == task else 0 for t in TASKS}
     assert set(report["initial_test_metrics"]) == set(report["final_test_metrics"]) == {task}
+    if task == "midi":
+        assert report["initial_test_metrics"][task]["generation"] is None
+        assert report["initial_test_metrics"][task]["token_limit_count"] is None
+        assert report["initial_test_metrics"][task]["generation_skipped"]
+        assert report["final_test_metrics"][task]["generation"]["examples"] == 1
     state = torch.load(output / "checkpoint.pt", weights_only=True)
     assert {r["task"] for r in state["history"]} == {task}
     for name in state["trainable"]:

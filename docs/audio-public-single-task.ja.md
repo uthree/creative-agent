@@ -26,4 +26,4 @@ uv run --no-sync python experiments/run_single_task_comparison.py \
   --baseline runs/audio-public-multitask-lfm3-5000-20261101/report.json
 ```
 
-開始前・1,000更新後の固定testと訓練probeを自由生成し、同長無音・別音声の正解token NLLも比較する。TensorBoardには各条件の入力、正解、LLM応答、MIDI比較画像を残す。ASRはaudio潜在表現→LLMの方針を維持する。短区間の同じtestを採点し直すため、この追加実験自体は新しい未使用testによる最終性能保証とはしない。
+短区間は開始前・1,000更新後の固定testと訓練probeを自由生成し、同長無音・別音声の正解token NLLも比較する。長区間は未学習モデルの長文生成で更新開始が遅れたため、初期自由生成をログを残して停止し、`initial_midi_generation: false`で全例のNLLのみ測る。学習後は全例を自由生成し、初期の未実行F1を0として扱わない。TensorBoardには各条件の学習後の入力、正解、LLM応答、MIDI比較画像を残す。ASRはaudio潜在表現→LLMの方針を維持する。短区間の同じtestを採点し直すため、この追加実験自体は新しい未使用testによる最終性能保証とはしない。
