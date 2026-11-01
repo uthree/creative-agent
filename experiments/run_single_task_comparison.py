@@ -108,7 +108,7 @@ def main():
             command = [
                 sys.executable,
                 "-m",
-                "creative_agent",
+                "creative_agent.cli",
                 "train-audio-multitask",
                 "--config",
                 recipe,
