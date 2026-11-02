@@ -45,6 +45,8 @@ def test_twenty_fps_shapes_padding_and_gradients(config, variant):
     loss = torch.nn.functional.cross_entropy(model(wave, lengths, mask)[mask], labels[mask])
     loss.backward()
     for module in (model.stem, model.reducer, model.blocks, model.head):
+        if not list(module.parameters()):
+            continue
         grads = [p.grad for p in module.parameters() if p.grad is not None]
         assert grads and all(torch.isfinite(g).all() for g in grads)
         assert sum(float(g.abs().sum()) for g in grads) > 0
@@ -77,7 +79,32 @@ def test_paired_initialization_and_physical_time_resolution(config):
     )
     wave = torch.randn(1, 2, HOP * 10)
     lengths = torch.tensor([len(wave[0, 0])])
-    assert [m.context_inputs(wave, lengths)[0].shape[1] for m in models] == [50, 10, 10, 10]
+    assert [m.context_inputs(wave, lengths)[0].shape[1] for m in models] == [50, 10, 10, 10, 10]
+
+
+def test_raw_patch_projection_keeps_channel_order_time_order_and_sample_values(config):
+    model = RepresentationEncoder(config, "patch20").eval()
+    with torch.no_grad():
+        model.stem.weight.zero_()
+        model.stem.bias.zero_()
+        for row, column in enumerate((0, HOP, HOP - 1, 2 * HOP - 1)):
+            model.stem.weight[row, column] = 1
+    wave = torch.arange(6 * HOP, dtype=torch.float32).reshape(1, 2, 3 * HOP)
+    features, _ = model.context_inputs(wave, torch.tensor([3 * HOP]))
+    expected = torch.stack(
+        [
+            wave[0, 0, ::HOP],
+            wave[0, 1, ::HOP],
+            wave[0, 0, HOP - 1 :: HOP],
+            wave[0, 1, HOP - 1 :: HOP],
+        ],
+        dim=1,
+    )
+    torch.testing.assert_close(features[0, :, :4], expected, rtol=0, atol=0)
+    assert (features[:, :, 4:] == 0).all()
+    assert not any(
+        isinstance(m, (torch.nn.Conv1d, torch.nn.AvgPool1d, torch.nn.LSTM)) for m in model.modules()
+    )
 
 
 @pytest.mark.parametrize("position", [0, 1, 5, 10, 11])
@@ -97,8 +124,9 @@ def test_seanet_mask_guard_covers_receptive_field_at_recording_boundaries(config
     )
 
 
-def test_seanet_ignores_padding_at_each_stage_and_keeps_short_audio_independent(config):
-    model = RepresentationEncoder(config, "seanet20").eval()
+@pytest.mark.parametrize("variant", ["seanet20", "patch20"])
+def test_waveform_frontend_ignores_padding_and_keeps_short_audio_independent(config, variant):
+    model = RepresentationEncoder(config, variant).eval()
     short = torch.randn(1, 2, HOP * 3)
     length = torch.tensor([HOP * 2 + 137])
     batched = torch.randn(2, 2, HOP * 12)
@@ -135,7 +163,7 @@ def test_masking_is_repeatable_and_leaves_context(config):
         replace(config, batch_size=3)
 
 
-@pytest.mark.parametrize("variant", ["cnn20", "seanet20"])
+@pytest.mark.parametrize("variant", ["cnn20", "seanet20", "patch20"])
 def test_paired_training_resume_and_saved_condition_targets(config, tmp_path, monkeypatch, variant):
     from types import SimpleNamespace
 
@@ -205,3 +233,12 @@ def test_paired_training_resume_and_saved_condition_targets(config, tmp_path, mo
             torch.equal(a["target"], b["target"])
             for a, b in zip(saved["clean"], saved[mode], strict=True)
         )
+    from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
+
+    events = EventAccumulator(str(roots[0] / run_name / "tensorboard")).Reload()
+    assert len(events.Tags()["audio"]) == 12
+    for tag in events.Tags()["audio"]:
+        assert [event.step for event in events.Audio(tag)] == [4]
+    for tag in events.Tags()["images"]:
+        expected_steps = [0, 4] if tag.startswith("validation/") else [4]
+        assert [event.step for event in events.Images(tag)] == expected_steps

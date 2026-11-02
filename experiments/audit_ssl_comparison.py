@@ -184,6 +184,7 @@ def main():
                 )
                 ** 0.5
                 for group in ("stem", "reducer", "blocks", "head")
+                if any(n.startswith(group + ".") for n, _ in model.named_parameters())
             }
             assert all(v > 0 for v in changes.values())
             model.load_state_dict(state["model"])

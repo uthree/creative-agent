@@ -43,6 +43,8 @@ RTX 3070で20更新と別プロセスからの21更新目への再開を確認�
 [段階的な残差CNN → 20 FPS → Transformer](docs/audio-seanet20.ja.md)は、EnCodecのSEANetを参考にしたLSTMなしの前段を追加する。`seanet20`と`early_concat`を同じSSL経路で比較できる。
 [ELU構成の比較結果](docs/audio-seanet20-report.ja.md)では各1,000更新・3 seedを実行し、新CNNの入力依存の弱さと対照に対する精度未達を記録した。
 
+[50 ms波形パッチ → 線形投影 → Transformer](docs/audio-patch20.ja.md)の`patch20`では、CNN前段を使わない直接パッチ埋め込みを同じSSL経路で比較できる。
+
 [開発と学習の実行計画](docs/implementation-plan.ja.md)に、Aurisでの既存実験、2段階学習、評価条件、実装順序、計算予算をまとめている。
 
 最初の実用成果は、時刻と対象を添えた音声講評。制作ツールでの編集と再観測を段階的に統合する。初回は音声・音楽を対象とし、動画学習は後続とする。

@@ -146,7 +146,7 @@ def scores(saved, priors, clusters):
 
 
 @torch.no_grad()
-def evaluate(model, data, examples, codebook, device, *, log=None):
+def evaluate(model, data, examples, codebook, device, *, log=None, log_audio=True):
     model.eval()
     extractor = CleanTargetFeatures(model.config.mel_bins).to(device)
     saved = {mode: [] for mode in ("clean", "mixed", "silence")}
@@ -177,20 +177,21 @@ def evaluate(model, data, examples, codebook, device, *, log=None):
                 if log and example["group"] not in logged and mode == "mixed":
                     writer, step, prefix = log
                     group = example["group"]
-                    log_stereo_audio(
-                        writer,
-                        clean[i, :, : lengths[i]].cpu(),
-                        48000,
-                        step,
-                        prefix + f"/{group}/clean",
-                    )
-                    log_stereo_audio(
-                        writer,
-                        mixed[i, :, : lengths[i]].cpu(),
-                        48000,
-                        step,
-                        prefix + f"/{group}/mixed",
-                    )
+                    if log_audio:
+                        log_stereo_audio(
+                            writer,
+                            clean[i, :, : lengths[i]].cpu(),
+                            48000,
+                            step,
+                            prefix + f"/{group}/clean",
+                        )
+                        log_stereo_audio(
+                            writer,
+                            mixed[i, :, : lengths[i]].cpu(),
+                            48000,
+                            step,
+                            prefix + f"/{group}/mixed",
+                        )
                     image = prediction_image(
                         target[i].cpu(), prediction[i].cpu(), mask[i].cpu(), model.config.clusters
                     )
@@ -294,6 +295,7 @@ def train_comparison(manifest, suite, variant, seed, device, *, stop_after=None)
             codebook,
             device,
             log=(writer, step, "validation/examples"),
+            log_audio=step == plan["steps"],
         )
         atomic_checkpoint(directory / f"validation-{step:06d}.pt", rows)
         evaluations.append({"step": step, "metrics": metrics})

@@ -11,7 +11,7 @@ from creative_agent.model import BidirectionalBlock
 from creative_agent.seanet import ProgressiveDownsampler, conv, valid_samples
 
 COMPARISON_VARIANTS = ("late_concat", "early_concat", "cnn20")
-VARIANTS = (*COMPARISON_VARIANTS, "seanet20")
+VARIANTS = (*COMPARISON_VARIANTS, "seanet20", "patch20")
 HOP = 2400  # 48 kHz / 20 FPS; also the non-overlapping teacher window.
 
 
@@ -77,6 +77,11 @@ def concatenate(features):
     return features.reshape(features.shape[0], -1, features.shape[-1] * 5)
 
 
+def waveform_patches(waves):
+    """Nonoverlapping 50 ms patches, flattened as left samples then right samples."""
+    return waves.unfold(-1, HOP, HOP).permute(0, 2, 1, 3).flatten(-2)
+
+
 class ConvolutionSubsampler(nn.Module):
     """Conformer-inspired pointwise GLU, depthwise convolution, norm and SiLU.
 
@@ -121,7 +126,10 @@ class RepresentationEncoder(nn.Module):
         self.norm = nn.RMSNorm(config.width)
         self.output_norm = nn.RMSNorm(config.width)
         self.head = nn.Linear(config.width, config.clusters)
-        if variant == "seanet20":
+        if variant == "patch20":
+            self.stem = nn.Linear(2 * HOP, config.width)
+            self.reducer = nn.Identity()
+        elif variant == "seanet20":
             # Keep paired Transformer/head initialization identical to the existing controls.
             self.stem = conv(2, config.seanet_base_width, 7, padding=3)
             self.reducer = ProgressiveDownsampler(config.seanet_base_width, config.width)
@@ -143,16 +151,18 @@ class RepresentationEncoder(nn.Module):
             mask = torch.zeros_like(valid20)
         if mask.shape != valid20.shape or (mask & ~valid20).any():
             raise ValueError("invalid 20 Hz mask")
-        if self.variant == "seanet20":
+        if self.variant == "patch20":
+            hidden = self.stem(waveform_patches(valid_samples(waves, lengths)))
+        elif self.variant == "seanet20":
             waves = valid_samples(waves, lengths)
             hidden = self.reducer(self.stem(waves), lengths).transpose(1, 2)
         else:
             hidden = self.stem(waves).transpose(1, 2)
         valid100 = frame_valid(lengths, count * 5, hop=480)
-        if self.variant != "seanet20":
+        if self.variant not in ("seanet20", "patch20"):
             hidden = hidden.masked_fill(~valid100[:, :, None], 0)
         guarded = guard_mask(mask) & valid20
-        if self.variant == "seanet20":
+        if self.variant in ("seanet20", "patch20"):
             valid, hidden_mask = valid20, guarded
         elif self.variant == "cnn20":
             hidden, valid, hidden_mask = self.reducer(hidden), valid20, guarded
