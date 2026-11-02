@@ -1,0 +1,657 @@
+{
+  "schema_version": "ssl_objective_comparison_v1",
+  "date_jst": "2026-11-02",
+  "source_commit": "bcdb21841d51d04f3835c8cc4b1494572cb67967",
+  "source_dirty": false,
+  "config": {
+    "width": 128,
+    "heads": 4,
+    "layers": 2,
+    "ffn_width": 352,
+    "stem_width": 32,
+    "clusters": 64,
+    "mel_bins": 40,
+    "crop_seconds": 4.0,
+    "mask_ratio": 0.4,
+    "mask_span": 4,
+    "mix_probability": 0,
+    "learning_rate": 0.0003,
+    "warmup_steps": 50,
+    "batch_size": 8,
+    "seanet_base_width": 4
+  },
+  "steps_per_condition": 10000,
+  "additional_steps_per_condition": 9000,
+  "seed": 20261102,
+  "execution_order": [
+    "latent_acoustic",
+    "latent"
+  ],
+  "data": {
+    "train": {
+      "music": {
+        "recordings": 71,
+        "split_groups": 14
+      },
+      "en": {
+        "recordings": 252,
+        "split_groups": 27
+      },
+      "ja": {
+        "recordings": 640,
+        "split_groups": 640
+      }
+    },
+    "validation": {
+      "music": {
+        "recordings": 11,
+        "split_groups": 3
+      },
+      "en": {
+        "recordings": 8,
+        "split_groups": 8
+      },
+      "ja": {
+        "recordings": 8,
+        "split_groups": 8
+      }
+    },
+    "test": {
+      "music": {
+        "recordings": 14,
+        "split_groups": 3
+      },
+      "en": {
+        "recordings": 16,
+        "split_groups": 6
+      },
+      "ja": {
+        "recordings": 16,
+        "split_groups": 16
+      }
+    }
+  },
+  "parent": {
+    "plan_sha256": "36c428411e716e4e57915e8067bd46d34625c366c34d88595a700280fd05d77e",
+    "steps": 1000,
+    "checkpoint_sha256": {
+      "latent_acoustic": "375f09ba65bd1cfc090ed1c484a5b5e7b931290aba3f777c342fe8a5645197fa",
+      "latent": "8be3ec1296edf6664bcd550a1a0e0a9cb2d0d95b1b7ec031527f590cea913bc2"
+    },
+    "source_commit": "14edc91e01789f9a635d44c579b6f9df5f39bfc8"
+  },
+  "probe_windows": {
+    "train": 412,
+    "validation": 27,
+    "test": 46
+  },
+  "midi_probe_sources": {
+    "train": {
+      "supported": 45,
+      "excluded": 26,
+      "works": 14
+    },
+    "validation": {
+      "supported": 6,
+      "excluded": 5,
+      "works": 3
+    },
+    "test": {
+      "supported": 11,
+      "excluded": 3,
+      "works": 3
+    }
+  },
+  "protocol": {
+    "readout": "frozen FP32 encoder + train-only standardized linear ridge",
+    "cluster": "64 train-fit acoustic classes; music/en/ja weights .5/.25/.25",
+    "pitch": "128 MIDI key-active labels at 50 ms patch centers; micro F1; no pedal extension",
+    "selection": "validation-only alpha and threshold; fixed final 10000-step encoder continued from 1000; no test-based replacement",
+    "environmental_audio": false,
+    "llm_training": false,
+    "replicates": 1
+  },
+  "coefficients": {
+    "latent": 1.0,
+    "spectrum20": 0.06116852798427046,
+    "spectrum50": 0.060691125424262256,
+    "spectrum200": 0.05732196155633637,
+    "energy": 0.008402209365214781,
+    "stereo": 0.0
+  },
+  "manifest_sha256": "bbe02d91a1b0193e57c56a79b1c114a2a2ebca677c907dd4f721cd42d3e51659",
+  "schedule_sha256": "b6776a034a886c96a0bc4c344cbc775dca2dc5d44153e1f19ec387c01804068a",
+  "codebook_sha256": "2a7b12df6938fe3c9877dac5939babaa3bcce487d4ebb99ba3add69df6707119",
+  "results": {
+    "untrained": {
+      "test": {
+        "cluster": {
+          "music": {
+            "frames": 1120,
+            "accuracy": 0.48571428656578064
+          },
+          "en": {
+            "frames": 1156,
+            "accuracy": 0.011245674453675747
+          },
+          "ja": {
+            "frames": 1178,
+            "accuracy": 0.07555178552865982
+          },
+          "balanced_accuracy": 0.2645565082784742
+        },
+        "midi_key_activity": {
+          "frames": 880,
+          "positive_keys": 1030,
+          "tp": 311,
+          "fp": 2892,
+          "fn": 719,
+          "precision": 0.09709647205744615,
+          "recall": 0.30194174757281556,
+          "micro_f1": 0.14694070399244036
+        },
+        "unsupported_midi_sources": 3
+      },
+      "silence": {
+        "cluster": {
+          "music": {
+            "frames": 1120,
+            "accuracy": 0.4776785671710968
+          },
+          "en": {
+            "frames": 1156,
+            "accuracy": 0.0
+          },
+          "ja": {
+            "frames": 1178,
+            "accuracy": 0.0008488964522257447
+          },
+          "balanced_accuracy": 0.23905150769860484
+        },
+        "midi_key_activity": {
+          "frames": 880,
+          "positive_keys": 1030,
+          "tp": 0,
+          "fp": 0,
+          "fn": 1030,
+          "precision": 0.0,
+          "recall": 0.0,
+          "micro_f1": 0.0
+        },
+        "unsupported_midi_sources": 3
+      },
+      "probe_selection": {
+        "cluster": {
+          "validation_score": 0.13220744975842535,
+          "alpha": 0.001,
+          "threshold": 0,
+          "train_frames": 32278
+        },
+        "pitch": {
+          "validation_score": 0.3471986417657046,
+          "alpha": 1.0,
+          "threshold": 0.1,
+          "train_frames": 14400
+        }
+      },
+      "feature_std": 0.3010905981063843,
+      "effective_rank": 28.247928619384766,
+      "clean_silence_feature_rms": 0.39005187153816223,
+      "replayed_test_frames": 3454,
+      "encoder_sha256": "a7059ee24cd3a5413d809146176b99f88172a255a623993ae47a4ec6bf98f637"
+    },
+    "latent_acoustic": {
+      "test": {
+        "cluster": {
+          "music": {
+            "frames": 1120,
+            "accuracy": 0.5241071581840515
+          },
+          "en": {
+            "frames": 1156,
+            "accuracy": 0.08044982701539993
+          },
+          "ja": {
+            "frames": 1178,
+            "accuracy": 0.2045840471982956
+          },
+          "balanced_accuracy": 0.33331204764544964
+        },
+        "midi_key_activity": {
+          "frames": 880,
+          "positive_keys": 1030,
+          "tp": 329,
+          "fp": 2461,
+          "fn": 701,
+          "precision": 0.11792114695340501,
+          "recall": 0.3194174757281553,
+          "micro_f1": 0.17225130890052356
+        },
+        "unsupported_midi_sources": 3
+      },
+      "silence": {
+        "cluster": {
+          "music": {
+            "frames": 1120,
+            "accuracy": 0.4776785671710968
+          },
+          "en": {
+            "frames": 1156,
+            "accuracy": 0.0
+          },
+          "ja": {
+            "frames": 1178,
+            "accuracy": 0.0008488964522257447
+          },
+          "balanced_accuracy": 0.23905150769860484
+        },
+        "midi_key_activity": {
+          "frames": 880,
+          "positive_keys": 1030,
+          "tp": 0,
+          "fp": 0,
+          "fn": 1030,
+          "precision": 0.0,
+          "recall": 0.0,
+          "micro_f1": 0.0
+        },
+        "unsupported_midi_sources": 3
+      },
+      "probe_selection": {
+        "cluster": {
+          "validation_score": 0.1843754928559065,
+          "alpha": 0.01,
+          "threshold": 0,
+          "train_frames": 32278
+        },
+        "pitch": {
+          "validation_score": 0.2777777777777778,
+          "alpha": 0.1,
+          "threshold": 0.1,
+          "train_frames": 14400
+        }
+      },
+      "feature_std": 0.6780599355697632,
+      "effective_rank": 14.528883934020996,
+      "clean_silence_feature_rms": 1.2209627628326416,
+      "replayed_test_frames": 3454,
+      "encoder_sha256": "d5bca6d3ef2e9b764c62cc82394e0e70d2af97c4c1e398892eda836c9bfe4143"
+    },
+    "latent": {
+      "test": {
+        "cluster": {
+          "music": {
+            "frames": 1120,
+            "accuracy": 0.5232142806053162
+          },
+          "en": {
+            "frames": 1156,
+            "accuracy": 0.08910034596920013
+          },
+          "ja": {
+            "frames": 1178,
+            "accuracy": 0.20033955574035645
+          },
+          "balanced_accuracy": 0.3339671157300472
+        },
+        "midi_key_activity": {
+          "frames": 880,
+          "positive_keys": 1030,
+          "tp": 165,
+          "fp": 951,
+          "fn": 865,
+          "precision": 0.1478494623655914,
+          "recall": 0.16019417475728157,
+          "micro_f1": 0.15377446411929171
+        },
+        "unsupported_midi_sources": 3
+      },
+      "silence": {
+        "cluster": {
+          "music": {
+            "frames": 1120,
+            "accuracy": 0.4776785671710968
+          },
+          "en": {
+            "frames": 1156,
+            "accuracy": 0.0
+          },
+          "ja": {
+            "frames": 1178,
+            "accuracy": 0.0008488964522257447
+          },
+          "balanced_accuracy": 0.23905150769860484
+        },
+        "midi_key_activity": {
+          "frames": 880,
+          "positive_keys": 1030,
+          "tp": 0,
+          "fp": 0,
+          "fn": 1030,
+          "precision": 0.0,
+          "recall": 0.0,
+          "micro_f1": 0.0
+        },
+        "unsupported_midi_sources": 3
+      },
+      "probe_selection": {
+        "cluster": {
+          "validation_score": 0.18406949937343597,
+          "alpha": 0.01,
+          "threshold": 0,
+          "train_frames": 32278
+        },
+        "pitch": {
+          "validation_score": 0.3423728813559322,
+          "alpha": 0.01,
+          "threshold": 0.2,
+          "train_frames": 14400
+        }
+      },
+      "feature_std": 0.6725077033042908,
+      "effective_rank": 24.538854598999023,
+      "clean_silence_feature_rms": 0.8073659539222717,
+      "replayed_test_frames": 3454,
+      "encoder_sha256": "ca51614960b1e0d94522088d1c91cef242c3b0f6ba333d122e626726c6152bf4"
+    }
+  },
+  "training": {
+    "latent_acoustic": {
+      "completed": true,
+      "steps": 10000,
+      "additional_steps": 9000,
+      "seconds": 606.4528567918751,
+      "last": {
+        "step": 10000,
+        "loss": 0.3613870143890381,
+        "latent": 0.3400830924510956,
+        "spectrum20": 0.1314324289560318,
+        "energy": 0.09262466430664062,
+        "stereo": 0.0,
+        "spectrum50": 0.12140299379825592,
+        "spectrum200": 0.08928564935922623,
+        "gradient_norm": 0.1938742846250534,
+        "ema_decay": 0.999,
+        "teacher_std": 0.9264079332351685,
+        "masked_frames": 238,
+        "lr": 0.0003
+      },
+      "initial_encoder_sha256": "a7059ee24cd3a5413d809146176b99f88172a255a623993ae47a4ec6bf98f637",
+      "final_encoder_sha256": "d5bca6d3ef2e9b764c62cc82394e0e70d2af97c4c1e398892eda836c9bfe4143",
+      "teacher_sha256": "c62c9f9b5f39c17acdd89fd657ed00cca1c4cbbb4062772569b54dbad7df354c",
+      "parameters": 1166858,
+      "encoder_parameters": 1025216,
+      "optimizer_step_values": [
+        10000
+      ],
+      "peak_cuda_gib": 0.8231635093688965,
+      "coefficients": {
+        "latent": 1.0,
+        "spectrum20": 0.06116852798427046,
+        "spectrum50": 0.060691125424262256,
+        "spectrum200": 0.05732196155633637,
+        "energy": 0.008402209365214781,
+        "stereo": 0.0
+      },
+      "schedule_sha256": "b6776a034a886c96a0bc4c344cbc775dca2dc5d44153e1f19ec387c01804068a"
+    },
+    "latent": {
+      "completed": true,
+      "steps": 10000,
+      "additional_steps": 9000,
+      "seconds": 460.8632139746551,
+      "last": {
+        "step": 10000,
+        "loss": 0.31226664781570435,
+        "latent": 0.31226664781570435,
+        "gradient_norm": 0.15908515453338623,
+        "ema_decay": 0.999,
+        "teacher_std": 0.9206172227859497,
+        "masked_frames": 238,
+        "lr": 0.0003
+      },
+      "initial_encoder_sha256": "a7059ee24cd3a5413d809146176b99f88172a255a623993ae47a4ec6bf98f637",
+      "final_encoder_sha256": "ca51614960b1e0d94522088d1c91cef242c3b0f6ba333d122e626726c6152bf4",
+      "teacher_sha256": "3df97b3bf800b37d55136b0753f2fa40a118f8c23e47291a728e37d0fca51476",
+      "parameters": 1166858,
+      "encoder_parameters": 1025216,
+      "optimizer_step_values": [
+        10000
+      ],
+      "peak_cuda_gib": 0.0839848518371582,
+      "coefficients": {
+        "latent": 1.0
+      },
+      "schedule_sha256": "b6776a034a886c96a0bc4c344cbc775dca2dc5d44153e1f19ec387c01804068a"
+    }
+  },
+  "comparison_to_1000": {
+    "latent_acoustic": {
+      "cluster_accuracy_delta": 0.03482661955058575,
+      "midi_frame_f1_delta": 0.00766673622552852
+    },
+    "latent": {
+      "cluster_accuracy_delta": 0.022612842731177807,
+      "midi_frame_f1_delta": -0.03156748286221864
+    }
+  },
+  "pitch_diagnostics": {
+    "scope": "Exploratory diagnostics on saved validation-selected readouts; no refitting",
+    "thresholds": [
+      0.1,
+      0.2
+    ],
+    "micro_ap": "all MIDI key/frame scores flattened; ties grouped; no test selection",
+    "diagnostic_script_sha256": "42ea2cdf6045d6aee7d160c25cf697753f301d3ef735937f6dedb2408305d3e4",
+    "suites": [
+      {
+        "steps": 1000,
+        "source_commit": "14edc91e01789f9a635d44c579b6f9df5f39bfc8",
+        "results": {
+          "untrained": {
+            "micro_average_precision": 0.07560620349458046,
+            "validation_selected_threshold": 0.1,
+            "fixed_threshold": {
+              "0.1": {
+                "frames": 880,
+                "positive_keys": 1030,
+                "tp": 311,
+                "fp": 2892,
+                "fn": 719,
+                "precision": 0.09709647205744615,
+                "recall": 0.30194174757281556,
+                "micro_f1": 0.14694070399244036
+              },
+              "0.2": {
+                "frames": 880,
+                "positive_keys": 1030,
+                "tp": 88,
+                "fp": 729,
+                "fn": 942,
+                "precision": 0.10771113831089352,
+                "recall": 0.0854368932038835,
+                "micro_f1": 0.09528965890633459
+              }
+            },
+            "probe_sha256": "2e989b4dd48f3a86f63040c363fe8bbcdecf0539a816849a4c2e400a1badef2f"
+          },
+          "latent_acoustic": {
+            "micro_average_precision": 0.08586996340552991,
+            "validation_selected_threshold": 0.1,
+            "fixed_threshold": {
+              "0.1": {
+                "frames": 880,
+                "positive_keys": 1030,
+                "tp": 415,
+                "fp": 3598,
+                "fn": 615,
+                "precision": 0.10341390480936954,
+                "recall": 0.4029126213592233,
+                "micro_f1": 0.16458457267499504
+              },
+              "0.2": {
+                "frames": 880,
+                "positive_keys": 1030,
+                "tp": 189,
+                "fp": 1368,
+                "fn": 841,
+                "precision": 0.12138728323699421,
+                "recall": 0.18349514563106797,
+                "micro_f1": 0.146115191341322
+              }
+            },
+            "probe_sha256": "9c1a84bd7383936e17c5abd3504da341972e5a6fa9ec55882158ee1589fafe2d"
+          },
+          "latent": {
+            "micro_average_precision": 0.1148590935437541,
+            "validation_selected_threshold": 0.1,
+            "fixed_threshold": {
+              "0.1": {
+                "frames": 880,
+                "positive_keys": 1030,
+                "tp": 416,
+                "fp": 3043,
+                "fn": 614,
+                "precision": 0.12026597282451576,
+                "recall": 0.40388349514563104,
+                "micro_f1": 0.18534194698151035
+              },
+              "0.2": {
+                "frames": 880,
+                "positive_keys": 1030,
+                "tp": 172,
+                "fp": 1138,
+                "fn": 858,
+                "precision": 0.13129770992366413,
+                "recall": 0.1669902912621359,
+                "micro_f1": 0.147008547008547
+              }
+            },
+            "probe_sha256": "0ac45d3bd11203f1679f1ad58cc28a472f3b6a3cd15f7d1c79a89c1aa62fcd41"
+          }
+        }
+      },
+      {
+        "steps": 10000,
+        "source_commit": "bcdb21841d51d04f3835c8cc4b1494572cb67967",
+        "results": {
+          "untrained": {
+            "micro_average_precision": 0.07560620349458046,
+            "validation_selected_threshold": 0.1,
+            "fixed_threshold": {
+              "0.1": {
+                "frames": 880,
+                "positive_keys": 1030,
+                "tp": 311,
+                "fp": 2892,
+                "fn": 719,
+                "precision": 0.09709647205744615,
+                "recall": 0.30194174757281556,
+                "micro_f1": 0.14694070399244036
+              },
+              "0.2": {
+                "frames": 880,
+                "positive_keys": 1030,
+                "tp": 88,
+                "fp": 729,
+                "fn": 942,
+                "precision": 0.10771113831089352,
+                "recall": 0.0854368932038835,
+                "micro_f1": 0.09528965890633459
+              }
+            },
+            "probe_sha256": "2e989b4dd48f3a86f63040c363fe8bbcdecf0539a816849a4c2e400a1badef2f"
+          },
+          "latent_acoustic": {
+            "micro_average_precision": 0.11740788274811377,
+            "validation_selected_threshold": 0.1,
+            "fixed_threshold": {
+              "0.1": {
+                "frames": 880,
+                "positive_keys": 1030,
+                "tp": 329,
+                "fp": 2461,
+                "fn": 701,
+                "precision": 0.11792114695340501,
+                "recall": 0.3194174757281553,
+                "micro_f1": 0.17225130890052356
+              },
+              "0.2": {
+                "frames": 880,
+                "positive_keys": 1030,
+                "tp": 178,
+                "fp": 771,
+                "fn": 852,
+                "precision": 0.18756585879873552,
+                "recall": 0.17281553398058253,
+                "micro_f1": 0.17988883274381
+              }
+            },
+            "probe_sha256": "4339955c69ed50006d71c133044b84f8b4d0aa235f91e5dd2f33f58f42f308c5"
+          },
+          "latent": {
+            "micro_average_precision": 0.1196979402860116,
+            "validation_selected_threshold": 0.2,
+            "fixed_threshold": {
+              "0.1": {
+                "frames": 880,
+                "positive_keys": 1030,
+                "tp": 357,
+                "fp": 3234,
+                "fn": 673,
+                "precision": 0.09941520467836257,
+                "recall": 0.3466019417475728,
+                "micro_f1": 0.15451201038736204
+              },
+              "0.2": {
+                "frames": 880,
+                "positive_keys": 1030,
+                "tp": 165,
+                "fp": 951,
+                "fn": 865,
+                "precision": 0.1478494623655914,
+                "recall": 0.16019417475728157,
+                "micro_f1": 0.15377446411929171
+              }
+            },
+            "probe_sha256": "8639adb3d2a5eb9d53c8f6a527a35ad2e1d354357eea26088b3c3a8bfc312a06"
+          }
+        }
+      }
+    ]
+  },
+  "audit": {
+    "passed": true,
+    "total_updates": 20000,
+    "additional_updates": 18000,
+    "runs": {
+      "latent_acoustic": {
+        "updates": 10000,
+        "additional_updates": 9000,
+        "changed_tensors": {
+          "encoder.stem.": 2,
+          "encoder.blocks.": 18,
+          "predictor.": 2,
+          "acoustic.": 8
+        },
+        "replayed_test_frames": 3454
+      },
+      "latent": {
+        "updates": 10000,
+        "additional_updates": 9000,
+        "changed_tensors": {
+          "encoder.stem.": 2,
+          "encoder.blocks.": 18,
+          "predictor.": 2,
+          "acoustic.": 0
+        },
+        "replayed_test_frames": 3454
+      }
+    },
+    "persistent_files": 27,
+    "persistent_bytes": 65622309,
+    "parent_files_unchanged": true,
+    "artifact_manifest_sha256": "1bd14224d1aa9cbde61c86a8ab8ab0d3d6ba8305b074e4fdda9216c1b550ce54",
+    "audit_sha256": "c95fbe76d9e9b906bed9ce29d964a06b78cb027f22cab5494d30a4e2d4cf0672"
+  }
+}

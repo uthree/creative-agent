@@ -204,3 +204,23 @@ def test_continuation_rejects_changed_algorithm_teacher_and_prefix(tmp_path):
     (tmp_path / "acoustic-stats.pt").write_bytes(b"changed teacher")
     with pytest.raises(ValueError, match="calibration"):
         parent_metadata(tmp_path, config, 4, 17, "manifest", schedule)
+
+
+@pytest.mark.parametrize(
+    "scores,target,expected",
+    [
+        ([3.0, 2.0, 1.0], [1, 0, 1], 5 / 6),
+        ([1.0, 1.0, 1.0], [1, 0, 1], 2 / 3),
+        ([1.0, 2.0], [0, 0], 0.0),
+    ],
+)
+def test_pitch_average_precision_handles_ties_without_optimistic_order(scores, target, expected):
+    import runpy
+    from pathlib import Path
+
+    functions = runpy.run_path(
+        str(Path(__file__).resolve().parents[1] / "experiments/diagnose_ssl_pitch_probes.py")
+    )
+    assert functions["average_precision"](
+        torch.tensor(scores), torch.tensor(target)
+    ) == pytest.approx(expected)
