@@ -44,6 +44,7 @@ RTX 3070で20更新と別プロセスからの21更新目への再開を確認�
 [ELU構成の比較結果](docs/audio-seanet20-report.ja.md)では各1,000更新・3 seedを実行し、新CNNの入力依存の弱さと対照に対する精度未達を記録した。
 
 [50 ms波形パッチ → 線形投影 → Transformer](docs/audio-patch20.ja.md)の`patch20`では、CNN前段を使わない直接パッチ埋め込みを同じSSL経路で比較できる。
+[6,000更新の実測結果](docs/audio-patch20-report.ja.md)では、対照より通常音声CEが全3 seedで低下し、混合CEも平均で低下した。パラメータ数は約1.94倍の比較である。
 
 [開発と学習の実行計画](docs/implementation-plan.ja.md)に、Aurisでの既存実験、2段階学習、評価条件、実装順序、計算予算をまとめている。
 

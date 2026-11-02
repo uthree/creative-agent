@@ -2,6 +2,8 @@
 
 `patch20`は48 kHzステレオ波形を非重複50 msパッチに分け、各パッチの4,800値（左2,400 samples、その後に右2,400 samples）を1回の線形投影で128次元へ写す。CNN・前段の活性化・平均プーリングを使わず、20 FPSで既存の双方向Transformerへ渡す。
 
+[各1,000更新・3 seedの比較結果](audio-patch20-report.ja.md)では、直接投影の通常音声CEが全3 seedで低下した。パラメータ数の増加と、混合音声でのばらつきも記録している。
+
 ```mermaid
 flowchart TB
     W["48 kHz・ステレオ波形"] --> P["非重複50 msパッチ<br/>2,400 samples × 2ch"]
