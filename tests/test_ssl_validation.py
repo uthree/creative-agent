@@ -47,5 +47,6 @@ def test_fixed_validation_detects_collapse_without_mutating_training_state():
     ):
         assert collapsed[key] == 0
     assert collapsed["target_is_degenerate"] == 1
+    assert collapsed["variance_penalty"] > 0.98
     assert collapsed["relative_gain_over_zero"] == 0
     assert effective_rank(torch.zeros(20, 4)) == 0

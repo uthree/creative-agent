@@ -15,6 +15,7 @@ from creative_agent.representation_data import RepresentationData, fingerprint, 
 from creative_agent.representation_training import load_json, save_json, scalar_metrics
 from creative_agent.ssl_objectives import (
     OBJECTIVES,
+    SUPPORTED_OBJECTIVES,
     AcousticTargets,
     ObjectiveModel,
     objective_losses,
@@ -29,6 +30,7 @@ from creative_agent.ssl_probes import (
 )
 from creative_agent.ssl_validation import validation_diagnostics
 from creative_agent.training import atomic_checkpoint, log_stereo_audio, source_identity
+from creative_agent.vicreg import VICREG_COEFFICIENTS, VICREG_SETTINGS
 
 
 def experiment_hash():
@@ -134,7 +136,7 @@ def prepare_objectives(
     if (
         not objectives
         or len(set(objectives)) != len(objectives)
-        or set(objectives) - set(OBJECTIVES)
+        or set(objectives) - set(SUPPORTED_OBJECTIVES)
     ):
         raise ValueError("distinct supported objectives required")
     if type(validation_interval) is not int or validation_interval < 0:
@@ -210,6 +212,7 @@ def prepare_objectives(
             "seed": seed,
             "order": list(objectives),
             "validation_interval": validation_interval,
+            "vicreg": VICREG_SETTINGS if "latent_vicreg" in objectives else None,
             "manifest_sha256": data.data.signature,
             "data": data.description(),
             "schedule_sha256": fingerprint(schedule),
@@ -227,7 +230,7 @@ def prepare_objectives(
 
 
 def train_objective(manifest, suite, objective, device, *, stop_after=None):
-    if objective not in OBJECTIVES:
+    if objective not in SUPPORTED_OBJECTIVES:
         raise ValueError("unsupported objective")
     torch.set_num_threads(2)
     plan = load_json(suite / "plan.json")
@@ -286,15 +289,25 @@ def train_objective(manifest, suite, objective, device, *, stop_after=None):
         history, seconds = restore_state(model, teacher, optimizer, saved, initial)
         inherited_history = True
     limit = min(stop_after or plan["steps"], plan["steps"])
-    if len(history) >= limit:
+    if len(history) >= limit and (
+        limit < plan["steps"]
+        or ((directory / "training.json").exists() and (directory / "encoder.pt").exists())
+    ):
         return (
             load_json(directory / "training.json")
             if (directory / "training.json").exists()
             else {"completed": False, "steps": len(history)}
         )
+    prior_events = any((directory / "tensorboard").glob("events.*"))
     writer = SummaryWriter(
-        str(directory / "tensorboard"), purge_step=len(history) + 1 if history else None
+        str(directory / "tensorboard"),
+        purge_step=len(history) + 1 if history else (0 if prior_events else None),
     )
+    validation_path = directory / "validation.json"
+    if validation_path.exists():
+        # A crash after validation but before checkpoint replacement can leave future rows.
+        rows = [r for r in load_json(validation_path) if history and r["step"] <= len(history)]
+        save_json(validation_path, rows)
     if inherited_history:
         for row in history:
             scalar_metrics(writer, "train", row, row["step"])
@@ -303,7 +316,14 @@ def train_objective(manifest, suite, objective, device, *, stop_after=None):
             f"Restored step {len(history)}; earlier scalars copied from parent history",
             len(history),
         )
-    coefficients = plan["coefficients"] if objective == "latent_acoustic" else {"latent": 1.0}
+    if objective == "latent_acoustic":
+        coefficients = plan["coefficients"]
+    elif objective == "latent_vicreg":
+        if plan.get("vicreg") != VICREG_SETTINGS:
+            raise ValueError("VICReg settings changed")
+        coefficients = dict(VICREG_COEFFICIENTS)
+    else:
+        coefficients = {"latent": 1.0}
     writer.add_text(
         "run/objective", objective + "; frozen readouts, no LLM or labeled SSL", len(history)
     )
@@ -401,7 +421,7 @@ def train_objective(manifest, suite, objective, device, *, stop_after=None):
     return result
 
 
-def evaluate_objectives(manifest, suite, device):
+def evaluate_objectives(manifest, suite, device, *, objectives=None):
     torch.set_num_threads(2)
     plan = load_json(suite / "plan.json")
     if source_identity()["file_sha256"] != plan["source"]["file_sha256"]:
@@ -416,8 +436,13 @@ def evaluate_objectives(manifest, suite, device):
     ):
         raise ValueError("evaluation provenance changed")
     codebook = torch.load(suite / "codebook.pt", weights_only=True)
-    result = {}
-    for name in ("untrained", *plan["order"]):
+    selected = plan["order"] if objectives is None else list(objectives)
+    if not selected or set(selected) - set(plan["order"]):
+        raise ValueError("evaluation objective absent from plan")
+    result = load_json(suite / "comparison.json") if (suite / "comparison.json").exists() else {}
+    for name in ("untrained", *selected):
+        if name in result:
+            continue
         torch.manual_seed(plan["seed"])
         encoder = ObjectiveModel(config).encoder.to(device)
         if name != "untrained":
@@ -466,7 +491,10 @@ def evaluate_objectives(manifest, suite, device):
             "replayed_test_frames": len(centered),
             "encoder_sha256": tensor_hash(encoder.state_dict()),
         }
-        writer = SummaryWriter(str(directory / "tensorboard"))
+        # Evaluation is resumable without purging the completed training event stream.
+        for partial in (directory / "tensorboard").glob("*.evaluation"):
+            partial.unlink()
+        writer = SummaryWriter(str(directory / "tensorboard"), filename_suffix=".evaluation")
         scalar_metrics(writer, "probe/test", metrics, plan["steps"] if name != "untrained" else 0)
         scalar_metrics(
             writer, "probe/silence", silence_metrics, plan["steps"] if name != "untrained" else 0

@@ -6,6 +6,8 @@
 
 新規SSLの学習目的は**EMA教師の潜在予測のみ（`latent`）**を採用する。[損失・教師更新・実際の設定値](docs/audio-latent-ssl.ja.md)を参照。`run_ssl_objectives.py train`の既定値も`latent`で、`suite`は過去の③→②比較を再現する専用経路として残す。旧クラスタSSL・LLM課題の学習経路は別であり、この選択だけでは置き換わらない。
 
+[GPT-2式の残差初期化とVICReg型損失](docs/audio-gpt2-vicreg.ja.md)では、残差出力層を標準偏差`0.02 / sqrt(2L)`で初期化し、潜在予測のみを先に検証した後、同じ初期値で分散・共分散項を加える。新規latent用CLIはGPT-2式を既定値とし、旧configの再現用fallbackは保持する。
+
 [初期化の対照実験](docs/audio-ssl-initialization-comparison.ja.md)では、残差出力重みの1e-4初期化と、メル尺度に並べたsin/cosによるパッチ投影初期化を個別に検証する。共通の凍結probeに加え、固定validationでゼロ予測との差、教師・生徒の分散、有効rank、入力依存、残差の相対量を追う。
 [各10k更新の実測](docs/audio-ssl-initialization-report.ja.md)では、残差初期化がtest音響accuracy 34.13%・MIDIフレームF1 19.26%・AP 17.27%で対照を上回り、正弦波初期化は対照を下回った。1 seedの結果で、MIDI validationの優位は一貫していない。
 

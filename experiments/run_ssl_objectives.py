@@ -12,7 +12,7 @@ from creative_agent.ssl_objective_training import (
     prepare_objectives,
     train_objective,
 )
-from creative_agent.ssl_objectives import OBJECTIVES
+from creative_agent.ssl_objectives import OBJECTIVES, SUPPORTED_OBJECTIVES
 
 
 def main():
@@ -25,6 +25,8 @@ def main():
     parser.add_argument("--steps", type=int, default=1000)
     parser.add_argument("--seed", type=int, default=20261102)
     parser.add_argument("--patch-init", choices=("random", "mel_sinusoidal"), default="random")
+    parser.add_argument("--residual-init", choices=("legacy", "gpt2"), default="gpt2")
+    parser.add_argument("--objectives", nargs="+", choices=SUPPORTED_OBJECTIVES)
     parser.add_argument(
         "--residual-init-scale",
         type=float,
@@ -33,7 +35,7 @@ def main():
     )
     parser.add_argument(
         "--objective",
-        choices=OBJECTIVES,
+        choices=SUPPORTED_OBJECTIVES,
         default="latent",
         help="train stage only (default: latent)",
     )
@@ -54,11 +56,13 @@ def main():
                 mix_probability=0,
                 residual_init_scale=args.residual_init_scale,
                 patch_init=args.patch_init,
+                residual_init=args.residual_init,
             ),
             args.steps,
             args.seed,
             device,
             parent=args.parent,
+            objectives=args.objectives or OBJECTIVES,
         )
     elif args.stage == "prepare":
         parser.error("output plan already exists")
@@ -75,7 +79,9 @@ def main():
             str(args.parent.resolve()) if args.parent else None
         ):
             parser.error("existing plan has a different parent")
-        for objective in OBJECTIVES:
+        if args.objectives is not None and args.objectives != plan["order"]:
+            parser.error("existing plan has different objectives")
+        for objective in plan["order"]:
             train_objective(args.manifest, args.suite, objective, device)
         evaluate_objectives(args.manifest, args.suite, device)
     elif args.stage == "evaluate":

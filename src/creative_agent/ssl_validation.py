@@ -7,6 +7,7 @@ from creative_agent.representation import HOP, frame_valid
 from creative_agent.representation_data import masked_positions
 from creative_agent.ssl_objectives import balanced_mean, latent_target
 from creative_agent.ssl_probes import clean_batch
+from creative_agent.vicreg import variance_covariance
 
 
 def effective_rank(features):
@@ -84,6 +85,9 @@ def batch_diagnostics(model, teacher, waves, lengths, mask, groups):
                 ]
             )
         clean = model.encoder.encode(waves, lengths).float()
+        variance, covariance, statistics = variance_covariance(clean, waves, lengths, groups)
+        metrics.update(variance_penalty=float(variance), covariance_penalty=float(covariance))
+        metrics.update(statistics)
         for handle in handles:
             handle.remove()
         handles.clear()

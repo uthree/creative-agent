@@ -74,12 +74,34 @@ def test_legacy_representation_config_preserves_original_initialization(config):
     saved = config.to_dict()
     saved.pop("residual_init_scale")
     saved.pop("patch_init")
+    saved.pop("residual_init")
+    saved.pop("residual_init_std")
     torch.manual_seed(17)
     legacy = RepresentationEncoder(RepresentationConfig(**saved))
     torch.manual_seed(17)
     explicit = RepresentationEncoder(replace(config, residual_init_scale=1.0))
     for key, value in explicit.state_dict().items():
         torch.testing.assert_close(value, legacy.state_dict()[key], rtol=0, atol=0)
+
+
+def test_gpt2_residual_initialization_scales_by_depth_and_preserves_other_parameters(config):
+    for layers in (2, 4):
+        settings = replace(config, width=128, layers=layers, ffn_width=352)
+        torch.manual_seed(57)
+        original = RepresentationEncoder(settings)
+        torch.manual_seed(57)
+        scaled = RepresentationEncoder(replace(settings, residual_init="gpt2"))
+        changed = []
+        for name, value in scaled.state_dict().items():
+            if not torch.equal(value, original.state_dict()[name]):
+                changed.append(name)
+                assert value.mean().abs() < 0.0003
+                assert float(value.std()) == pytest.approx(0.02 / (2 * layers) ** 0.5, rel=0.03)
+        assert set(changed) == {
+            f"blocks.{i}.{layer}.weight" for i in range(layers) for layer in ("output", "down")
+        }
+        with pytest.raises(ValueError, match="cannot be combined"):
+            replace(settings, residual_init="gpt2", residual_init_scale=1e-4)
 
 
 def test_sinusoidal_patches_select_frequency_preserve_channels_and_allow_learning(config):

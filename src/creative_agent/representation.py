@@ -1,5 +1,6 @@
 """20 Hz audio representations and clean discrete targets for masked denoising."""
 
+import hashlib
 import math
 from dataclasses import asdict, dataclass
 
@@ -37,6 +38,8 @@ class RepresentationConfig:
     seanet_base_width: int = 4
     residual_init_scale: float = 1.0
     patch_init: str = "random"
+    residual_init: str = "legacy"
+    residual_init_std: float = 0.02
 
     def __post_init__(self):
         for name in (
@@ -69,6 +72,13 @@ class RepresentationConfig:
             raise ValueError("unknown patch_init")
         if self.patch_init == "mel_sinusoidal" and self.width % 4:
             raise ValueError("mel_sinusoidal requires width divisible by four for stereo sin/cos")
+        if self.residual_init not in ("legacy", "gpt2"):
+            raise ValueError("unknown residual_init")
+        if self.residual_init == "gpt2" and self.residual_init_scale != 1:
+            raise ValueError("gpt2 initialization cannot be combined with residual_init_scale")
+        std = self.residual_init_std
+        if type(std) not in (int, float) or not math.isfinite(std) or not 0 < std <= 1:
+            raise ValueError("residual_init_std must be finite and in (0, 1]")
 
     def to_dict(self):
         return asdict(self)
@@ -166,7 +176,20 @@ class RepresentationEncoder(nn.Module):
         self.blocks = nn.ModuleList([BidirectionalBlock(block) for _ in range(config.layers)])
         # Initialization only: no persistent forward multiplier or extra parameters.
         # Keep 1.0 as the fallback for saved configurations predating this option.
-        if config.residual_init_scale != 1:
+        if config.residual_init == "gpt2":
+            # An independent, state-derived stream keeps all other paired parameters
+            # unchanged without reusing the random draws of the subsequent frontend.
+            seed = int.from_bytes(
+                hashlib.sha256(bytes(torch.get_rng_state().tolist())).digest()[:8], "little"
+            )
+            generator = torch.Generator(device=self.blocks[0].output.weight.device).manual_seed(
+                seed
+            )
+            std = config.residual_init_std / math.sqrt(2 * config.layers)
+            for layer in self.blocks:
+                nn.init.normal_(layer.output.weight, std=std, generator=generator)
+                nn.init.normal_(layer.down.weight, std=std, generator=generator)
+        elif config.residual_init_scale != 1:
             with torch.no_grad():
                 for layer in self.blocks:
                     layer.output.weight.mul_(config.residual_init_scale)

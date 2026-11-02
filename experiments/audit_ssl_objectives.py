@@ -11,19 +11,21 @@ from creative_agent.llm_diagnostics import tensor_hash
 from creative_agent.representation import RepresentationConfig
 from creative_agent.representation_training import load_json, save_json
 from creative_agent.ssl_objective_training import experiment_hash
-from creative_agent.ssl_objectives import OBJECTIVES, ObjectiveModel
+from creative_agent.ssl_objectives import SUPPORTED_OBJECTIVES, ObjectiveModel
 from creative_agent.training import source_identity
 
 
-def audit(suite):
+def audit(suite, *, objectives=None):
     plan = load_json(suite / "plan.json")
     artifacts = load_json(suite / "artifact-manifest.json")
     comparison = load_json(suite / "comparison.json")
     assert plan["source"]["file_sha256"] == source_identity()["file_sha256"]
     assert plan["experiment_sha256"] == experiment_hash()
-    objectives = plan["order"]
+    selected = plan["order"] if objectives is None else list(objectives)
+    assert not set(selected) - set(plan["order"])
+    objectives = selected
     assert objectives and len(set(objectives)) == len(objectives)
-    assert not set(objectives) - set(OBJECTIVES)
+    assert not set(objectives) - set(SUPPORTED_OBJECTIVES)
     total_bytes = 0
     for relative, item in artifacts["files"].items():
         path = suite / relative

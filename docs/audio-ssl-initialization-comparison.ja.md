@@ -67,6 +67,6 @@ PYTHONPYCACHEPREFIX=/tmp/creative-agent-bytecode-runtime \
 
 順番はbaseline → residual_1e4 → mel_sinusoidal。中断後は同じコマンドで保存点から継続する。個別監査と、共通入力・mask・probe例・正解・変更tensor範囲の照合を行い、合計更新数を保存する。小さいGPUスモークは出力先と`--steps`を変更して実行できる。
 
-汎用の`run_ssl_objectives.py prepare`でも`--residual-init-scale 1e-4`、`--patch-init mel_sinusoidal`を指定できる。既定値は従来の`1.0`と`random`のまま。古いconfigの欠落項もこれらへfallbackし、旧checkpointを読み込むと保存済み重みがそのまま使われる。実装hashを照合する厳密な継続実験には、記録されたrevisionを用いる。
+この実験revisionの`run_ssl_objectives.py prepare`では`--residual-init-scale 1e-4`、`--patch-init mel_sinusoidal`を指定できる。その後の[GPT-2式の比較](audio-gpt2-vicreg.ja.md)で新規CLIの既定値は`gpt2`へ変更した。現在のCLIで旧1e-4方式を新規作成する場合は`--residual-init legacy --residual-init-scale 1e-4`を指定する。古いconfigの欠落項は従来の`1.0`と`random`へfallbackし、旧checkpointの保存重みはそのまま使う。実装hashを照合する厳密な継続実験には、記録されたrevisionを用いる。
 
 データ・重み・optimizer・ログは除外対象の`runs/`に保存し、Gitには設定・ソース・小さな集計だけを残す。初期化や評価を変更した新しい実験であり、以前の10k checkpointへ途中から適用しない。

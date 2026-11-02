@@ -8,8 +8,10 @@ from torch import nn
 from torch.nn import functional as F
 
 from creative_agent.representation import HOP, RepresentationEncoder, frame_valid, guard_mask
+from creative_agent.vicreg import variance_covariance
 
 OBJECTIVES = ("latent_acoustic", "latent")  # Requested execution order: 3, then 2.
+SUPPORTED_OBJECTIVES = (*OBJECTIVES, "latent_vicreg")
 WINDOWS = {"spectrum20": 960, "spectrum50": 2400, "spectrum200": 9600}
 BANDS = 32
 SUBFRAMES = 5
@@ -131,12 +133,29 @@ def latent_target(teacher, waves, lengths):
 
 
 def objective_losses(
-    model, teacher, extractor, waves, lengths, mask, groups, stereo, stats, *, auxiliary=True
+    model,
+    teacher,
+    extractor,
+    waves,
+    lengths,
+    mask,
+    groups,
+    stereo,
+    stats,
+    *,
+    auxiliary=True,
+    regularize=False,
 ):
     prediction, acoustic = model(waves, lengths, mask, auxiliary=auxiliary)
     target = latent_target(teacher, waves, lengths)
     latent = F.smooth_l1_loss(prediction.float(), target, reduction="none").mean(-1)
     losses = {"latent": balanced_mean(latent, mask, groups)}
+    if regularize:
+        # A clean student view avoids satisfying the statistics from mask patterns.
+        features = model.encoder.encode(waves, lengths)
+        losses["variance"], losses["covariance"], _ = variance_covariance(
+            features, waves, lengths, groups
+        )
     if not auxiliary:
         return losses, target
     targets, masks = extractor(waves, lengths, mask)
@@ -168,7 +187,8 @@ def train_step(model, teacher, optimizer, extractor, batch, stats, coefficients,
             groups,
             stereo,
             stats,
-            auxiliary=len(coefficients) > 1,
+            auxiliary=any(k in AcousticTargets.dimensions for k in coefficients),
+            regularize="variance" in coefficients or "covariance" in coefficients,
         )
     loss = sum(losses[k] * weight for k, weight in coefficients.items() if weight > 0)
     if not torch.isfinite(loss):
