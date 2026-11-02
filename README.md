@@ -7,6 +7,7 @@
 [発話・音楽・環境音に共通するSSLの調査](docs/audio-universal-ssl-survey.ja.md)では、M2D、WavJEPA、SSLAM、USAD 2.0等を比較し、直接パッチモデルのEMA潜在予測と音響復元補助損失を候補として整理した。各方式の限界と汎化評価を記載している。
 
 [SSL目的の③→②比較](docs/audio-ssl-objective-comparison.ja.md)では、音響復元補助付きのEMA潜在予測、潜在予測だけの順で学習し、共通の凍結線形probeによる音響クラスタ精度とMIDI押下フレームF1を比較できる。
+[各1,000更新の実測](docs/audio-ssl-objective-comparison-report.ja.md)では、②が音響accuracy 31.14%・MIDIフレームF1 18.53%で③を上回った。1 seedの簡易比較で、採譜やASRの完成精度とは区別する。
 
 初期方式の自己教師あり学習スモークも実装済み。[実行手順](docs/audio-ssl-smoke.ja.md)に従って、自作の48 kHzステレオ音声で前処理、マスク付き復元、実更新、保存、再開を確認できる。
 

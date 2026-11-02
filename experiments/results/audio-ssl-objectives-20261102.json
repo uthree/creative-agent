@@ -1,0 +1,446 @@
+{
+  "schema_version": "ssl_objective_comparison_v1",
+  "date_jst": "2026-11-02",
+  "source_commit": "14edc91e01789f9a635d44c579b6f9df5f39bfc8",
+  "source_dirty": false,
+  "config": {
+    "width": 128,
+    "heads": 4,
+    "layers": 2,
+    "ffn_width": 352,
+    "stem_width": 32,
+    "clusters": 64,
+    "mel_bins": 40,
+    "crop_seconds": 4.0,
+    "mask_ratio": 0.4,
+    "mask_span": 4,
+    "mix_probability": 0,
+    "learning_rate": 0.0003,
+    "warmup_steps": 50,
+    "batch_size": 8,
+    "seanet_base_width": 4
+  },
+  "steps_per_condition": 1000,
+  "seed": 20261102,
+  "execution_order": [
+    "latent_acoustic",
+    "latent"
+  ],
+  "data": {
+    "train": {
+      "music": {
+        "recordings": 71,
+        "split_groups": 14
+      },
+      "en": {
+        "recordings": 252,
+        "split_groups": 27
+      },
+      "ja": {
+        "recordings": 640,
+        "split_groups": 640
+      }
+    },
+    "validation": {
+      "music": {
+        "recordings": 11,
+        "split_groups": 3
+      },
+      "en": {
+        "recordings": 8,
+        "split_groups": 8
+      },
+      "ja": {
+        "recordings": 8,
+        "split_groups": 8
+      }
+    },
+    "test": {
+      "music": {
+        "recordings": 14,
+        "split_groups": 3
+      },
+      "en": {
+        "recordings": 16,
+        "split_groups": 6
+      },
+      "ja": {
+        "recordings": 16,
+        "split_groups": 16
+      }
+    }
+  },
+  "probe_windows": {
+    "train": 412,
+    "validation": 27,
+    "test": 46
+  },
+  "midi_probe_sources": {
+    "train": {
+      "supported": 45,
+      "excluded": 26,
+      "works": 14
+    },
+    "validation": {
+      "supported": 6,
+      "excluded": 5,
+      "works": 3
+    },
+    "test": {
+      "supported": 11,
+      "excluded": 3,
+      "works": 3
+    }
+  },
+  "protocol": {
+    "readout": "frozen FP32 encoder + train-only standardized linear ridge",
+    "cluster": "64 train-fit acoustic classes; music/en/ja weights .5/.25/.25",
+    "pitch": "128 MIDI key-active labels at 50 ms patch centers; micro F1; no pedal extension",
+    "selection": "validation-only alpha and threshold; final fixed 1000-step encoder",
+    "environmental_audio": false,
+    "llm_training": false,
+    "replicates": 1
+  },
+  "coefficients": {
+    "latent": 1.0,
+    "spectrum20": 0.06116852798427046,
+    "spectrum50": 0.060691125424262256,
+    "spectrum200": 0.05732196155633637,
+    "energy": 0.008402209365214781,
+    "stereo": 0.0
+  },
+  "manifest_sha256": "bbe02d91a1b0193e57c56a79b1c114a2a2ebca677c907dd4f721cd42d3e51659",
+  "schedule_sha256": "f653bc4de641a110724ee9d5f76799a093c643320affd004e7611c3fa4d80bc6",
+  "codebook_sha256": "2a7b12df6938fe3c9877dac5939babaa3bcce487d4ebb99ba3add69df6707119",
+  "results": {
+    "untrained": {
+      "test": {
+        "cluster": {
+          "music": {
+            "frames": 1120,
+            "accuracy": 0.48571428656578064
+          },
+          "en": {
+            "frames": 1156,
+            "accuracy": 0.011245674453675747
+          },
+          "ja": {
+            "frames": 1178,
+            "accuracy": 0.07555178552865982
+          },
+          "balanced_accuracy": 0.2645565082784742
+        },
+        "midi_key_activity": {
+          "frames": 880,
+          "positive_keys": 1030,
+          "tp": 311,
+          "fp": 2892,
+          "fn": 719,
+          "precision": 0.09709647205744615,
+          "recall": 0.30194174757281556,
+          "micro_f1": 0.14694070399244036
+        },
+        "unsupported_midi_sources": 3
+      },
+      "silence": {
+        "cluster": {
+          "music": {
+            "frames": 1120,
+            "accuracy": 0.4776785671710968
+          },
+          "en": {
+            "frames": 1156,
+            "accuracy": 0.0
+          },
+          "ja": {
+            "frames": 1178,
+            "accuracy": 0.0008488964522257447
+          },
+          "balanced_accuracy": 0.23905150769860484
+        },
+        "midi_key_activity": {
+          "frames": 880,
+          "positive_keys": 1030,
+          "tp": 0,
+          "fp": 0,
+          "fn": 1030,
+          "precision": 0.0,
+          "recall": 0.0,
+          "micro_f1": 0.0
+        },
+        "unsupported_midi_sources": 3
+      },
+      "probe_selection": {
+        "cluster": {
+          "validation_score": 0.13220744975842535,
+          "alpha": 0.001,
+          "threshold": 0,
+          "train_frames": 32278
+        },
+        "pitch": {
+          "validation_score": 0.3471986417657046,
+          "alpha": 1.0,
+          "threshold": 0.1,
+          "train_frames": 14400
+        }
+      },
+      "feature_std": 0.3010905981063843,
+      "effective_rank": 28.247928619384766,
+      "clean_silence_feature_rms": 0.39005187153816223,
+      "replayed_test_frames": 3454,
+      "encoder_sha256": "a7059ee24cd3a5413d809146176b99f88172a255a623993ae47a4ec6bf98f637"
+    },
+    "latent_acoustic": {
+      "test": {
+        "cluster": {
+          "music": {
+            "frames": 1120,
+            "accuracy": 0.49464285373687744
+          },
+          "en": {
+            "frames": 1156,
+            "accuracy": 0.04930795729160309
+          },
+          "ja": {
+            "frames": 1178,
+            "accuracy": 0.1553480476140976
+          },
+          "balanced_accuracy": 0.2984854280948639
+        },
+        "midi_key_activity": {
+          "frames": 880,
+          "positive_keys": 1030,
+          "tp": 415,
+          "fp": 3598,
+          "fn": 615,
+          "precision": 0.10341390480936954,
+          "recall": 0.4029126213592233,
+          "micro_f1": 0.16458457267499504
+        },
+        "unsupported_midi_sources": 3
+      },
+      "silence": {
+        "cluster": {
+          "music": {
+            "frames": 1120,
+            "accuracy": 0.4776785671710968
+          },
+          "en": {
+            "frames": 1156,
+            "accuracy": 0.0
+          },
+          "ja": {
+            "frames": 1178,
+            "accuracy": 0.0008488964522257447
+          },
+          "balanced_accuracy": 0.23905150769860484
+        },
+        "midi_key_activity": {
+          "frames": 880,
+          "positive_keys": 1030,
+          "tp": 0,
+          "fp": 0,
+          "fn": 1030,
+          "precision": 0.0,
+          "recall": 0.0,
+          "micro_f1": 0.0
+        },
+        "unsupported_midi_sources": 3
+      },
+      "probe_selection": {
+        "cluster": {
+          "validation_score": 0.15211237454786897,
+          "alpha": 0.001,
+          "threshold": 0,
+          "train_frames": 32278
+        },
+        "pitch": {
+          "validation_score": 0.28713222261609356,
+          "alpha": 0.01,
+          "threshold": 0.1,
+          "train_frames": 14400
+        }
+      },
+      "feature_std": 0.6697631478309631,
+      "effective_rank": 15.6961669921875,
+      "clean_silence_feature_rms": 0.7792033553123474,
+      "replayed_test_frames": 3454,
+      "encoder_sha256": "2fd58b81c7d3bf104a9fbc3c6ca902a51635473efb71547744755710f1d46d46"
+    },
+    "latent": {
+      "test": {
+        "cluster": {
+          "music": {
+            "frames": 1120,
+            "accuracy": 0.5160714387893677
+          },
+          "en": {
+            "frames": 1156,
+            "accuracy": 0.05622837319970131
+          },
+          "ja": {
+            "frames": 1178,
+            "accuracy": 0.15704584121704102
+          },
+          "balanced_accuracy": 0.3113542729988694
+        },
+        "midi_key_activity": {
+          "frames": 880,
+          "positive_keys": 1030,
+          "tp": 416,
+          "fp": 3043,
+          "fn": 614,
+          "precision": 0.12026597282451576,
+          "recall": 0.40388349514563104,
+          "micro_f1": 0.18534194698151035
+        },
+        "unsupported_midi_sources": 3
+      },
+      "silence": {
+        "cluster": {
+          "music": {
+            "frames": 1120,
+            "accuracy": 0.4776785671710968
+          },
+          "en": {
+            "frames": 1156,
+            "accuracy": 0.0
+          },
+          "ja": {
+            "frames": 1178,
+            "accuracy": 0.0008488964522257447
+          },
+          "balanced_accuracy": 0.23905150769860484
+        },
+        "midi_key_activity": {
+          "frames": 880,
+          "positive_keys": 1030,
+          "tp": 0,
+          "fp": 0,
+          "fn": 1030,
+          "precision": 0.0,
+          "recall": 0.0,
+          "micro_f1": 0.0
+        },
+        "unsupported_midi_sources": 3
+      },
+      "probe_selection": {
+        "cluster": {
+          "validation_score": 0.1678320188075304,
+          "alpha": 0.001,
+          "threshold": 0,
+          "train_frames": 32278
+        },
+        "pitch": {
+          "validation_score": 0.3138247390066435,
+          "alpha": 0.1,
+          "threshold": 0.1,
+          "train_frames": 14400
+        }
+      },
+      "feature_std": 0.6691005825996399,
+      "effective_rank": 14.823848724365234,
+      "clean_silence_feature_rms": 0.8530392050743103,
+      "replayed_test_frames": 3454,
+      "encoder_sha256": "ee0c3906f73021fdc9eb183bc54ef76cf1efbcedde20b10452b0dd7168d950c6"
+    }
+  },
+  "training": {
+    "latent_acoustic": {
+      "completed": true,
+      "steps": 1000,
+      "seconds": 61.666056453039346,
+      "last": {
+        "step": 1000,
+        "loss": 0.26509934663772583,
+        "latent": 0.24919119477272034,
+        "spectrum20": 0.09882064163684845,
+        "energy": 0.09173933416604996,
+        "stereo": 0.0,
+        "spectrum50": 0.08566676825284958,
+        "spectrum200": 0.06792175769805908,
+        "gradient_norm": 0.8547037243843079,
+        "ema_decay": 0.998991,
+        "teacher_std": 0.8002902865409851,
+        "masked_frames": 232,
+        "lr": 0.0003
+      },
+      "initial_encoder_sha256": "a7059ee24cd3a5413d809146176b99f88172a255a623993ae47a4ec6bf98f637",
+      "final_encoder_sha256": "2fd58b81c7d3bf104a9fbc3c6ca902a51635473efb71547744755710f1d46d46",
+      "teacher_sha256": "a5aeab40911fe9a344e92999a0088ad0ac12f3409cf292b507f8692b7fdd4da8",
+      "parameters": 1166858,
+      "encoder_parameters": 1025216,
+      "optimizer_step_values": [
+        1000
+      ],
+      "peak_cuda_gib": 0.8234381675720215,
+      "coefficients": {
+        "latent": 1.0,
+        "spectrum20": 0.06116852798427046,
+        "spectrum50": 0.060691125424262256,
+        "spectrum200": 0.05732196155633637,
+        "energy": 0.008402209365214781,
+        "stereo": 0.0
+      },
+      "schedule_sha256": "f653bc4de641a110724ee9d5f76799a093c643320affd004e7611c3fa4d80bc6"
+    },
+    "latent": {
+      "completed": true,
+      "steps": 1000,
+      "seconds": 47.11965878981573,
+      "last": {
+        "step": 1000,
+        "loss": 0.24884673953056335,
+        "latent": 0.24884673953056335,
+        "gradient_norm": 0.17210449278354645,
+        "ema_decay": 0.998991,
+        "teacher_std": 0.7593058347702026,
+        "masked_frames": 232,
+        "lr": 0.0003
+      },
+      "initial_encoder_sha256": "a7059ee24cd3a5413d809146176b99f88172a255a623993ae47a4ec6bf98f637",
+      "final_encoder_sha256": "ee0c3906f73021fdc9eb183bc54ef76cf1efbcedde20b10452b0dd7168d950c6",
+      "teacher_sha256": "daef30075808217dd779499afcfe9a464478bb0301e9346173c1b4f69a76e898",
+      "parameters": 1166858,
+      "encoder_parameters": 1025216,
+      "optimizer_step_values": [
+        1000
+      ],
+      "peak_cuda_gib": 0.0842595100402832,
+      "coefficients": {
+        "latent": 1.0
+      },
+      "schedule_sha256": "f653bc4de641a110724ee9d5f76799a093c643320affd004e7611c3fa4d80bc6"
+    }
+  },
+  "audit": {
+    "passed": true,
+    "total_updates": 2000,
+    "runs": {
+      "latent_acoustic": {
+        "updates": 1000,
+        "changed_tensors": {
+          "encoder.stem.": 2,
+          "encoder.blocks.": 18,
+          "predictor.": 2,
+          "acoustic.": 8
+        },
+        "replayed_test_frames": 3454
+      },
+      "latent": {
+        "updates": 1000,
+        "changed_tensors": {
+          "encoder.stem.": 2,
+          "encoder.blocks.": 18,
+          "predictor.": 2,
+          "acoustic.": 0
+        },
+        "replayed_test_frames": 3454
+      }
+    },
+    "persistent_files": 23,
+    "persistent_bytes": 53069753,
+    "artifact_manifest_sha256": "c1901ed749a52949102013035b1acd5a03cc194a17e81ace7b9b97d7b6912c4b",
+    "audit_sha256": "0c1908ac81cdc47b9634916ef692e015ae389e1e06f563ebe49939a4235e83d9"
+  }
+}
