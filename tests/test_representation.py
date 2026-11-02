@@ -31,6 +31,81 @@ def config():
     )
 
 
+def test_default_encoder_uses_the_same_model_as_explicit_direct_patches(config):
+    torch.manual_seed(7)
+    default = RepresentationEncoder(config)
+    torch.manual_seed(7)
+    explicit = RepresentationEncoder(config, "patch20")
+    wave = torch.randn(1, 2, 4 * HOP)
+    lengths = torch.tensor([4 * HOP])
+    torch.testing.assert_close(default.encode(wave, lengths), explicit.encode(wave, lengths))
+    assert isinstance(default.stem, torch.nn.Linear)
+    assert default.stem.in_features == 2 * HOP
+
+
+@pytest.mark.parametrize("saved", [None, ["early_concat", "patch20"], "legacy"])
+def test_suite_cli_uses_direct_patches_for_new_plans_and_preserves_saved_variants(
+    tmp_path, monkeypatch, saved
+):
+    import json
+    import runpy
+    import sys
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    recipe = root / "recipes/audio-representation-comparison.json"
+    suite = tmp_path / "suite"
+    plan = {"config": json.loads(recipe.read_text()), "steps": 4, "seeds": [17]}
+    if saved is not None:
+        suite.mkdir()
+        if saved != "legacy":
+            plan["variants"] = saved
+        (suite / "plan.json").write_text(json.dumps(plan))
+    trained = []
+
+    def run(command, **kwargs):
+        if "prepare" in command:
+            suite.mkdir()
+            plan["variants"] = command[command.index("--variants") + 1 :]
+            (suite / "plan.json").write_text(json.dumps(plan))
+        else:
+            variant = command[command.index("--variant") + 1]
+            trained.append(variant)
+            directory = suite / f"{variant}-seed-17"
+            directory.mkdir()
+            (directory / "report.json").write_text(json.dumps({"variant": variant}))
+
+    monkeypatch.setattr("subprocess.run", run)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "run_ssl_comparison.py",
+            "suite",
+            "--manifest",
+            "unused.json",
+            "--suite",
+            str(suite),
+            "--recipe",
+            str(recipe),
+            "--steps",
+            "4",
+            "--seeds",
+            "17",
+            "--device",
+            "cpu",
+        ],
+    )
+    runpy.run_path(str(root / "experiments/run_ssl_comparison.py"), run_name="__main__")
+    expected = (
+        ["late_concat", "early_concat", "cnn20"] if saved == "legacy" else saved or ["patch20"]
+    )
+    assert trained == expected
+    assert set(json.loads((suite / "comparison.json").read_text())) == {
+        f"{variant}-seed-17" for variant in expected
+    }
+
+
 @pytest.mark.parametrize("variant", VARIANTS)
 def test_twenty_fps_shapes_padding_and_gradients(config, variant):
     model = RepresentationEncoder(config, variant)

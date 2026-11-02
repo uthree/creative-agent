@@ -15,6 +15,7 @@ from creative_agent.audio import file_hash
 from creative_agent.llm_diagnostics import tensor_hash
 from creative_agent.representation import (
     COMPARISON_VARIANTS,
+    DEFAULT_VARIANT,
     HOP,
     VARIANTS,
     CleanTargetFeatures,
@@ -49,7 +50,7 @@ def amp(device):
 
 
 def prepare_comparison(
-    manifest, output, config, steps, seeds, device, *, variants=COMPARISON_VARIANTS
+    manifest, output, config, steps, seeds, device, *, variants=(DEFAULT_VARIANT,)
 ):
     if output.exists():
         raise ValueError("comparison directory already exists")

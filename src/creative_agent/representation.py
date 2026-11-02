@@ -10,6 +10,8 @@ from creative_agent.config import AudioSSLConfig
 from creative_agent.model import BidirectionalBlock
 from creative_agent.seanet import ProgressiveDownsampler, conv, valid_samples
 
+DEFAULT_VARIANT = "patch20"
+# Original plans without an explicit variants field describe these three controls.
 COMPARISON_VARIANTS = ("late_concat", "early_concat", "cnn20")
 VARIANTS = (*COMPARISON_VARIANTS, "seanet20", "patch20")
 HOP = 2400  # 48 kHz / 20 FPS; also the non-overlapping teacher window.
@@ -105,7 +107,7 @@ class ConvolutionSubsampler(nn.Module):
 class RepresentationEncoder(nn.Module):
     """Reusable encoder returning 20 Hz, width-dimensional audio representations."""
 
-    def __init__(self, config, variant="cnn20"):
+    def __init__(self, config, variant=DEFAULT_VARIANT):
         super().__init__()
         if variant not in VARIANTS:
             raise ValueError("unknown representation variant")

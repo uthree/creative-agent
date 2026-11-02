@@ -50,6 +50,6 @@ uv run --no-sync python experiments/audit_ssl_comparison.py \
   --summary runs/audio-seanet20-smoke-20261102/audited-summary.json
 ```
 
-`--variants`を省略したsuiteは従来の3条件を維持する。新しいplanには選んだ条件を記録し、学習・監査がその条件を使う。保存形式は既存と同じで`variant=seanet20`から再構築する。過去のrunは書き換えず、新しい実行先で教師・計画・重み・TensorBoardを保存する。
+新規suiteは`patch20`が既定のため、この比較では`--variants early_concat seanet20`を明示する。新しいplanには選んだ条件を記録し、学習・監査がその条件を使う。保存形式は既存と同じで`variant=seanet20`から再構築する。過去のrunは書き換えず、新しい実行先で教師・計画・重み・TensorBoardを保存する。
 
 TensorBoardには既存経路と同様にloss、勾配、混合例数、群別評価、入力音声と教師／予測画像を記録する。今回の変更範囲はencoder単体のSSL経路であり、LLM接続・文字起こし・採譜の再学習は別段階になる。

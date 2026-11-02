@@ -2,7 +2,9 @@
 
 音声・音楽を理解し、制作アプリで作成・修正・修復を完了するエージェントの学習基盤。
 
-音声の自己教師あり学習スモークを実装済み。[実行手順](docs/audio-ssl-smoke.ja.md)に従って、自作の48 kHzステレオ音声で前処理、マスク付き復元、実更新、保存、再開を確認できる。
+新規SSLの標準構成は、**50 ms波形パッチ → Linear 4,800→128 → 双方向Transformer 2層**の`patch20`とする。20 FPS・128次元を出力し、CNN前段と平均プーリングを使わない。[採用方針と起動方法](docs/audio-patch20.ja.md)、[比較結果](docs/audio-patch20-report.ja.md)を参照。新規plan・encoder・単独学習の既定値も`patch20`である。
+
+初期方式の自己教師あり学習スモークも実装済み。[実行手順](docs/audio-ssl-smoke.ja.md)に従って、自作の48 kHzステレオ音声で前処理、マスク付き復元、実更新、保存、再開を確認できる。
 
 RTX 3070で20更新と別プロセスからの21更新目への再開を確認した。[実測結果](docs/audio-ssl-smoke-report.ja.md)に、検証内容と現在の学習品質の限界をまとめている。
 
@@ -36,7 +38,7 @@ RTX 3070で20更新と別プロセスからの21更新目への再開を確認�
 
 [LLMを変更した切り分け実験](docs/audio-llm-diagnostics-report.ja.md)では、LFM3とQwen3の音声入力・正解情報テキスト入力をASRと30秒・60秒採譜で比較した。計8,000更新で全条件の訓練例を完全再現できたが、未知音声では訓練答案のコピーが多く、LLM変更では解決しなかった。[条件と実行手順](docs/audio-llm-diagnostics.ja.md)も参照。
 
-新規学習の音声接続は、5フレームを時刻順に連結してからLLM次元へ投影する。[接続方式と旧checkpointの扱い](docs/audio-multitask-lfm3.ja.md#フレーム連結への変更と旧成果物)に、末尾padding、旧平均cacheの識別、projectorの再学習を記載している。
+既存の100 FPS encoderを使うLLM学習では、5フレームを時刻順に連結してからLLM次元へ投影する。[接続方式と旧checkpointの扱い](docs/audio-multitask-lfm3.ja.md#フレーム連結への変更と旧成果物)に、末尾padding、旧平均cacheの識別、projectorの再学習を記載している。標準の`patch20`はencoder自体が20 FPSを返すため、今後のLLM接続ではこの表現を直接投影する契約へ移行する。
 
 [20 FPS CNNと浅いTransformerのSSL比較](docs/audio-representation-comparison.ja.md)では、音楽・英語・日本語を使い、固定の離散教師に対するmask予測と混合音声のdenoisingを学習する。100 FPSで文脈処理する対照、先に連結する対照、Conformerを参考にしたCNNを同じ条件で比較する。 [実測報告](docs/audio-representation-comparison-report.ja.md)では9 run・9,000更新を監査し、先行連結20 FPSの近い集計CEと長音声の高速化、今回のdepthwise CNN案の精度未達を記録している。
 

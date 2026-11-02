@@ -8,7 +8,12 @@ from pathlib import Path
 
 import torch
 
-from creative_agent.representation import COMPARISON_VARIANTS, VARIANTS, RepresentationConfig
+from creative_agent.representation import (
+    COMPARISON_VARIANTS,
+    DEFAULT_VARIANT,
+    VARIANTS,
+    RepresentationConfig,
+)
 from creative_agent.representation_training import (
     load_json,
     prepare_comparison,
@@ -27,15 +32,19 @@ def main():
     )
     parser.add_argument("--steps", type=int, default=1000)
     parser.add_argument("--seeds", type=int, nargs="+", default=[20261102, 20261103, 20261104])
-    parser.add_argument("--variant", choices=VARIANTS, default="cnn20")
-    parser.add_argument(
-        "--variants", choices=VARIANTS, nargs="+", default=list(COMPARISON_VARIANTS)
-    )
+    parser.add_argument("--variant", choices=VARIANTS, default=DEFAULT_VARIANT)
+    parser.add_argument("--variants", choices=VARIANTS, nargs="+")
     parser.add_argument("--seed", type=int, default=20261102)
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--stop-after", type=int)
     args = parser.parse_args()
     device = torch.device(args.device)
+    if args.variants is None:
+        args.variants = (
+            load_json(args.suite / "plan.json").get("variants", list(COMPARISON_VARIANTS))
+            if args.stage == "suite" and (args.suite / "plan.json").exists()
+            else [DEFAULT_VARIANT]
+        )
     if not 1 <= args.steps <= 100000 or len(set(args.seeds)) != len(args.seeds):
         parser.error("positive bounded steps and distinct seeds required")
     if len(set(args.variants)) != len(args.variants):

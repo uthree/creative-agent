@@ -20,6 +20,20 @@ flowchart TB
 
 投影層は614,528パラメータ、SSL headを含む全体は1,025,216。対照`early_concat`は527,712であり、同じモデルサイズの比較ではない。Transformerの幅・深さを変えず、パラメータ数・処理時間・メモリを併記する。
 
+## 標準構成としての採用
+
+2026年11月2日（JST）。前段の単純さと、比較で通常音声CEが全3 seedで改善した結果を踏まえ、今後の音声表現学習は`patch20`を基準とする。`RepresentationEncoder(config)`、新規plan、CLIの単独学習は構成指定を省略すると`patch20`を使う。
+
+```sh
+uv run --no-sync python experiments/run_ssl_comparison.py suite \
+  --manifest data/public-audio-20261101/manifest.json \
+  --suite runs/audio-patch20-next
+```
+
+新規suiteは`patch20`だけを既定の各1,000更新・3 seedで実行する。対照との比較は`--variants early_concat patch20`を明示する。既存suiteで構成指定を省略した場合は保存planの`variants`に従い、この項目のない初期planは従来の3条件として解釈する。checkpointは保存された`variant`を指定して再構築し、学習再開には保存済みソース・planの照合も必要である。
+
+LLM接続は、20 FPS・128次元の出力をそのままLLMの埋め込み幅へ投影する方針とする。さらに5フレームをまとめる処理は加えない。既存の100 FPS encoderを使うLLM経路からの移植とprojectorの再学習は後続の実装で、ASR・採譜の精度はその段階で評価する。
+
 ## 固定する比較
 
 実音楽・英語・日本語の同じsource分割を使う。各条件1,000更新・3 seed（20261102／20261103／20261104）、計6,000更新。最大4秒、batch 8、群比率2:1:1、trainのみでfitした64クラスタ、LR 3e-4・warmup 50・AdamW・BF16 autocastを共通にする。seedごとのTransformer・mask token・headの初期値、教師、音声区間、donor、SNR、maskを揃える。testは最終更新だけで評価する。

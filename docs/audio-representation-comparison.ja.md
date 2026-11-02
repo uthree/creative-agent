@@ -46,7 +46,8 @@ TensorBoardには全更新のloss・勾配・mask数・混合例数・LR、valid
 ```sh
 uv run --no-sync python experiments/run_ssl_comparison.py prepare \
   --manifest data/public-audio-20261101/manifest.json \
-  --suite runs/audio-ssl-cnn-comparison-20261102
+  --suite runs/audio-ssl-cnn-comparison-20261102 \
+  --variants late_concat early_concat cnn20
 
 uv run --no-sync python experiments/run_ssl_comparison.py train \
   --manifest data/public-audio-20261101/manifest.json \
