@@ -2,6 +2,8 @@
 
 2026年11月2日 JST。[汎用SSL調査](audio-universal-ssl-survey.ja.md)の③「EMA潜在予測＋音響復元」、②「EMA潜在予測だけ」を、この順に同じ実データで学習する小規模比較。新しい実装と実験経路の説明であり、最終的な精度は別の実測報告に記載する。
 
+10,000更新の比較後、新規学習には②の潜在予測のみを採用した。[採用した損失の詳細](audio-latent-ssl.ja.md)に式と設定を記載する。単独の`train`で`--objective`を省略すると②になり、以下の`suite`は比較再現用として③→②の両方を実行する。
+
 ## 固定するもの
 
 - 非重複50 msの48 kHzステレオ波形パッチ、`Linear(4800, 128)`、幅128・2層・4 headsの双方向Transformer。CNN・時間平均による間引きは使わない。
@@ -65,7 +67,7 @@ MIDIは原音cropの開始時刻を足したパッチ中心で、`onset <= cente
 
 `checkpoint.pt`には教師・生徒・optimizer・全更新の履歴、`encoder.pt`には再利用可能なencoderを保存する。評価ではreadoutとencoderを保存重みから読み直し、全testフレームの予測が一致することを確認する。全成果物のサイズ・SHA256一覧を作り、監査では更新数、optimizer step、変更された重み、共通正解、TensorBoardを照合する。
 
-TensorBoardにはtrain loss、EMA係数、教師の分散、勾配、共通probeのtest／無音精度、入力音声、対応するクラスタ正解／予測、音楽のMIDI押下ピアノロール正解／予測を記録する。画像は上側が正解、下側が予測。これはSSLとprobeの比較であり、LLM応答やMIDI生成モデルの学習は含まない。
+TensorBoardにはtrain loss、EMA係数、正規化後の教師targetの標準偏差、勾配、共通probeのtest／無音精度、入力音声、対応するクラスタ正解／予測、音楽のMIDI押下ピアノロール正解／予測を記録する。画像は上側が正解、下側が予測。これはSSLとprobeの比較であり、LLM応答やMIDI生成モデルの学習は含まない。
 
 永続ディスクの容量が小さいため、実行前にcheckpoint2つ・encoder2つ・atomic置換用の一時コピー・ログを含めた容量を確認する。データ・重み・特徴・ログはGitに含めない。
 

@@ -1,4 +1,4 @@
-"""Compare acoustic-auxiliary latent SSL (3) followed by latent-only SSL (2)."""
+"""Train latent-only SSL by default; suite reproduces the paired 3-then-2 comparison."""
 
 import argparse
 from pathlib import Path
@@ -24,7 +24,12 @@ def main():
     parser.add_argument("--parent", type=Path)
     parser.add_argument("--steps", type=int, default=1000)
     parser.add_argument("--seed", type=int, default=20261102)
-    parser.add_argument("--objective", choices=OBJECTIVES, default=OBJECTIVES[0])
+    parser.add_argument(
+        "--objective",
+        choices=OBJECTIVES,
+        default="latent",
+        help="train stage only (default: latent)",
+    )
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--stop-after", type=int)
     args = parser.parse_args()
