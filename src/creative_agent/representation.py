@@ -1,5 +1,6 @@
 """20 Hz audio representations and clean discrete targets for masked denoising."""
 
+import math
 from dataclasses import asdict, dataclass
 
 import torch
@@ -34,6 +35,8 @@ class RepresentationConfig:
     warmup_steps: int = 50
     batch_size: int = 8
     seanet_base_width: int = 4
+    residual_init_scale: float = 1.0
+    patch_init: str = "random"
 
     def __post_init__(self):
         for name in (
@@ -59,6 +62,13 @@ class RepresentationConfig:
             raise ValueError("invalid crop duration or learning rate")
         if self.batch_size % 4:
             raise ValueError("batch size must be divisible by four: music/en/ja = 2/1/1")
+        scale = self.residual_init_scale
+        if type(scale) not in (int, float) or not math.isfinite(scale) or not 0 < scale <= 1:
+            raise ValueError("residual_init_scale must be finite and in (0, 1]")
+        if self.patch_init not in ("random", "mel_sinusoidal"):
+            raise ValueError("unknown patch_init")
+        if self.patch_init == "mel_sinusoidal" and self.width % 4:
+            raise ValueError("mel_sinusoidal requires width divisible by four for stereo sin/cos")
 
     def to_dict(self):
         return asdict(self)
@@ -82,6 +92,33 @@ def concatenate(features):
 def waveform_patches(waves):
     """Nonoverlapping 50 ms patches, flattened as left samples then right samples."""
     return waves.unfold(-1, HOP, HOP).permute(0, 2, 1, 3).flatten(-2)
+
+
+@torch.no_grad()
+def initialize_sinusoidal_patches(projection):
+    """Trainable Hann-windowed sin/cos pairs, 20 Hz..20 kHz on the HTK mel scale.
+
+    Rows: left sin/cos pairs, then right pairs. This is not a mel spectrogram:
+    no power, triangular frequency integration, log or phase removal is applied.
+    """
+    bands = projection.out_features // 4
+    mel = torch.linspace(
+        2595 * math.log10(1 + 20 / 700),
+        2595 * math.log10(1 + 20000 / 700),
+        bands,
+        dtype=torch.float64,
+    )
+    hz = 700 * (10 ** (mel / 2595) - 1)
+    seconds = (torch.arange(HOP, dtype=torch.float64) - (HOP - 1) / 2) / 48000
+    angle = 2 * math.pi * hz[:, None] * seconds
+    filters = torch.stack((angle.sin(), angle.cos()), dim=1).flatten(0, 1)
+    filters *= torch.hann_window(HOP, periodic=False, dtype=torch.float64)
+    # Match the expected row L2 norm of nn.Linear's original uniform initialization.
+    filters /= filters.norm(dim=1, keepdim=True) * math.sqrt(3)
+    projection.weight.zero_()
+    projection.weight[: 2 * bands, :HOP].copy_(filters)
+    projection.weight[2 * bands :, HOP:].copy_(filters)
+    projection.bias.zero_()
 
 
 class ConvolutionSubsampler(nn.Module):
@@ -111,6 +148,8 @@ class RepresentationEncoder(nn.Module):
         super().__init__()
         if variant not in VARIANTS:
             raise ValueError("unknown representation variant")
+        if config.patch_init != "random" and variant != "patch20":
+            raise ValueError("sinusoidal patch initialization is supported only for patch20")
         self.config, self.variant = config, variant
         self.output_hop = HOP
         self.stem = nn.Sequential(
@@ -125,11 +164,20 @@ class RepresentationEncoder(nn.Module):
             width=config.width, heads=config.heads, layers=config.layers, ffn_width=config.ffn_width
         )
         self.blocks = nn.ModuleList([BidirectionalBlock(block) for _ in range(config.layers)])
+        # Initialization only: no persistent forward multiplier or extra parameters.
+        # Keep 1.0 as the fallback for saved configurations predating this option.
+        if config.residual_init_scale != 1:
+            with torch.no_grad():
+                for layer in self.blocks:
+                    layer.output.weight.mul_(config.residual_init_scale)
+                    layer.down.weight.mul_(config.residual_init_scale)
         self.norm = nn.RMSNorm(config.width)
         self.output_norm = nn.RMSNorm(config.width)
         self.head = nn.Linear(config.width, config.clusters)
         if variant == "patch20":
             self.stem = nn.Linear(2 * HOP, config.width)
+            if config.patch_init == "mel_sinusoidal":
+                initialize_sinusoidal_patches(self.stem)
             self.reducer = nn.Identity()
         elif variant == "seanet20":
             # Keep paired Transformer/head initialization identical to the existing controls.

@@ -27,6 +27,7 @@ from creative_agent.ssl_probes import (
     probe_examples,
     score_probes,
 )
+from creative_agent.ssl_validation import validation_diagnostics
 from creative_agent.training import atomic_checkpoint, log_stereo_audio, source_identity
 
 
@@ -115,9 +116,31 @@ def restore_state(model, teacher, optimizer, saved, initial):
     return saved["history"], saved["seconds"]
 
 
-def prepare_objectives(manifest, suite, codebook_path, config, steps, seed, device, *, parent=None):
+def prepare_objectives(
+    manifest,
+    suite,
+    codebook_path,
+    config,
+    steps,
+    seed,
+    device,
+    *,
+    parent=None,
+    objectives=OBJECTIVES,
+    validation_interval=0,
+):
     if suite.exists() or steps < 1 or config.clusters != 64 or config.mix_probability != 0:
         raise ValueError("new output, positive steps, 64 classes and no artificial mixing required")
+    if (
+        not objectives
+        or len(set(objectives)) != len(objectives)
+        or set(objectives) - set(OBJECTIVES)
+    ):
+        raise ValueError("distinct supported objectives required")
+    if type(validation_interval) is not int or validation_interval < 0:
+        raise ValueError("nonnegative validation_interval required")
+    if parent is not None and tuple(objectives) != OBJECTIVES:
+        raise ValueError("parent continuation requires the original paired comparison")
     torch.set_num_threads(2)
     data = RepresentationData(manifest, config.crop_seconds)
     codebook = torch.load(codebook_path, weights_only=True, map_location="cpu")
@@ -130,13 +153,14 @@ def prepare_objectives(manifest, suite, codebook_path, config, steps, seed, devi
         raise ValueError("probe teacher must be fitted on train only")
     schedule = data.schedule(steps, config.batch_size, seed)
     extractor = AcousticTargets().to(device)
-    stats_examples = [e for batch in schedule[: min(8, steps)] for e in batch]
-    stats = fit_acoustic_stats(data, stats_examples, extractor, config, device)
+    auxiliary = "latent_acoustic" in objectives
+    stats_examples = [e for batch in schedule[: min(8, steps)] for e in batch] if auxiliary else []
+    stats = fit_acoustic_stats(data, stats_examples, extractor, config, device) if auxiliary else {}
     torch.manual_seed(seed)
     model = ObjectiveModel(config).to(device)
     teacher = model.make_teacher()
     batch = model_batch(data, schedule[0], config, seed + 100000, device)
-    losses, _ = objective_losses(model, teacher, extractor, *batch, stats)
+    losses, _ = objective_losses(model, teacher, extractor, *batch, stats, auxiliary=auxiliary)
     norms = {}
     for key, value in losses.items():
         grad = torch.autograd.grad(value, model.encoder.stem.weight, retain_graph=True)[0]
@@ -144,7 +168,7 @@ def prepare_objectives(manifest, suite, codebook_path, config, steps, seed, devi
     if not math.isfinite(norms["latent"]) or norms["latent"] <= 0:
         raise ValueError("invalid latent calibration gradient")
     coefficients = {"latent": 1.0}
-    for key in extractor.dimensions:
+    for key in extractor.dimensions if auxiliary else ():
         coefficients[key] = (
             min(1.0, max(0.001, 0.05 * norms["latent"] / norms[key]))
             if math.isfinite(norms[key]) and norms[key] > 0
@@ -167,7 +191,7 @@ def prepare_objectives(manifest, suite, codebook_path, config, steps, seed, devi
     model_bytes = sum(p.numel() for p in model.parameters()) * 4
     encoder_bytes = sum(p.numel() for p in model.encoder.parameters()) * 4
     state_bytes = 3 * model_bytes + encoder_bytes + max(512_000, steps * 256)
-    estimate = 3 * state_bytes + 2 * encoder_bytes + 8_000_000
+    estimate = (len(objectives) + 1) * state_bytes + len(objectives) * encoder_bytes + 8_000_000
     if shutil.disk_usage(suite.parent).free < estimate:
         raise OSError(f"need {estimate} free bytes for durable checkpoints and atomic replacement")
     suite.mkdir(parents=True)
@@ -184,7 +208,8 @@ def prepare_objectives(manifest, suite, codebook_path, config, steps, seed, devi
             "config": config.to_dict(),
             "steps": steps,
             "seed": seed,
-            "order": list(OBJECTIVES),
+            "order": list(objectives),
+            "validation_interval": validation_interval,
             "manifest_sha256": data.data.signature,
             "data": data.description(),
             "schedule_sha256": fingerprint(schedule),
@@ -207,6 +232,8 @@ def train_objective(manifest, suite, objective, device, *, stop_after=None):
     torch.set_num_threads(2)
     plan = load_json(suite / "plan.json")
     config = RepresentationConfig(**plan["config"])
+    if objective not in plan["order"]:
+        raise ValueError("objective absent from prepared plan")
     if source_identity()["file_sha256"] != plan["source"]["file_sha256"]:
         raise ValueError("source changed after preparation")
     if experiment_hash() != plan["experiment_sha256"]:
@@ -281,6 +308,25 @@ def train_objective(manifest, suite, objective, device, *, stop_after=None):
         "run/objective", objective + "; frozen readouts, no LLM or labeled SSL", len(history)
     )
     extractor = AcousticTargets().to(device)
+    interval = plan.get("validation_interval", 0)
+
+    def log_validation(step):
+        metrics = validation_diagnostics(
+            model,
+            teacher,
+            data,
+            plan["probe_examples"]["validation"],
+            plan["seed"] + 900000,
+            device,
+        )
+        scalar_metrics(writer, "validation", metrics, step)
+        path = directory / "validation.json"
+        rows = load_json(path) if path.exists() else []
+        rows.append({"step": step, **metrics})
+        save_json(path, rows)
+
+    if interval and not history:
+        log_validation(0)
     if device.type == "cuda":
         torch.cuda.reset_peak_memory_stats()
     for step in range(len(history), limit):
@@ -296,6 +342,8 @@ def train_objective(manifest, suite, objective, device, *, stop_after=None):
         seconds += time.perf_counter() - started
         history.append(row)
         scalar_metrics(writer, "train", row, step + 1)
+        if interval and ((step + 1) % interval == 0 or step + 1 == plan["steps"]):
+            log_validation(step + 1)
         if (step + 1) % 250 == 0 or step + 1 == limit:
             atomic_checkpoint(
                 checkpoint,
@@ -369,7 +417,7 @@ def evaluate_objectives(manifest, suite, device):
         raise ValueError("evaluation provenance changed")
     codebook = torch.load(suite / "codebook.pt", weights_only=True)
     result = {}
-    for name in ("untrained", *OBJECTIVES):
+    for name in ("untrained", *plan["order"]):
         torch.manual_seed(plan["seed"])
         encoder = ObjectiveModel(config).encoder.to(device)
         if name != "untrained":
@@ -407,6 +455,7 @@ def evaluate_objectives(manifest, suite, device):
         rank = float((-(probability * probability.clamp_min(1e-12).log()).sum()).exp())
         result[name] = {
             "test": metrics,
+            "validation": score_probes(probes, packs["validation"])[0],
             "silence": silence_metrics,
             "probe_selection": selection,
             "feature_std": float(centered.std(0).mean()),
@@ -477,7 +526,7 @@ def evaluate_objectives(manifest, suite, device):
             "files": {
                 str(p.relative_to(suite)): {"bytes": p.stat().st_size, "sha256": file_hash(p)}
                 for p in sorted(suite.rglob("*"))
-                if p.is_file() and p.name != "artifact-manifest.json"
+                if p.is_file() and p.name not in ("artifact-manifest.json", "audit.json")
             },
             "manifest_sha256": data.data.signature,
             "source": plan["source"],

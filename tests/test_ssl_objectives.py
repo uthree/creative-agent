@@ -1,4 +1,5 @@
 import copy
+from dataclasses import replace
 
 import pytest
 import torch
@@ -71,11 +72,16 @@ def test_teacher_is_stop_gradient_and_ema_is_exact(setup):
 
 
 @pytest.mark.parametrize("auxiliary", [True, False])
-def test_training_resume_is_exact_and_only_enabled_heads_update(setup, auxiliary):
+@pytest.mark.parametrize("residual_init_scale", [1.0, 1e-4])
+@pytest.mark.parametrize("patch_init", ["random", "mel_sinusoidal"])
+def test_training_resume_is_exact_and_only_enabled_heads_update(
+    setup, auxiliary, residual_init_scale, patch_init
+):
     from creative_agent.llm_diagnostics import tensor_hash
     from creative_agent.ssl_objective_training import restore_state
 
     config, extractor, stats, batch = setup
+    config = replace(config, residual_init_scale=residual_init_scale, patch_init=patch_init)
     torch.manual_seed(9)
     model = ObjectiveModel(config)
     initial_hash = tensor_hash(model.encoder.state_dict())

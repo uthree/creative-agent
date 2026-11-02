@@ -21,7 +21,9 @@ def audit(suite):
     comparison = load_json(suite / "comparison.json")
     assert plan["source"]["file_sha256"] == source_identity()["file_sha256"]
     assert plan["experiment_sha256"] == experiment_hash()
-    assert plan["order"] == list(OBJECTIVES)
+    objectives = plan["order"]
+    assert objectives and len(set(objectives)) == len(objectives)
+    assert not set(objectives) - set(OBJECTIVES)
     total_bytes = 0
     for relative, item in artifacts["files"].items():
         path = suite / relative
@@ -32,7 +34,7 @@ def audit(suite):
     initial_hash = tensor_hash(initial.encoder.state_dict())
     runs = {}
     parent = plan.get("parent")
-    for name in OBJECTIVES:
+    for name in objectives:
         directory = suite / name
         state = torch.load(directory / "checkpoint.pt", weights_only=True, map_location="cpu")
         exported = torch.load(directory / "encoder.pt", weights_only=True, map_location="cpu")
@@ -88,7 +90,7 @@ def audit(suite):
         }
     targets = [
         torch.load(suite / name / "test-predictions.pt", weights_only=True)
-        for name in ("untrained", *OBJECTIVES)
+        for name in ("untrained", *objectives)
     ]
     for key in ("cluster_target", "pitch_target"):
         assert all(torch.equal(targets[0][key], v[key]) for v in targets[1:])
@@ -104,6 +106,7 @@ def audit(suite):
     }
     save_json(suite / "audit.json", result)
     print(result)
+    return result
 
 
 if __name__ == "__main__":

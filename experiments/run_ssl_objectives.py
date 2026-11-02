@@ -24,6 +24,13 @@ def main():
     parser.add_argument("--parent", type=Path)
     parser.add_argument("--steps", type=int, default=1000)
     parser.add_argument("--seed", type=int, default=20261102)
+    parser.add_argument("--patch-init", choices=("random", "mel_sinusoidal"), default="random")
+    parser.add_argument(
+        "--residual-init-scale",
+        type=float,
+        default=1.0,
+        help="new plan: scale attention/FFN residual output weights once (default: 1)",
+    )
     parser.add_argument(
         "--objective",
         choices=OBJECTIVES,
@@ -43,7 +50,11 @@ def main():
             args.manifest,
             args.suite,
             args.codebook,
-            RepresentationConfig(mix_probability=0),
+            RepresentationConfig(
+                mix_probability=0,
+                residual_init_scale=args.residual_init_scale,
+                patch_init=args.patch_init,
+            ),
             args.steps,
             args.seed,
             device,

@@ -11,25 +11,7 @@ from creative_agent.representation import RepresentationConfig
 from creative_agent.representation_data import RepresentationData
 from creative_agent.representation_training import load_json, save_json
 from creative_agent.ssl_objectives import OBJECTIVES, ObjectiveModel
-from creative_agent.ssl_probes import collect_features, pitch_metrics, readout
-
-
-def average_precision(scores, targets):
-    """Non-interpolated micro AP, grouping exactly tied scores together."""
-    scores, targets = scores.flatten().double(), targets.flatten().bool()
-    if not torch.isfinite(scores).all() or scores.shape != targets.shape:
-        raise ValueError("finite, matching scores and targets required")
-    positives = int(targets.sum())
-    if not positives:
-        return 0.0
-    order = torch.argsort(scores, descending=True, stable=True)
-    ranked, positive = scores[order], targets[order].double().cumsum(0)
-    last = torch.ones(len(order), dtype=torch.bool)
-    last[:-1] = ranked[:-1] != ranked[1:]
-    indices = last.nonzero().flatten()
-    counts = positive[indices]
-    gained = counts - torch.cat((torch.zeros(1), counts[:-1]))
-    return float(((counts / (indices + 1)) * gained).sum() / positives)
+from creative_agent.ssl_probes import average_precision, collect_features, pitch_metrics, readout
 
 
 def diagnose(manifest, suites, output, device):

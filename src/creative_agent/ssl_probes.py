@@ -121,6 +121,24 @@ def pitch_metrics(prediction, target):
     }
 
 
+def average_precision(scores, targets):
+    """Non-interpolated micro AP; exactly tied scores share one threshold."""
+    scores, targets = scores.flatten().double(), targets.flatten().bool()
+    if not torch.isfinite(scores).all() or scores.shape != targets.shape:
+        raise ValueError("finite, matching scores and targets required")
+    positives = int(targets.sum())
+    if not positives:
+        return 0.0
+    order = torch.argsort(scores, descending=True, stable=True)
+    ranked, positive = scores[order], targets[order].double().cumsum(0)
+    last = torch.ones(len(order), dtype=torch.bool)
+    last[:-1] = ranked[:-1] != ranked[1:]
+    indices = last.nonzero().flatten()
+    counts = positive[indices]
+    gained = counts - torch.cat((torch.zeros(1), counts[:-1]))
+    return float(((counts / (indices + 1)) * gained).sum() / positives)
+
+
 def readout(probe, features):
     features = (features.double() - probe["mean"]) / probe["scale"]
     return F.pad(features, (0, 1), value=1) @ probe["weight"]
@@ -180,10 +198,13 @@ def fit_probe(train, validation, kind):
 def score_probes(probes, data):
     cluster = readout(probes["cluster"], data["x"]).argmax(-1)
     valid = data["pitch_valid"]
-    pitch = readout(probes["pitch"], data["x"])[valid] >= probes["pitch"]["threshold"]
+    scores = readout(probes["pitch"], data["x"])[valid]
+    pitch = scores >= probes["pitch"]["threshold"]
+    metrics = pitch_metrics(pitch, data["pitch"][valid])
+    metrics["micro_average_precision"] = average_precision(scores, data["pitch"][valid])
     return {
         "cluster": classification_metrics(cluster, data["cluster"], data["group"]),
-        "midi_key_activity": pitch_metrics(pitch, data["pitch"][valid]),
+        "midi_key_activity": metrics,
         "unsupported_midi_sources": data["unsupported_midi_sources"],
     }, {
         "cluster_prediction": cluster,

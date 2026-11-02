@@ -43,6 +43,79 @@ def test_default_encoder_uses_the_same_model_as_explicit_direct_patches(config):
     assert default.stem.in_features == 2 * HOP
 
 
+@pytest.mark.parametrize("scale", [1e-3, 1e-4])
+def test_small_residual_initialization_starts_near_identity_and_keeps_gradients(config, scale):
+    torch.manual_seed(53)
+    original = RepresentationEncoder(config)
+    torch.manual_seed(53)
+    scaled = RepresentationEncoder(replace(config, residual_init_scale=scale))
+    x = torch.randn(2, 10, config.width)
+    seconds = torch.arange(10) * 0.05
+    valid = torch.ones(2, 10, dtype=torch.bool)
+    original_y = original.blocks[0](x, valid, seconds)
+    scaled_y = scaled.blocks[0](x, valid, seconds)
+    assert (scaled_y - x).norm() < (original_y - x).norm() * (2 * scale)
+    # Unscaled frontend remains input-dependent, and init consumes the same RNG draws.
+    torch.testing.assert_close(original.stem.weight, scaled.stem.weight, rtol=0, atol=0)
+    torch.testing.assert_close(original.blocks[0].qkv.weight, scaled.blocks[0].qkv.weight)
+    scaled_y.square().mean().backward()
+    for parameter in scaled.blocks[0].parameters():
+        assert parameter.grad is not None and torch.isfinite(parameter.grad).all()
+        assert parameter.grad.norm() > 0
+
+
+@pytest.mark.parametrize("scale", [0, -1, 1.1, float("nan"), float("inf"), True])
+def test_invalid_residual_initialization_is_rejected(config, scale):
+    with pytest.raises(ValueError, match="residual_init_scale"):
+        replace(config, residual_init_scale=scale)
+
+
+def test_legacy_representation_config_preserves_original_initialization(config):
+    saved = config.to_dict()
+    saved.pop("residual_init_scale")
+    saved.pop("patch_init")
+    torch.manual_seed(17)
+    legacy = RepresentationEncoder(RepresentationConfig(**saved))
+    torch.manual_seed(17)
+    explicit = RepresentationEncoder(replace(config, residual_init_scale=1.0))
+    for key, value in explicit.state_dict().items():
+        torch.testing.assert_close(value, legacy.state_dict()[key], rtol=0, atol=0)
+
+
+def test_sinusoidal_patches_select_frequency_preserve_channels_and_allow_learning(config):
+    from creative_agent.representation import initialize_sinusoidal_patches
+
+    model = RepresentationEncoder(replace(config, width=128, patch_init="mel_sinusoidal"))
+    mel = torch.linspace(
+        2595 * torch.log10(torch.tensor(1 + 20 / 700)),
+        2595 * torch.log10(torch.tensor(1 + 20000 / 700)),
+        32,
+    )
+    hz = 700 * (10 ** (mel / 2595) - 1)
+    seconds = (torch.arange(HOP).double() - (HOP - 1) / 2) / 48000
+    phases = torch.tensor([0, torch.pi / 2]).double()
+    tone = (2 * torch.pi * hz[10].double() * seconds[None] + phases[:, None]).sin().float()
+    wave = torch.zeros(2, 2, HOP)
+    wave[:, 0] = tone
+    projected = model.stem(wave.flatten(1))
+    energy = projected[:, :64].reshape(2, 32, 2).square().sum(-1)
+    assert (energy.argmax(-1) == 10).all()
+    torch.testing.assert_close(energy[0, 10], energy[1, 10], rtol=0.01, atol=0)
+    assert (projected[:, 64:] == 0).all()
+    swapped = model.stem(wave.flip(1).flatten(1))
+    torch.testing.assert_close(projected[:, :64], swapped[:, 64:])
+    torch.testing.assert_close(model.stem.weight.norm(dim=1), torch.full((128,), 3**-0.5))
+    # Init is deterministic and consumes no random draws, keeping other weights paired.
+    rng = torch.get_rng_state()
+    initialize_sinusoidal_patches(model.stem)
+    assert torch.equal(rng, torch.get_rng_state())
+    initial = model.stem.weight.detach().clone()
+    projected.square().mean().backward()
+    optimizer = torch.optim.AdamW(model.stem.parameters(), lr=3e-4)
+    optimizer.step()
+    assert not torch.equal(initial, model.stem.weight)
+
+
 @pytest.mark.parametrize("saved", [None, ["early_concat", "patch20"], "legacy"])
 def test_suite_cli_uses_direct_patches_for_new_plans_and_preserves_saved_variants(
     tmp_path, monkeypatch, saved
