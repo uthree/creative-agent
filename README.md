@@ -4,7 +4,9 @@
 
 新規SSLの標準構成は、**50 ms波形パッチ → Linear 4,800→128 → 双方向Transformer 2層**の`patch20`とする。20 FPS・128次元を出力し、CNN前段と平均プーリングを使わない。[採用方針と起動方法](docs/audio-patch20.ja.md)、[比較結果](docs/audio-patch20-report.ja.md)を参照。新規plan・encoder・単独学習の既定値も`patch20`である。
 
-[発話・音楽・環境音に共通するSSLの調査](docs/audio-universal-ssl-survey.ja.md)では、M2D、WavJEPA、SSLAM、USAD 2.0等を比較し、直接パッチモデルのEMA潜在予測と音響復元補助損失を次の候補とした。新しい損失は未実装・未学習であり、現行のクラスタCEとの比較条件と汎化評価を記載している。
+[発話・音楽・環境音に共通するSSLの調査](docs/audio-universal-ssl-survey.ja.md)では、M2D、WavJEPA、SSLAM、USAD 2.0等を比較し、直接パッチモデルのEMA潜在予測と音響復元補助損失を候補として整理した。各方式の限界と汎化評価を記載している。
+
+[SSL目的の③→②比較](docs/audio-ssl-objective-comparison.ja.md)では、音響復元補助付きのEMA潜在予測、潜在予測だけの順で学習し、共通の凍結線形probeによる音響クラスタ精度とMIDI押下フレームF1を比較できる。
 
 初期方式の自己教師あり学習スモークも実装済み。[実行手順](docs/audio-ssl-smoke.ja.md)に従って、自作の48 kHzステレオ音声で前処理、マスク付き復元、実更新、保存、再開を確認できる。
 
