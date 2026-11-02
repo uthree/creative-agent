@@ -21,6 +21,7 @@ def main():
     parser.add_argument("--manifest", required=True, type=Path)
     parser.add_argument("--suite", required=True, type=Path)
     parser.add_argument("--codebook", type=Path)
+    parser.add_argument("--parent", type=Path)
     parser.add_argument("--steps", type=int, default=1000)
     parser.add_argument("--seed", type=int, default=20261102)
     parser.add_argument("--objective", choices=OBJECTIVES, default=OBJECTIVES[0])
@@ -29,6 +30,8 @@ def main():
     args = parser.parse_args()
     device = torch.device(args.device)
     if args.stage in ("prepare", "suite") and not (args.suite / "plan.json").exists():
+        if args.parent is not None and args.codebook is None:
+            args.codebook = args.parent / "codebook.pt"
         if args.codebook is None:
             parser.error("preparation requires a train-only probe codebook")
         prepare_objectives(
@@ -39,6 +42,7 @@ def main():
             args.steps,
             args.seed,
             device,
+            parent=args.parent,
         )
     elif args.stage == "prepare":
         parser.error("output plan already exists")
@@ -50,6 +54,11 @@ def main():
         plan = load_json(args.suite / "plan.json")
         if (plan["steps"], plan["seed"]) != (args.steps, args.seed):
             parser.error("existing plan differs from requested steps/seed")
+        recorded_parent = plan.get("parent")
+        if (recorded_parent["directory"] if recorded_parent else None) != (
+            str(args.parent.resolve()) if args.parent else None
+        ):
+            parser.error("existing plan has a different parent")
         for objective in OBJECTIVES:
             train_objective(args.manifest, args.suite, objective, device)
         evaluate_objectives(args.manifest, args.suite, device)

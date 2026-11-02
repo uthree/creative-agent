@@ -68,3 +68,26 @@ MIDIは原音cropの開始時刻を足したパッチ中心で、`onset <= cente
 TensorBoardにはtrain loss、EMA係数、教師の分散、勾配、共通probeのtest／無音精度、入力音声、対応するクラスタ正解／予測、音楽のMIDI押下ピアノロール正解／予測を記録する。画像は上側が正解、下側が予測。これはSSLとprobeの比較であり、LLM応答やMIDI生成モデルの学習は含まない。
 
 永続ディスクの容量が小さいため、実行前にcheckpoint2つ・encoder2つ・atomic置換用の一時コピー・ログを含めた容量を確認する。データ・重み・特徴・ログはGitに含めない。
+
+## 1,000更新から10,000更新へ継続する
+
+```bash
+PYTHONPYCACHEPREFIX=/tmp/creative-agent-bytecode-runtime \
+  .venv/bin/python experiments/run_ssl_objectives.py suite \
+  --manifest data/public-audio-20261101/manifest.json \
+  --parent runs/audio-ssl-objectives-20261102 \
+  --suite runs/audio-ssl-objectives-10k-20261102 \
+  --steps 10000 --seed 20261102 --device cuda
+
+PYTHONPYCACHEPREFIX=/tmp/creative-agent-bytecode-runtime \
+  .venv/bin/python experiments/audit_ssl_objectives.py \
+  --suite runs/audio-ssl-objectives-10k-20261102
+```
+
+別の出力先で、親の生徒・EMA教師・optimizer・更新履歴を引き継ぎ、③→②の順に各9,000更新を追加する。合計は各10,000更新であり、各11,000更新ではない。親のcheckpoint・encoder・probe・評価結果は上書きしない。
+
+親planとcheckpointのSHA256、config・seed・manifest、最初の1,000更新のスケジュールが一致することを確認する。学習アルゴリズム・データ・probeのコードが変わった親からは継続しない。校正統計・補助loss係数・codebook・probe例は親と同じものを引き継ぎ、再校正値に置き換えない。EMAは既存の式に従い1,000更新後は0.999付近、LRはwarmup後の3e-4を維持する。
+
+新しいTensorBoardには、親の保存履歴から最初の1,000更新のtrain scalarを再記録し、以降を追加する。再記録した履歴を新たなoptimizer更新とは数えず、監査で親の履歴との厳密一致と、合計・追加更新数を別々に確認する。10,000更新の最終encoderに、同じ候補集合からvalidationで選ぶprobeを学習し、共通testで比較する。
+
+容量確保には再生成可能なPython bytecode cacheだけを一時領域へ退避できる。ソース、インストール済みライブラリ本体、データ、重み、実験ログは維持し、新しいbytecodeの書き込み先も一時領域へ指定する。checkpoint等の実験成果物は永続領域へ保存する。

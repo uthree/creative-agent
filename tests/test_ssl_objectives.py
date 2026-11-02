@@ -72,26 +72,45 @@ def test_teacher_is_stop_gradient_and_ema_is_exact(setup):
 
 @pytest.mark.parametrize("auxiliary", [True, False])
 def test_training_resume_is_exact_and_only_enabled_heads_update(setup, auxiliary):
+    from creative_agent.llm_diagnostics import tensor_hash
+    from creative_agent.ssl_objective_training import restore_state
+
     config, extractor, stats, batch = setup
     torch.manual_seed(9)
     model = ObjectiveModel(config)
+    initial_hash = tensor_hash(model.encoder.state_dict())
     initial_acoustic = copy.deepcopy(model.acoustic.state_dict())
     teacher = model.make_teacher()
     optimizer = torch.optim.AdamW(model.parameters(), lr=config.learning_rate)
     coefficients = {"latent": 1.0}
     if auxiliary:
         coefficients.update({k: 0.1 for k in extractor.dimensions})
+    history = []
     for step in range(2):
-        train_step(model, teacher, optimizer, extractor, batch, stats, coefficients, step, config)
-    saved = copy.deepcopy((model.state_dict(), teacher.state_dict(), optimizer.state_dict()))
+        history.append(
+            train_step(
+                model, teacher, optimizer, extractor, batch, stats, coefficients, step, config
+            )
+        )
+    saved = copy.deepcopy(
+        {
+            "model": model.state_dict(),
+            "teacher": teacher.state_dict(),
+            "optimizer": optimizer.state_dict(),
+            "history": history,
+            "seconds": 2.0,
+            "initial_encoder_sha256": initial_hash,
+        }
+    )
     for step in range(2, 4):
         train_step(model, teacher, optimizer, extractor, batch, stats, coefficients, step, config)
     resumed = ObjectiveModel(config)
-    resumed.load_state_dict(saved[0])
     resumed_teacher = resumed.make_teacher()
-    resumed_teacher.load_state_dict(saved[1])
     resumed_optimizer = torch.optim.AdamW(resumed.parameters(), lr=config.learning_rate)
-    resumed_optimizer.load_state_dict(saved[2])
+    inherited, seconds = restore_state(
+        resumed, resumed_teacher, resumed_optimizer, saved, initial_hash
+    )
+    assert inherited == history and seconds == 2
     for step in range(2, 4):
         train_step(
             resumed,
@@ -140,3 +159,48 @@ def test_ridge_normalization_uses_only_training_features():
     assert (probe["mean"].abs() < 1).all()
     assert selected["train_frames"] == 24
     assert readout(probe, x).shape == (24, 64)
+
+
+def test_continuation_rejects_changed_algorithm_teacher_and_prefix(tmp_path):
+    from creative_agent.audio import file_hash
+    from creative_agent.representation_data import fingerprint
+    from creative_agent.representation_training import save_json
+    from creative_agent.ssl_objective_training import parent_metadata
+    from creative_agent.ssl_objectives import OBJECTIVES
+    from creative_agent.training import source_identity
+
+    config = RepresentationConfig(mix_probability=0)
+    schedule = [[{"clip": i}] for i in range(4)]
+    for name in ("codebook.pt", "acoustic-stats.pt"):
+        (tmp_path / name).write_bytes(b"fixed calibration fixture")
+    for objective in OBJECTIVES:
+        (tmp_path / objective).mkdir()
+        save_json(tmp_path / objective / "training.json", {"completed": True, "steps": 2})
+        (tmp_path / objective / "checkpoint.pt").write_bytes(b"checkpoint hash fixture")
+    plan = {
+        "config": config.to_dict(),
+        "seed": 17,
+        "manifest_sha256": "manifest",
+        "steps": 2,
+        "schedule_sha256": fingerprint(schedule[:2]),
+        "source": source_identity(),
+        "codebook_sha256": file_hash(tmp_path / "codebook.pt"),
+        "stats_sha256": file_hash(tmp_path / "acoustic-stats.pt"),
+    }
+    plan["source"]["file_sha256"]["src/creative_agent/ssl_objective_training.py"] = "old trainer"
+    save_json(tmp_path / "plan.json", plan)
+    _, metadata = parent_metadata(tmp_path, config, 4, 17, "manifest", schedule)
+    assert metadata["steps"] == 2 and set(metadata["checkpoint_sha256"]) == set(OBJECTIVES)
+    with pytest.raises(ValueError, match="prefix"):
+        parent_metadata(tmp_path, config, 4, 17, "manifest", [[{"clip": 99}], *schedule[1:]])
+    with pytest.raises(ValueError, match="same config"):
+        parent_metadata(tmp_path, config, 4, 18, "manifest", schedule)
+    changed = copy.deepcopy(plan)
+    changed["source"]["file_sha256"]["src/creative_agent/ssl_objectives.py"] = "changed algorithm"
+    save_json(tmp_path / "plan.json", changed)
+    with pytest.raises(ValueError, match="algorithm"):
+        parent_metadata(tmp_path, config, 4, 17, "manifest", schedule)
+    save_json(tmp_path / "plan.json", plan)
+    (tmp_path / "acoustic-stats.pt").write_bytes(b"changed teacher")
+    with pytest.raises(ValueError, match="calibration"):
+        parent_metadata(tmp_path, config, 4, 17, "manifest", schedule)

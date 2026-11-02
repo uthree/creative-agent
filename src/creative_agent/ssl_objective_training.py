@@ -72,7 +72,50 @@ def fit_acoustic_stats(data, examples, extractor, config, device):
     return result
 
 
-def prepare_objectives(manifest, suite, codebook_path, config, steps, seed, device):
+def parent_metadata(parent, config, steps, seed, signature, schedule):
+    """Allow trainer orchestration changes, but keep the actual learning algorithm fixed."""
+    previous = load_json(parent / "plan.json")
+    if (previous["config"], previous["seed"], previous["manifest_sha256"]) != (
+        config.to_dict(),
+        seed,
+        signature,
+    ) or steps <= previous["steps"]:
+        raise ValueError("continuation must extend the same config, seed and manifest")
+    if fingerprint(schedule[: previous["steps"]]) != previous["schedule_sha256"]:
+        raise ValueError("parent input schedule is not the exact prefix")
+    current = source_identity()["file_sha256"]
+    old = previous["source"]["file_sha256"]
+    changed = {k for k in set(current) | set(old) if current.get(k) != old.get(k)}
+    if changed - {"src/creative_agent/ssl_objective_training.py"}:
+        raise ValueError("learning algorithm or data/probe code changed since parent training")
+    for name, key in (("codebook.pt", "codebook_sha256"), ("acoustic-stats.pt", "stats_sha256")):
+        if file_hash(parent / name) != previous[key]:
+            raise ValueError("parent calibration changed")
+    checkpoints = {}
+    for objective in OBJECTIVES:
+        report = load_json(parent / objective / "training.json")
+        if not report["completed"] or report["steps"] != previous["steps"]:
+            raise ValueError("parent run is incomplete")
+        checkpoints[objective] = file_hash(parent / objective / "checkpoint.pt")
+    return previous, {
+        "directory": str(parent.resolve()),
+        "plan_sha256": file_hash(parent / "plan.json"),
+        "steps": previous["steps"],
+        "checkpoint_sha256": checkpoints,
+        "source_commit": previous["source"]["commit"],
+    }
+
+
+def restore_state(model, teacher, optimizer, saved, initial):
+    if saved["initial_encoder_sha256"] != initial:
+        raise ValueError("initial encoder differs")
+    model.load_state_dict(saved["model"])
+    teacher.load_state_dict(saved["teacher"])
+    optimizer.load_state_dict(saved["optimizer"])
+    return saved["history"], saved["seconds"]
+
+
+def prepare_objectives(manifest, suite, codebook_path, config, steps, seed, device, *, parent=None):
     if suite.exists() or steps < 1 or config.clusters != 64 or config.mix_probability != 0:
         raise ValueError("new output, positive steps, 64 classes and no artificial mixing required")
     torch.set_num_threads(2)
@@ -107,16 +150,33 @@ def prepare_objectives(manifest, suite, codebook_path, config, steps, seed, devi
             if math.isfinite(norms[key]) and norms[key] > 0
             else 0.0
         )
+    inherited = None
+    probes = probe_examples(data)
+    if parent is not None:
+        previous, inherited = parent_metadata(
+            parent, config, steps, seed, data.data.signature, schedule
+        )
+        stats = torch.load(parent / "acoustic-stats.pt", weights_only=True)
+        stats_examples = previous["stats_examples"]
+        coefficients = previous["coefficients"]
+        norms = previous["calibration_stem_gradient_norms"]
+        probes = previous["probe_examples"]
+        if file_hash(codebook_path) != previous["codebook_sha256"]:
+            raise ValueError("continuation must use the same probe teacher")
     # Each checkpoint is <~20 MB at width 128; keep room for atomic replacement.
     model_bytes = sum(p.numel() for p in model.parameters()) * 4
     encoder_bytes = sum(p.numel() for p in model.encoder.parameters()) * 4
-    state_bytes = 3 * model_bytes + encoder_bytes + 512_000
+    state_bytes = 3 * model_bytes + encoder_bytes + max(512_000, steps * 256)
     estimate = 3 * state_bytes + 2 * encoder_bytes + 8_000_000
     if shutil.disk_usage(suite.parent).free < estimate:
         raise OSError(f"need {estimate} free bytes for durable checkpoints and atomic replacement")
     suite.mkdir(parents=True)
     atomic_checkpoint(suite / "codebook.pt", codebook)
     atomic_checkpoint(suite / "acoustic-stats.pt", stats)
+    if parent is not None:
+        # Preserve exact serialized calibration artifacts as well as their tensor values.
+        shutil.copyfile(parent / "codebook.pt", suite / "codebook.pt")
+        shutil.copyfile(parent / "acoustic-stats.pt", suite / "acoustic-stats.pt")
     save_json(
         suite / "plan.json",
         {
@@ -128,7 +188,7 @@ def prepare_objectives(manifest, suite, codebook_path, config, steps, seed, devi
             "manifest_sha256": data.data.signature,
             "data": data.description(),
             "schedule_sha256": fingerprint(schedule),
-            "probe_examples": probe_examples(data),
+            "probe_examples": probes,
             "stats_examples": stats_examples,
             "coefficients": coefficients,
             "calibration_stem_gradient_norms": norms,
@@ -136,6 +196,7 @@ def prepare_objectives(manifest, suite, codebook_path, config, steps, seed, devi
             "stats_sha256": file_hash(suite / "acoustic-stats.pt"),
             "experiment_sha256": experiment_hash(),
             "source": source_identity(),
+            "parent": inherited,
         },
     )
 
@@ -170,6 +231,8 @@ def train_objective(manifest, suite, objective, device, *, stop_after=None):
     directory.mkdir(exist_ok=True)
     checkpoint = directory / "checkpoint.pt"
     history, seconds = [], 0.0
+    inherited_history = False
+    parent = plan.get("parent")
     if checkpoint.exists():
         saved = torch.load(checkpoint, weights_only=True, map_location="cpu")
         if (
@@ -177,10 +240,24 @@ def train_objective(manifest, suite, objective, device, *, stop_after=None):
             or saved["objective"] != objective
         ):
             raise ValueError("incompatible resume")
-        model.load_state_dict(saved["model"])
-        teacher.load_state_dict(saved["teacher"])
-        optimizer.load_state_dict(saved["optimizer"])
-        history, seconds = saved["history"], saved["seconds"]
+        history, seconds = restore_state(model, teacher, optimizer, saved, initial)
+    elif parent is not None:
+        path = Path(parent["directory"])
+        source_checkpoint = path / objective / "checkpoint.pt"
+        if (
+            file_hash(path / "plan.json") != parent["plan_sha256"]
+            or file_hash(source_checkpoint) != parent["checkpoint_sha256"][objective]
+        ):
+            raise ValueError("parent checkpoint changed")
+        saved = torch.load(source_checkpoint, weights_only=True, map_location="cpu")
+        if (
+            saved["plan_sha256"] != parent["plan_sha256"]
+            or saved["objective"] != objective
+            or len(saved["history"]) != parent["steps"]
+        ):
+            raise ValueError("invalid parent checkpoint")
+        history, seconds = restore_state(model, teacher, optimizer, saved, initial)
+        inherited_history = True
     limit = min(stop_after or plan["steps"], plan["steps"])
     if len(history) >= limit:
         return (
@@ -191,6 +268,14 @@ def train_objective(manifest, suite, objective, device, *, stop_after=None):
     writer = SummaryWriter(
         str(directory / "tensorboard"), purge_step=len(history) + 1 if history else None
     )
+    if inherited_history:
+        for row in history:
+            scalar_metrics(writer, "train", row, row["step"])
+        writer.add_text(
+            "run/continuation",
+            f"Restored step {len(history)}; earlier scalars copied from parent history",
+            len(history),
+        )
     coefficients = plan["coefficients"] if objective == "latent_acoustic" else {"latent": 1.0}
     writer.add_text(
         "run/objective", objective + "; frozen readouts, no LLM or labeled SSL", len(history)
@@ -224,6 +309,7 @@ def train_objective(manifest, suite, objective, device, *, stop_after=None):
                     "history": history,
                     "seconds": seconds,
                     "initial_encoder_sha256": initial,
+                    "parent_steps": parent["steps"] if parent else 0,
                 },
             )
             writer.flush()
@@ -248,6 +334,7 @@ def train_objective(manifest, suite, objective, device, *, stop_after=None):
     result = {
         "completed": True,
         "steps": limit,
+        "additional_steps": limit - (parent["steps"] if parent else 0),
         "seconds": seconds,
         "last": history[-1],
         "initial_encoder_sha256": initial,

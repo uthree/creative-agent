@@ -31,6 +31,7 @@ def audit(suite):
     initial = ObjectiveModel(RepresentationConfig(**plan["config"]))
     initial_hash = tensor_hash(initial.encoder.state_dict())
     runs = {}
+    parent = plan.get("parent")
     for name in OBJECTIVES:
         directory = suite / name
         state = torch.load(directory / "checkpoint.pt", weights_only=True, map_location="cpu")
@@ -57,6 +58,16 @@ def audit(suite):
             )
         assert changed["encoder.stem."] and changed["encoder.blocks."] and changed["predictor."]
         assert bool(changed["acoustic."]) == (name == "latent_acoustic")
+        if parent is not None:
+            original = Path(parent["directory"])
+            assert file_hash(original / "plan.json") == parent["plan_sha256"]
+            assert file_hash(original / name / "checkpoint.pt") == parent["checkpoint_sha256"][name]
+            previous = torch.load(
+                original / name / "checkpoint.pt", weights_only=True, map_location="cpu"
+            )
+            assert state["history"][: parent["steps"]] == previous["history"]
+            assert state["parent_steps"] == parent["steps"]
+            assert any(not torch.equal(v, state["model"][k]) for k, v in previous["model"].items())
         events = EventAccumulator(
             str(directory / "tensorboard"), size_guidance={"scalars": 0}
         ).Reload()
@@ -71,6 +82,7 @@ def audit(suite):
         assert len(saved["cluster_target"]) == comparison[name]["replayed_test_frames"]
         runs[name] = {
             "updates": len(logged),
+            "additional_updates": len(logged) - (parent["steps"] if parent else 0),
             "changed_tensors": changed,
             "replayed_test_frames": len(saved["cluster_target"]),
         }
@@ -84,6 +96,7 @@ def audit(suite):
         "passed": True,
         "runs": runs,
         "total_updates": sum(r["updates"] for r in runs.values()),
+        "additional_updates": sum(r["additional_updates"] for r in runs.values()),
         "artifact_files": len(artifacts["files"]),
         "artifact_bytes": total_bytes,
         "manifest_sha256": plan["manifest_sha256"],
