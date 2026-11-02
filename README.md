@@ -7,6 +7,7 @@
 新規SSLの学習目的は**EMA教師の潜在予測のみ（`latent`）**を採用する。[損失・教師更新・実際の設定値](docs/audio-latent-ssl.ja.md)を参照。`run_ssl_objectives.py train`の既定値も`latent`で、`suite`は過去の③→②比較を再現する専用経路として残す。旧クラスタSSL・LLM課題の学習経路は別であり、この選択だけでは置き換わらない。
 
 [初期化の対照実験](docs/audio-ssl-initialization-comparison.ja.md)では、残差出力重みの1e-4初期化と、メル尺度に並べたsin/cosによるパッチ投影初期化を個別に検証する。共通の凍結probeに加え、固定validationでゼロ予測との差、教師・生徒の分散、有効rank、入力依存、残差の相対量を追う。
+[各10k更新の実測](docs/audio-ssl-initialization-report.ja.md)では、残差初期化がtest音響accuracy 34.13%・MIDIフレームF1 19.26%・AP 17.27%で対照を上回り、正弦波初期化は対照を下回った。1 seedの結果で、MIDI validationの優位は一貫していない。
 
 [発話・音楽・環境音に共通するSSLの調査](docs/audio-universal-ssl-survey.ja.md)では、M2D、WavJEPA、SSLAM、USAD 2.0等を比較し、直接パッチモデルのEMA潜在予測と音響復元補助損失を候補として整理した。各方式の限界と汎化評価を記載している。
 

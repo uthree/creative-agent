@@ -1,0 +1,2361 @@
+{
+  "schema_version": "latent_ssl_initialization_comparison_v1",
+  "date_jst": "2026-11-02",
+  "source_commit": "3c4119be4dd46c29c81b013fba9bb5f8523227d5",
+  "source_dirty": false,
+  "runner_sha256": "20610367b7b9367816d168fd9e7596a67d0f6de9e1e0470e64802bcea76bb176",
+  "steps_per_condition": 10000,
+  "seed": 20261102,
+  "replicates": 1,
+  "execution_order": [
+    "baseline",
+    "residual_1e4",
+    "mel_sinusoidal"
+  ],
+  "configs": {
+    "baseline": {
+      "width": 128,
+      "heads": 4,
+      "layers": 2,
+      "ffn_width": 352,
+      "stem_width": 32,
+      "clusters": 64,
+      "mel_bins": 40,
+      "crop_seconds": 4.0,
+      "mask_ratio": 0.4,
+      "mask_span": 4,
+      "mix_probability": 0,
+      "learning_rate": 0.0003,
+      "warmup_steps": 50,
+      "batch_size": 8,
+      "seanet_base_width": 4,
+      "residual_init_scale": 1.0,
+      "patch_init": "random"
+    },
+    "residual_1e4": {
+      "width": 128,
+      "heads": 4,
+      "layers": 2,
+      "ffn_width": 352,
+      "stem_width": 32,
+      "clusters": 64,
+      "mel_bins": 40,
+      "crop_seconds": 4.0,
+      "mask_ratio": 0.4,
+      "mask_span": 4,
+      "mix_probability": 0,
+      "learning_rate": 0.0003,
+      "warmup_steps": 50,
+      "batch_size": 8,
+      "seanet_base_width": 4,
+      "residual_init_scale": 0.0001,
+      "patch_init": "random"
+    },
+    "mel_sinusoidal": {
+      "width": 128,
+      "heads": 4,
+      "layers": 2,
+      "ffn_width": 352,
+      "stem_width": 32,
+      "clusters": 64,
+      "mel_bins": 40,
+      "crop_seconds": 4.0,
+      "mask_ratio": 0.4,
+      "mask_span": 4,
+      "mix_probability": 0,
+      "learning_rate": 0.0003,
+      "warmup_steps": 50,
+      "batch_size": 8,
+      "seanet_base_width": 4,
+      "residual_init_scale": 1.0,
+      "patch_init": "mel_sinusoidal"
+    }
+  },
+  "data": {
+    "train": {
+      "music": {
+        "recordings": 71,
+        "split_groups": 14
+      },
+      "en": {
+        "recordings": 252,
+        "split_groups": 27
+      },
+      "ja": {
+        "recordings": 640,
+        "split_groups": 640
+      }
+    },
+    "validation": {
+      "music": {
+        "recordings": 11,
+        "split_groups": 3
+      },
+      "en": {
+        "recordings": 8,
+        "split_groups": 8
+      },
+      "ja": {
+        "recordings": 8,
+        "split_groups": 8
+      }
+    },
+    "test": {
+      "music": {
+        "recordings": 14,
+        "split_groups": 3
+      },
+      "en": {
+        "recordings": 16,
+        "split_groups": 6
+      },
+      "ja": {
+        "recordings": 16,
+        "split_groups": 16
+      }
+    }
+  },
+  "manifest_sha256": "bbe02d91a1b0193e57c56a79b1c114a2a2ebca677c907dd4f721cd42d3e51659",
+  "schedule_sha256": "b6776a034a886c96a0bc4c344cbc775dca2dc5d44153e1f19ec387c01804068a",
+  "paired_initialization": {
+    "changed_tensors": {
+      "residual_1e4": [
+        "encoder.blocks.0.output.weight",
+        "encoder.blocks.0.down.weight",
+        "encoder.blocks.1.output.weight",
+        "encoder.blocks.1.down.weight"
+      ],
+      "mel_sinusoidal": [
+        "encoder.stem.weight",
+        "encoder.stem.bias"
+      ]
+    },
+    "initial_model_sha256": {
+      "baseline": "42696a58eb7f7b4c285a1ead85d5806f320c93b12aabb7e2a1bde6d2123bb2b5",
+      "residual_1e4": "75395ea5409719e2389e72c27d7f95169708586fe3011c3b12c3a11a1d327eed",
+      "mel_sinusoidal": "4806cb17545fdf541f76bf016d166f1f2ee8302f3358a7eb437d18060c57be15"
+    }
+  },
+  "protocol": {
+    "objective": "latent only; no acoustic or variance/covariance losses",
+    "readout": "FP32 frozen encoder, train-only standardized ridge; validation-only alpha/threshold",
+    "cluster": "64 acoustic classes, music/en/ja weights .5/.25/.25",
+    "pitch": "128 MIDI key-active frame labels at 50 ms centers; no pedal extension",
+    "micro_ap": "flattened key/frame scores; exact ties grouped; same F1-selected readout",
+    "checkpoint": "fixed final 10000 updates; no test selection",
+    "validation_diagnostics": "6 fixed recordings, fixed crop/mask, every 500 steps incl step 0",
+    "environmental_audio": false,
+    "llm_training": false
+  },
+  "results": {
+    "baseline": {
+      "untrained": {
+        "test": {
+          "cluster": {
+            "music": {
+              "frames": 1120,
+              "accuracy": 0.48571428656578064
+            },
+            "en": {
+              "frames": 1156,
+              "accuracy": 0.011245674453675747
+            },
+            "ja": {
+              "frames": 1178,
+              "accuracy": 0.07555178552865982
+            },
+            "balanced_accuracy": 0.2645565082784742
+          },
+          "midi_key_activity": {
+            "frames": 880,
+            "positive_keys": 1030,
+            "tp": 311,
+            "fp": 2892,
+            "fn": 719,
+            "precision": 0.09709647205744615,
+            "recall": 0.30194174757281556,
+            "micro_f1": 0.14694070399244036,
+            "micro_average_precision": 0.07560620349458046
+          },
+          "unsupported_midi_sources": 3
+        },
+        "validation": {
+          "cluster": {
+            "music": {
+              "frames": 880,
+              "accuracy": 0.20113636553287506
+            },
+            "en": {
+              "frames": 527,
+              "accuracy": 0.013282732106745243
+            },
+            "ja": {
+              "frames": 565,
+              "accuracy": 0.11327433586120605
+            },
+            "balanced_accuracy": 0.13220744975842535
+          },
+          "midi_key_activity": {
+            "frames": 480,
+            "positive_keys": 901,
+            "tp": 409,
+            "fp": 1046,
+            "fn": 492,
+            "precision": 0.2810996563573883,
+            "recall": 0.45394006659267483,
+            "micro_f1": 0.3471986417657046,
+            "micro_average_precision": 0.22241313121822198
+          },
+          "unsupported_midi_sources": 5
+        },
+        "silence": {
+          "cluster": {
+            "music": {
+              "frames": 1120,
+              "accuracy": 0.4776785671710968
+            },
+            "en": {
+              "frames": 1156,
+              "accuracy": 0.0
+            },
+            "ja": {
+              "frames": 1178,
+              "accuracy": 0.0008488964522257447
+            },
+            "balanced_accuracy": 0.23905150769860484
+          },
+          "midi_key_activity": {
+            "frames": 880,
+            "positive_keys": 1030,
+            "tp": 0,
+            "fp": 0,
+            "fn": 1030,
+            "precision": 0.0,
+            "recall": 0.0,
+            "micro_f1": 0.0,
+            "micro_average_precision": 0.02820014414887386
+          },
+          "unsupported_midi_sources": 3
+        },
+        "probe_selection": {
+          "cluster": {
+            "validation_score": 0.13220744975842535,
+            "alpha": 0.001,
+            "threshold": 0,
+            "train_frames": 32278
+          },
+          "pitch": {
+            "validation_score": 0.3471986417657046,
+            "alpha": 1.0,
+            "threshold": 0.1,
+            "train_frames": 14400
+          }
+        },
+        "feature_std": 0.3010905981063843,
+        "effective_rank": 28.247928619384766,
+        "clean_silence_feature_rms": 0.39005187153816223,
+        "replayed_test_frames": 3454,
+        "encoder_sha256": "a7059ee24cd3a5413d809146176b99f88172a255a623993ae47a4ec6bf98f637"
+      },
+      "latent": {
+        "test": {
+          "cluster": {
+            "music": {
+              "frames": 1120,
+              "accuracy": 0.5232142806053162
+            },
+            "en": {
+              "frames": 1156,
+              "accuracy": 0.08910034596920013
+            },
+            "ja": {
+              "frames": 1178,
+              "accuracy": 0.20033955574035645
+            },
+            "balanced_accuracy": 0.3339671157300472
+          },
+          "midi_key_activity": {
+            "frames": 880,
+            "positive_keys": 1030,
+            "tp": 165,
+            "fp": 951,
+            "fn": 865,
+            "precision": 0.1478494623655914,
+            "recall": 0.16019417475728157,
+            "micro_f1": 0.15377446411929171,
+            "micro_average_precision": 0.1196979402860116
+          },
+          "unsupported_midi_sources": 3
+        },
+        "validation": {
+          "cluster": {
+            "music": {
+              "frames": 880,
+              "accuracy": 0.2181818187236786
+            },
+            "en": {
+              "frames": 527,
+              "accuracy": 0.06451612710952759
+            },
+            "ja": {
+              "frames": 565,
+              "accuracy": 0.23539823293685913
+            },
+            "balanced_accuracy": 0.18406949937343597
+          },
+          "midi_key_activity": {
+            "frames": 480,
+            "positive_keys": 901,
+            "tp": 303,
+            "fp": 566,
+            "fn": 598,
+            "precision": 0.3486766398158803,
+            "recall": 0.3362930077691454,
+            "micro_f1": 0.3423728813559322,
+            "micro_average_precision": 0.28557106158039136
+          },
+          "unsupported_midi_sources": 5
+        },
+        "silence": {
+          "cluster": {
+            "music": {
+              "frames": 1120,
+              "accuracy": 0.4776785671710968
+            },
+            "en": {
+              "frames": 1156,
+              "accuracy": 0.0
+            },
+            "ja": {
+              "frames": 1178,
+              "accuracy": 0.0008488964522257447
+            },
+            "balanced_accuracy": 0.23905150769860484
+          },
+          "midi_key_activity": {
+            "frames": 880,
+            "positive_keys": 1030,
+            "tp": 0,
+            "fp": 0,
+            "fn": 1030,
+            "precision": 0.0,
+            "recall": 0.0,
+            "micro_f1": 0.0,
+            "micro_average_precision": 0.029885970248974426
+          },
+          "unsupported_midi_sources": 3
+        },
+        "probe_selection": {
+          "cluster": {
+            "validation_score": 0.18406949937343597,
+            "alpha": 0.01,
+            "threshold": 0,
+            "train_frames": 32278
+          },
+          "pitch": {
+            "validation_score": 0.3423728813559322,
+            "alpha": 0.01,
+            "threshold": 0.2,
+            "train_frames": 14400
+          }
+        },
+        "feature_std": 0.6725077033042908,
+        "effective_rank": 24.538854598999023,
+        "clean_silence_feature_rms": 0.8073659539222717,
+        "replayed_test_frames": 3454,
+        "encoder_sha256": "ca51614960b1e0d94522088d1c91cef242c3b0f6ba333d122e626726c6152bf4"
+      },
+      "validation_diagnostics": [
+        {
+          "step": 0,
+          "latent_loss": 0.5079863667488098,
+          "zero_predictor_loss": 0.4019753932952881,
+          "relative_gain_over_zero": -0.2637250319838529,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.16128511726856232,
+          "teacher_target_std": 0.9735410213470459,
+          "predictor_std": 0.09015129506587982,
+          "residual/layer_0/attention/rms_ratio": 8.367214390032531,
+          "residual/layer_0/attention/weight_rms": 0.05086861923336983,
+          "residual/layer_0/ffn/rms_ratio": 0.4438715419339865,
+          "residual/layer_0/ffn/weight_rms": 0.030721105635166168,
+          "residual/layer_1/attention/rms_ratio": 1.4191481474250218,
+          "residual/layer_1/attention/weight_rms": 0.05059998854994774,
+          "residual/layer_1/ffn/rms_ratio": 0.2536994844638195,
+          "residual/layer_1/ffn/weight_rms": 0.03082958236336708,
+          "student_temporal_std": 0.16128511726856232,
+          "student_global_std": 0.25383177399635315,
+          "student_effective_rank": 18.928054809570312,
+          "clean_silence_feature_rms": 0.38102075457572937,
+          "within_domain_input_swap_rms": 0.4511023163795471
+        },
+        {
+          "step": 500,
+          "latent_loss": 0.42697083950042725,
+          "zero_predictor_loss": 0.4337976574897766,
+          "relative_gain_over_zero": 0.015737332536218784,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.36123126745224,
+          "teacher_target_std": 1.0063846111297607,
+          "predictor_std": 0.09322794526815414,
+          "residual/layer_0/attention/rms_ratio": 1.6474007935192938,
+          "residual/layer_0/attention/weight_rms": 0.05075101554393768,
+          "residual/layer_0/ffn/rms_ratio": 0.7138583099124944,
+          "residual/layer_0/ffn/weight_rms": 0.03090781904757023,
+          "residual/layer_1/attention/rms_ratio": 1.1538927362669043,
+          "residual/layer_1/attention/weight_rms": 0.050535935908555984,
+          "residual/layer_1/ffn/rms_ratio": 0.35072112188823307,
+          "residual/layer_1/ffn/weight_rms": 0.030952777713537216,
+          "student_temporal_std": 0.5431876182556152,
+          "student_global_std": 0.6310760378837585,
+          "student_effective_rank": 17.68307113647461,
+          "clean_silence_feature_rms": 0.8507157564163208,
+          "within_domain_input_swap_rms": 1.022547721862793
+        },
+        {
+          "step": 1000,
+          "latent_loss": 0.417028546333313,
+          "zero_predictor_loss": 0.4323914349079132,
+          "relative_gain_over_zero": 0.0355300483180756,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.6402251720428467,
+          "teacher_target_std": 0.9992899894714355,
+          "predictor_std": 0.16733600199222565,
+          "residual/layer_0/attention/rms_ratio": 1.281831061212134,
+          "residual/layer_0/attention/weight_rms": 0.05071762949228287,
+          "residual/layer_0/ffn/rms_ratio": 1.1001263019777996,
+          "residual/layer_0/ffn/weight_rms": 0.03167696297168732,
+          "residual/layer_1/attention/rms_ratio": 0.7554135852842984,
+          "residual/layer_1/attention/weight_rms": 0.0510651133954525,
+          "residual/layer_1/ffn/rms_ratio": 0.4415625796344726,
+          "residual/layer_1/ffn/weight_rms": 0.03164975717663765,
+          "student_temporal_std": 0.6233691573143005,
+          "student_global_std": 0.6805273294448853,
+          "student_effective_rank": 12.096747398376465,
+          "clean_silence_feature_rms": 0.9190375804901123,
+          "within_domain_input_swap_rms": 0.969360888004303
+        },
+        {
+          "step": 1500,
+          "latent_loss": 0.40076345205307007,
+          "zero_predictor_loss": 0.4243106544017792,
+          "relative_gain_over_zero": 0.05549519462787822,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.6305989027023315,
+          "teacher_target_std": 0.9904420375823975,
+          "predictor_std": 0.19959157705307007,
+          "residual/layer_0/attention/rms_ratio": 1.298152294836524,
+          "residual/layer_0/attention/weight_rms": 0.05073186010122299,
+          "residual/layer_0/ffn/rms_ratio": 1.5147956130992386,
+          "residual/layer_0/ffn/weight_rms": 0.03246970474720001,
+          "residual/layer_1/attention/rms_ratio": 0.6034855497965153,
+          "residual/layer_1/attention/weight_rms": 0.05152442306280136,
+          "residual/layer_1/ffn/rms_ratio": 0.5125953188359631,
+          "residual/layer_1/ffn/weight_rms": 0.032676469534635544,
+          "student_temporal_std": 0.6278011202812195,
+          "student_global_std": 0.6925405263900757,
+          "student_effective_rank": 11.612761497497559,
+          "clean_silence_feature_rms": 0.9095537662506104,
+          "within_domain_input_swap_rms": 0.9756027460098267
+        },
+        {
+          "step": 2000,
+          "latent_loss": 0.39312613010406494,
+          "zero_predictor_loss": 0.42083802819252014,
+          "relative_gain_over_zero": 0.06584932024198598,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.6291202306747437,
+          "teacher_target_std": 0.9846667051315308,
+          "predictor_std": 0.22935208678245544,
+          "residual/layer_0/attention/rms_ratio": 1.2638631555162994,
+          "residual/layer_0/attention/weight_rms": 0.05071631819009781,
+          "residual/layer_0/ffn/rms_ratio": 1.6442963669218897,
+          "residual/layer_0/ffn/weight_rms": 0.03305613249540329,
+          "residual/layer_1/attention/rms_ratio": 0.6014242960200434,
+          "residual/layer_1/attention/weight_rms": 0.05208598077297211,
+          "residual/layer_1/ffn/rms_ratio": 0.5891626129692581,
+          "residual/layer_1/ffn/weight_rms": 0.033614449203014374,
+          "student_temporal_std": 0.5969216227531433,
+          "student_global_std": 0.6647235155105591,
+          "student_effective_rank": 11.36156177520752,
+          "clean_silence_feature_rms": 0.8408867716789246,
+          "within_domain_input_swap_rms": 0.902678370475769
+        },
+        {
+          "step": 2500,
+          "latent_loss": 0.39272356033325195,
+          "zero_predictor_loss": 0.41880080103874207,
+          "relative_gain_over_zero": 0.06226645374319084,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.6396796703338623,
+          "teacher_target_std": 0.9799906015396118,
+          "predictor_std": 0.2634025812149048,
+          "residual/layer_0/attention/rms_ratio": 1.2656826964297176,
+          "residual/layer_0/attention/weight_rms": 0.050756894052028656,
+          "residual/layer_0/ffn/rms_ratio": 1.638520747309723,
+          "residual/layer_0/ffn/weight_rms": 0.03367028757929802,
+          "residual/layer_1/attention/rms_ratio": 0.5377583462817441,
+          "residual/layer_1/attention/weight_rms": 0.052722521126270294,
+          "residual/layer_1/ffn/rms_ratio": 0.6455794953688492,
+          "residual/layer_1/ffn/weight_rms": 0.03464020788669586,
+          "student_temporal_std": 0.6152780055999756,
+          "student_global_std": 0.6701418161392212,
+          "student_effective_rank": 11.985932350158691,
+          "clean_silence_feature_rms": 0.8521323800086975,
+          "within_domain_input_swap_rms": 0.9600338935852051
+        },
+        {
+          "step": 3000,
+          "latent_loss": 0.39319539070129395,
+          "zero_predictor_loss": 0.4235861003398895,
+          "relative_gain_over_zero": 0.07174623910985223,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.6455196142196655,
+          "teacher_target_std": 0.9837972521781921,
+          "predictor_std": 0.25221845507621765,
+          "residual/layer_0/attention/rms_ratio": 1.2056788423669542,
+          "residual/layer_0/attention/weight_rms": 0.050774503499269485,
+          "residual/layer_0/ffn/rms_ratio": 1.689013612101113,
+          "residual/layer_0/ffn/weight_rms": 0.034267302602529526,
+          "residual/layer_1/attention/rms_ratio": 0.5187806863009697,
+          "residual/layer_1/attention/weight_rms": 0.053221166133880615,
+          "residual/layer_1/ffn/rms_ratio": 0.7420745639771625,
+          "residual/layer_1/ffn/weight_rms": 0.03558509424328804,
+          "student_temporal_std": 0.6297274827957153,
+          "student_global_std": 0.6903139352798462,
+          "student_effective_rank": 11.945777893066406,
+          "clean_silence_feature_rms": 0.8981214761734009,
+          "within_domain_input_swap_rms": 1.0051285028457642
+        },
+        {
+          "step": 3500,
+          "latent_loss": 0.3877577781677246,
+          "zero_predictor_loss": 0.42268431186676025,
+          "relative_gain_over_zero": 0.0826303052147469,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.6530740261077881,
+          "teacher_target_std": 0.9831510782241821,
+          "predictor_std": 0.2618226408958435,
+          "residual/layer_0/attention/rms_ratio": 1.2616765657294815,
+          "residual/layer_0/attention/weight_rms": 0.050861988216638565,
+          "residual/layer_0/ffn/rms_ratio": 1.5865122032206471,
+          "residual/layer_0/ffn/weight_rms": 0.034812163561582565,
+          "residual/layer_1/attention/rms_ratio": 0.45297134720719906,
+          "residual/layer_1/attention/weight_rms": 0.053681518882513046,
+          "residual/layer_1/ffn/rms_ratio": 0.7576214165803421,
+          "residual/layer_1/ffn/weight_rms": 0.03648015856742859,
+          "student_temporal_std": 0.6617595553398132,
+          "student_global_std": 0.7196065187454224,
+          "student_effective_rank": 12.869932174682617,
+          "clean_silence_feature_rms": 0.9599846601486206,
+          "within_domain_input_swap_rms": 1.0319569110870361
+        },
+        {
+          "step": 4000,
+          "latent_loss": 0.3821929693222046,
+          "zero_predictor_loss": 0.4237186312675476,
+          "relative_gain_over_zero": 0.09800291722155252,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.6624892950057983,
+          "teacher_target_std": 0.984228253364563,
+          "predictor_std": 0.3058748245239258,
+          "residual/layer_0/attention/rms_ratio": 1.200630030172516,
+          "residual/layer_0/attention/weight_rms": 0.05099964886903763,
+          "residual/layer_0/ffn/rms_ratio": 1.5405077591368124,
+          "residual/layer_0/ffn/weight_rms": 0.03532670810818672,
+          "residual/layer_1/attention/rms_ratio": 0.4835745611823909,
+          "residual/layer_1/attention/weight_rms": 0.0542018860578537,
+          "residual/layer_1/ffn/rms_ratio": 0.8713697148460258,
+          "residual/layer_1/ffn/weight_rms": 0.03739231452345848,
+          "student_temporal_std": 0.664702832698822,
+          "student_global_std": 0.7173672914505005,
+          "student_effective_rank": 12.591958999633789,
+          "clean_silence_feature_rms": 0.9426757097244263,
+          "within_domain_input_swap_rms": 1.0461525917053223
+        },
+        {
+          "step": 4500,
+          "latent_loss": 0.39217111468315125,
+          "zero_predictor_loss": 0.43117547035217285,
+          "relative_gain_over_zero": 0.09046051631175556,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.6621618866920471,
+          "teacher_target_std": 0.9924747943878174,
+          "predictor_std": 0.29557710886001587,
+          "residual/layer_0/attention/rms_ratio": 1.2205362545614862,
+          "residual/layer_0/attention/weight_rms": 0.05111110955476761,
+          "residual/layer_0/ffn/rms_ratio": 1.5154439196018952,
+          "residual/layer_0/ffn/weight_rms": 0.03594797104597092,
+          "residual/layer_1/attention/rms_ratio": 0.4710840846892354,
+          "residual/layer_1/attention/weight_rms": 0.054638516157865524,
+          "residual/layer_1/ffn/rms_ratio": 0.9942198146631316,
+          "residual/layer_1/ffn/weight_rms": 0.038402996957302094,
+          "student_temporal_std": 0.6653034687042236,
+          "student_global_std": 0.718551516532898,
+          "student_effective_rank": 14.44446086883545,
+          "clean_silence_feature_rms": 0.9365665912628174,
+          "within_domain_input_swap_rms": 1.0079143047332764
+        },
+        {
+          "step": 5000,
+          "latent_loss": 0.3951634168624878,
+          "zero_predictor_loss": 0.4329948425292969,
+          "relative_gain_over_zero": 0.08737153875972403,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.6632909178733826,
+          "teacher_target_std": 0.9938275218009949,
+          "predictor_std": 0.3269365131855011,
+          "residual/layer_0/attention/rms_ratio": 1.1435482257484768,
+          "residual/layer_0/attention/weight_rms": 0.05124417692422867,
+          "residual/layer_0/ffn/rms_ratio": 1.4979909585732558,
+          "residual/layer_0/ffn/weight_rms": 0.036454938352108,
+          "residual/layer_1/attention/rms_ratio": 0.4845286550820687,
+          "residual/layer_1/attention/weight_rms": 0.055243249982595444,
+          "residual/layer_1/ffn/rms_ratio": 0.9958155384836426,
+          "residual/layer_1/ffn/weight_rms": 0.039352189749479294,
+          "student_temporal_std": 0.6710823774337769,
+          "student_global_std": 0.7185271978378296,
+          "student_effective_rank": 14.70030689239502,
+          "clean_silence_feature_rms": 0.9378311634063721,
+          "within_domain_input_swap_rms": 1.0271399021148682
+        },
+        {
+          "step": 5500,
+          "latent_loss": 0.392331063747406,
+          "zero_predictor_loss": 0.43578189611434937,
+          "relative_gain_over_zero": 0.09970775003361276,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.6705197095870972,
+          "teacher_target_std": 0.9977079629898071,
+          "predictor_std": 0.32526451349258423,
+          "residual/layer_0/attention/rms_ratio": 1.1853814681614319,
+          "residual/layer_0/attention/weight_rms": 0.05139285326004028,
+          "residual/layer_0/ffn/rms_ratio": 1.5916224516227933,
+          "residual/layer_0/ffn/weight_rms": 0.03713744133710861,
+          "residual/layer_1/attention/rms_ratio": 0.4301724330066938,
+          "residual/layer_1/attention/weight_rms": 0.05575912445783615,
+          "residual/layer_1/ffn/rms_ratio": 1.023138817043133,
+          "residual/layer_1/ffn/weight_rms": 0.04027266800403595,
+          "student_temporal_std": 0.679649829864502,
+          "student_global_std": 0.7293132543563843,
+          "student_effective_rank": 14.354968070983887,
+          "clean_silence_feature_rms": 0.9707507491111755,
+          "within_domain_input_swap_rms": 1.0340591669082642
+        },
+        {
+          "step": 6000,
+          "latent_loss": 0.39528605341911316,
+          "zero_predictor_loss": 0.43738242983818054,
+          "relative_gain_over_zero": 0.09624615335975406,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.6747318506240845,
+          "teacher_target_std": 0.9996461272239685,
+          "predictor_std": 0.29832690954208374,
+          "residual/layer_0/attention/rms_ratio": 1.1278776488534858,
+          "residual/layer_0/attention/weight_rms": 0.05153198167681694,
+          "residual/layer_0/ffn/rms_ratio": 1.5063459660956777,
+          "residual/layer_0/ffn/weight_rms": 0.037658561021089554,
+          "residual/layer_1/attention/rms_ratio": 0.4702105242015714,
+          "residual/layer_1/attention/weight_rms": 0.056282371282577515,
+          "residual/layer_1/ffn/rms_ratio": 1.047852432023545,
+          "residual/layer_1/ffn/weight_rms": 0.04106592386960983,
+          "student_temporal_std": 0.6720892190933228,
+          "student_global_std": 0.7240081429481506,
+          "student_effective_rank": 16.721385955810547,
+          "clean_silence_feature_rms": 0.9529607892036438,
+          "within_domain_input_swap_rms": 1.0266109704971313
+        },
+        {
+          "step": 6500,
+          "latent_loss": 0.3939683139324188,
+          "zero_predictor_loss": 0.4376688301563263,
+          "relative_gain_over_zero": 0.09984836299239896,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.676365852355957,
+          "teacher_target_std": 1.0000543594360352,
+          "predictor_std": 0.3061756491661072,
+          "residual/layer_0/attention/rms_ratio": 1.0903126403091659,
+          "residual/layer_0/attention/weight_rms": 0.0516296923160553,
+          "residual/layer_0/ffn/rms_ratio": 1.5789467729800974,
+          "residual/layer_0/ffn/weight_rms": 0.038178909569978714,
+          "residual/layer_1/attention/rms_ratio": 0.4481064581641322,
+          "residual/layer_1/attention/weight_rms": 0.05674299970269203,
+          "residual/layer_1/ffn/rms_ratio": 0.9876965747378615,
+          "residual/layer_1/ffn/weight_rms": 0.04183785617351532,
+          "student_temporal_std": 0.6682733297348022,
+          "student_global_std": 0.716071367263794,
+          "student_effective_rank": 15.807424545288086,
+          "clean_silence_feature_rms": 0.9468650221824646,
+          "within_domain_input_swap_rms": 1.0107086896896362
+        },
+        {
+          "step": 7000,
+          "latent_loss": 0.3940606117248535,
+          "zero_predictor_loss": 0.43570542335510254,
+          "relative_gain_over_zero": 0.09558020028662406,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.6775522232055664,
+          "teacher_target_std": 0.9985510110855103,
+          "predictor_std": 0.318612277507782,
+          "residual/layer_0/attention/rms_ratio": 1.0395130015834713,
+          "residual/layer_0/attention/weight_rms": 0.05173478275537491,
+          "residual/layer_0/ffn/rms_ratio": 1.5714283035478216,
+          "residual/layer_0/ffn/weight_rms": 0.038704510778188705,
+          "residual/layer_1/attention/rms_ratio": 0.4413050837013186,
+          "residual/layer_1/attention/weight_rms": 0.05717882886528969,
+          "residual/layer_1/ffn/rms_ratio": 1.0803188964689987,
+          "residual/layer_1/ffn/weight_rms": 0.042588457465171814,
+          "student_temporal_std": 0.6862711906433105,
+          "student_global_std": 0.7344894409179688,
+          "student_effective_rank": 16.02619743347168,
+          "clean_silence_feature_rms": 0.970991849899292,
+          "within_domain_input_swap_rms": 1.0635603666305542
+        },
+        {
+          "step": 7500,
+          "latent_loss": 0.38933035731315613,
+          "zero_predictor_loss": 0.4341222643852234,
+          "relative_gain_over_zero": 0.10317809231806785,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.6793125867843628,
+          "teacher_target_std": 0.996936559677124,
+          "predictor_std": 0.3266746997833252,
+          "residual/layer_0/attention/rms_ratio": 1.0596021552248869,
+          "residual/layer_0/attention/weight_rms": 0.05186283588409424,
+          "residual/layer_0/ffn/rms_ratio": 1.5785902202307034,
+          "residual/layer_0/ffn/weight_rms": 0.0392180010676384,
+          "residual/layer_1/attention/rms_ratio": 0.3979961035722721,
+          "residual/layer_1/attention/weight_rms": 0.057567961513996124,
+          "residual/layer_1/ffn/rms_ratio": 0.9366261545677419,
+          "residual/layer_1/ffn/weight_rms": 0.04332416132092476,
+          "student_temporal_std": 0.6942710280418396,
+          "student_global_std": 0.7438997030258179,
+          "student_effective_rank": 18.09598159790039,
+          "clean_silence_feature_rms": 0.9849940538406372,
+          "within_domain_input_swap_rms": 1.0723789930343628
+        },
+        {
+          "step": 8000,
+          "latent_loss": 0.3885696530342102,
+          "zero_predictor_loss": 0.4334662854671478,
+          "relative_gain_over_zero": 0.10357583493385747,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.6788249015808105,
+          "teacher_target_std": 0.9953606724739075,
+          "predictor_std": 0.32535773515701294,
+          "residual/layer_0/attention/rms_ratio": 1.0324634655216864,
+          "residual/layer_0/attention/weight_rms": 0.05199464038014412,
+          "residual/layer_0/ffn/rms_ratio": 1.5419929457885395,
+          "residual/layer_0/ffn/weight_rms": 0.03983614593744278,
+          "residual/layer_1/attention/rms_ratio": 0.42889461235103293,
+          "residual/layer_1/attention/weight_rms": 0.05802512168884277,
+          "residual/layer_1/ffn/rms_ratio": 1.1087097373592636,
+          "residual/layer_1/ffn/weight_rms": 0.04402830824255943,
+          "student_temporal_std": 0.6783183813095093,
+          "student_global_std": 0.7235941886901855,
+          "student_effective_rank": 16.38745880126953,
+          "clean_silence_feature_rms": 0.9393754005432129,
+          "within_domain_input_swap_rms": 1.0444579124450684
+        },
+        {
+          "step": 8500,
+          "latent_loss": 0.3919719457626343,
+          "zero_predictor_loss": 0.434219628572464,
+          "relative_gain_over_zero": 0.09729565415714336,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.6778510808944702,
+          "teacher_target_std": 0.9954625368118286,
+          "predictor_std": 0.2934456765651703,
+          "residual/layer_0/attention/rms_ratio": 1.0306174863683712,
+          "residual/layer_0/attention/weight_rms": 0.05220283567905426,
+          "residual/layer_0/ffn/rms_ratio": 1.5424800596432149,
+          "residual/layer_0/ffn/weight_rms": 0.040416501462459564,
+          "residual/layer_1/attention/rms_ratio": 0.4110732018651232,
+          "residual/layer_1/attention/weight_rms": 0.058419954031705856,
+          "residual/layer_1/ffn/rms_ratio": 1.0896113960031393,
+          "residual/layer_1/ffn/weight_rms": 0.044706039130687714,
+          "student_temporal_std": 0.668815016746521,
+          "student_global_std": 0.7194185853004456,
+          "student_effective_rank": 18.812246322631836,
+          "clean_silence_feature_rms": 0.9529876708984375,
+          "within_domain_input_swap_rms": 1.033124327659607
+        },
+        {
+          "step": 9000,
+          "latent_loss": 0.38749054074287415,
+          "zero_predictor_loss": 0.4333241581916809,
+          "relative_gain_over_zero": 0.10577212597625874,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.6728402972221375,
+          "teacher_target_std": 0.9950820207595825,
+          "predictor_std": 0.34521913528442383,
+          "residual/layer_0/attention/rms_ratio": 0.9560127860840258,
+          "residual/layer_0/attention/weight_rms": 0.052308518439531326,
+          "residual/layer_0/ffn/rms_ratio": 1.4964680501679382,
+          "residual/layer_0/ffn/weight_rms": 0.040951475501060486,
+          "residual/layer_1/attention/rms_ratio": 0.44988481411660824,
+          "residual/layer_1/attention/weight_rms": 0.05891168490052223,
+          "residual/layer_1/ffn/rms_ratio": 1.0618812281310304,
+          "residual/layer_1/ffn/weight_rms": 0.04537113755941391,
+          "student_temporal_std": 0.6609525680541992,
+          "student_global_std": 0.7152384519577026,
+          "student_effective_rank": 19.542572021484375,
+          "clean_silence_feature_rms": 0.9224181175231934,
+          "within_domain_input_swap_rms": 1.0384249687194824
+        },
+        {
+          "step": 9500,
+          "latent_loss": 0.380126029253006,
+          "zero_predictor_loss": 0.43263161182403564,
+          "relative_gain_over_zero": 0.1213632594938191,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.6676645278930664,
+          "teacher_target_std": 0.9945372343063354,
+          "predictor_std": 0.35493263602256775,
+          "residual/layer_0/attention/rms_ratio": 1.0161331725370961,
+          "residual/layer_0/attention/weight_rms": 0.052543412894010544,
+          "residual/layer_0/ffn/rms_ratio": 1.5570404484998974,
+          "residual/layer_0/ffn/weight_rms": 0.041589267551898956,
+          "residual/layer_1/attention/rms_ratio": 0.4291638295532305,
+          "residual/layer_1/attention/weight_rms": 0.05934101343154907,
+          "residual/layer_1/ffn/rms_ratio": 1.1032678858567888,
+          "residual/layer_1/ffn/weight_rms": 0.04607656970620155,
+          "student_temporal_std": 0.6562168598175049,
+          "student_global_std": 0.7034116387367249,
+          "student_effective_rank": 18.95469856262207,
+          "clean_silence_feature_rms": 0.9017183780670166,
+          "within_domain_input_swap_rms": 1.0086466073989868
+        },
+        {
+          "step": 10000,
+          "latent_loss": 0.3829127848148346,
+          "zero_predictor_loss": 0.43345779180526733,
+          "relative_gain_over_zero": 0.11660883238463104,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.6653173565864563,
+          "teacher_target_std": 0.9960637092590332,
+          "predictor_std": 0.36301305890083313,
+          "residual/layer_0/attention/rms_ratio": 0.9810302107413864,
+          "residual/layer_0/attention/weight_rms": 0.05267810821533203,
+          "residual/layer_0/ffn/rms_ratio": 1.556348674704434,
+          "residual/layer_0/ffn/weight_rms": 0.042240869253873825,
+          "residual/layer_1/attention/rms_ratio": 0.4164075897296801,
+          "residual/layer_1/attention/weight_rms": 0.05963361635804176,
+          "residual/layer_1/ffn/rms_ratio": 1.0532713614941671,
+          "residual/layer_1/ffn/weight_rms": 0.04675658419728279,
+          "student_temporal_std": 0.6618976593017578,
+          "student_global_std": 0.7160665392875671,
+          "student_effective_rank": 20.33910369873047,
+          "clean_silence_feature_rms": 0.9213094711303711,
+          "within_domain_input_swap_rms": 1.0142412185668945
+        }
+      ],
+      "training": {
+        "completed": true,
+        "steps": 10000,
+        "additional_steps": 10000,
+        "seconds": 464.09680016602215,
+        "last": {
+          "step": 10000,
+          "loss": 0.31226664781570435,
+          "latent": 0.31226664781570435,
+          "gradient_norm": 0.15908515453338623,
+          "ema_decay": 0.999,
+          "teacher_std": 0.9206172227859497,
+          "masked_frames": 238,
+          "lr": 0.0003
+        },
+        "initial_encoder_sha256": "a7059ee24cd3a5413d809146176b99f88172a255a623993ae47a4ec6bf98f637",
+        "final_encoder_sha256": "ca51614960b1e0d94522088d1c91cef242c3b0f6ba333d122e626726c6152bf4",
+        "teacher_sha256": "3df97b3bf800b37d55136b0753f2fa40a118f8c23e47291a728e37d0fca51476",
+        "parameters": 1166858,
+        "encoder_parameters": 1025216,
+        "optimizer_step_values": [
+          10000
+        ],
+        "peak_cuda_gib": 0.0842595100402832,
+        "coefficients": {
+          "latent": 1.0
+        },
+        "schedule_sha256": "b6776a034a886c96a0bc4c344cbc775dca2dc5d44153e1f19ec387c01804068a"
+      }
+    },
+    "residual_1e4": {
+      "untrained": {
+        "test": {
+          "cluster": {
+            "music": {
+              "frames": 1120,
+              "accuracy": 0.5
+            },
+            "en": {
+              "frames": 1156,
+              "accuracy": 0.0008650519303046167
+            },
+            "ja": {
+              "frames": 1178,
+              "accuracy": 0.10016977787017822
+            },
+            "balanced_accuracy": 0.2752587074501207
+          },
+          "midi_key_activity": {
+            "frames": 880,
+            "positive_keys": 1030,
+            "tp": 291,
+            "fp": 2668,
+            "fn": 739,
+            "precision": 0.09834403514700912,
+            "recall": 0.28252427184466017,
+            "micro_f1": 0.14590122837803962,
+            "micro_average_precision": 0.07776207173357473
+          },
+          "unsupported_midi_sources": 3
+        },
+        "validation": {
+          "cluster": {
+            "music": {
+              "frames": 880,
+              "accuracy": 0.20568181574344635
+            },
+            "en": {
+              "frames": 527,
+              "accuracy": 0.0
+            },
+            "ja": {
+              "frames": 565,
+              "accuracy": 0.10619468986988068
+            },
+            "balanced_accuracy": 0.12938958033919334
+          },
+          "midi_key_activity": {
+            "frames": 480,
+            "positive_keys": 901,
+            "tp": 355,
+            "fp": 1343,
+            "fn": 546,
+            "precision": 0.20906949352179033,
+            "recall": 0.3940066592674806,
+            "micro_f1": 0.27318199307425933,
+            "micro_average_precision": 0.17471363231745157
+          },
+          "unsupported_midi_sources": 5
+        },
+        "silence": {
+          "cluster": {
+            "music": {
+              "frames": 1120,
+              "accuracy": 0.4776785671710968
+            },
+            "en": {
+              "frames": 1156,
+              "accuracy": 0.0
+            },
+            "ja": {
+              "frames": 1178,
+              "accuracy": 0.0008488964522257447
+            },
+            "balanced_accuracy": 0.23905150769860484
+          },
+          "midi_key_activity": {
+            "frames": 880,
+            "positive_keys": 1030,
+            "tp": 0,
+            "fp": 0,
+            "fn": 1030,
+            "precision": 0.0,
+            "recall": 0.0,
+            "micro_f1": 0.0,
+            "micro_average_precision": 0.022412892009086634
+          },
+          "unsupported_midi_sources": 3
+        },
+        "probe_selection": {
+          "cluster": {
+            "validation_score": 0.12938958033919334,
+            "alpha": 0.1,
+            "threshold": 0,
+            "train_frames": 32278
+          },
+          "pitch": {
+            "validation_score": 0.27318199307425933,
+            "alpha": 0.1,
+            "threshold": 0.1,
+            "train_frames": 14400
+          }
+        },
+        "feature_std": 0.7959209680557251,
+        "effective_rank": 49.638832092285156,
+        "clean_silence_feature_rms": 0.8944740295410156,
+        "replayed_test_frames": 3454,
+        "encoder_sha256": "175a02aeb3f6fd087144a61d8431519714f0717942e360c57255727c221c2ee4"
+      },
+      "latent": {
+        "test": {
+          "cluster": {
+            "music": {
+              "frames": 1120,
+              "accuracy": 0.5303571224212646
+            },
+            "en": {
+              "frames": 1156,
+              "accuracy": 0.07439446449279785
+            },
+            "ja": {
+              "frames": 1178,
+              "accuracy": 0.2300509363412857
+            },
+            "balanced_accuracy": 0.3412899114191532
+          },
+          "midi_key_activity": {
+            "frames": 880,
+            "positive_keys": 1030,
+            "tp": 202,
+            "fp": 866,
+            "fn": 828,
+            "precision": 0.1891385767790262,
+            "recall": 0.19611650485436893,
+            "micro_f1": 0.19256434699714015,
+            "micro_average_precision": 0.17274974283229325
+          },
+          "unsupported_midi_sources": 3
+        },
+        "validation": {
+          "cluster": {
+            "music": {
+              "frames": 880,
+              "accuracy": 0.271590918302536
+            },
+            "en": {
+              "frames": 527,
+              "accuracy": 0.07400379329919815
+            },
+            "ja": {
+              "frames": 565,
+              "accuracy": 0.23539823293685913
+            },
+            "balanced_accuracy": 0.21314596571028233
+          },
+          "midi_key_activity": {
+            "frames": 480,
+            "positive_keys": 901,
+            "tp": 313,
+            "fp": 652,
+            "fn": 588,
+            "precision": 0.3243523316062176,
+            "recall": 0.34739178690344064,
+            "micro_f1": 0.3354769560557342,
+            "micro_average_precision": 0.26805870043214053
+          },
+          "unsupported_midi_sources": 5
+        },
+        "silence": {
+          "cluster": {
+            "music": {
+              "frames": 1120,
+              "accuracy": 0.4776785671710968
+            },
+            "en": {
+              "frames": 1156,
+              "accuracy": 0.0
+            },
+            "ja": {
+              "frames": 1178,
+              "accuracy": 0.0008488964522257447
+            },
+            "balanced_accuracy": 0.23905150769860484
+          },
+          "midi_key_activity": {
+            "frames": 880,
+            "positive_keys": 1030,
+            "tp": 0,
+            "fp": 0,
+            "fn": 1030,
+            "precision": 0.0,
+            "recall": 0.0,
+            "micro_f1": 0.0,
+            "micro_average_precision": 0.02585302459435854
+          },
+          "unsupported_midi_sources": 3
+        },
+        "probe_selection": {
+          "cluster": {
+            "validation_score": 0.21314596571028233,
+            "alpha": 0.01,
+            "threshold": 0,
+            "train_frames": 32278
+          },
+          "pitch": {
+            "validation_score": 0.3354769560557342,
+            "alpha": 0.001,
+            "threshold": 0.2,
+            "train_frames": 14400
+          }
+        },
+        "feature_std": 0.7175505757331848,
+        "effective_rank": 34.40032196044922,
+        "clean_silence_feature_rms": 0.9404256939888,
+        "replayed_test_frames": 3454,
+        "encoder_sha256": "a3e84ed1eac4968029fb32b299ecded9761d9346617ec7062a71f318ef86333b"
+      },
+      "validation_diagnostics": [
+        {
+          "step": 0,
+          "latent_loss": 0.5277124643325806,
+          "zero_predictor_loss": 0.4218288064002991,
+          "relative_gain_over_zero": -0.2510109701512466,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.7941526174545288,
+          "teacher_target_std": 1.0052331686019897,
+          "predictor_std": 0.0002000503009185195,
+          "residual/layer_0/attention/rms_ratio": 0.0008367214567486217,
+          "residual/layer_0/attention/weight_rms": 5.086862074676901e-06,
+          "residual/layer_0/ffn/rms_ratio": 0.0004098205041705986,
+          "residual/layer_0/ffn/weight_rms": 3.0721105304110097e-06,
+          "residual/layer_1/attention/rms_ratio": 0.0007170734796331838,
+          "residual/layer_1/attention/weight_rms": 5.059999239165336e-06,
+          "residual/layer_1/ffn/rms_ratio": 0.00039754668117335544,
+          "residual/layer_1/ffn/weight_rms": 3.0829580737190554e-06,
+          "student_temporal_std": 0.7941526174545288,
+          "student_global_std": 0.8139997720718384,
+          "student_effective_rank": 37.247657775878906,
+          "clean_silence_feature_rms": 0.9255053997039795,
+          "within_domain_input_swap_rms": 1.143192172050476
+        },
+        {
+          "step": 500,
+          "latent_loss": 0.41789135336875916,
+          "zero_predictor_loss": 0.4300442934036255,
+          "relative_gain_over_zero": 0.028259740266940336,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.8946542739868164,
+          "teacher_target_std": 0.9965893626213074,
+          "predictor_std": 0.13781602680683136,
+          "residual/layer_0/attention/rms_ratio": 0.13399777908351695,
+          "residual/layer_0/attention/weight_rms": 0.003934388514608145,
+          "residual/layer_0/ffn/rms_ratio": 0.43255457132049824,
+          "residual/layer_0/ffn/weight_rms": 0.004675503354519606,
+          "residual/layer_1/attention/rms_ratio": 0.11859134508991527,
+          "residual/layer_1/attention/weight_rms": 0.0036849607713520527,
+          "residual/layer_1/ffn/rms_ratio": 0.07004908651686803,
+          "residual/layer_1/ffn/weight_rms": 0.0028861656319350004,
+          "student_temporal_std": 0.8744673132896423,
+          "student_global_std": 0.898331880569458,
+          "student_effective_rank": 21.148988723754883,
+          "clean_silence_feature_rms": 1.2786437273025513,
+          "within_domain_input_swap_rms": 1.2504987716674805
+        },
+        {
+          "step": 1000,
+          "latent_loss": 0.4213774800300598,
+          "zero_predictor_loss": 0.4332650899887085,
+          "relative_gain_over_zero": 0.02743726700657667,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.8440567255020142,
+          "teacher_target_std": 1.0033161640167236,
+          "predictor_std": 0.12434065341949463,
+          "residual/layer_0/attention/rms_ratio": 0.1691803724530325,
+          "residual/layer_0/attention/weight_rms": 0.005673157516866922,
+          "residual/layer_0/ffn/rms_ratio": 0.5459872922180663,
+          "residual/layer_0/ffn/weight_rms": 0.006798814982175827,
+          "residual/layer_1/attention/rms_ratio": 0.23072800126610685,
+          "residual/layer_1/attention/weight_rms": 0.005943360272794962,
+          "residual/layer_1/ffn/rms_ratio": 0.16885007223611392,
+          "residual/layer_1/ffn/weight_rms": 0.00477759912610054,
+          "student_temporal_std": 0.8021237850189209,
+          "student_global_std": 0.8260657787322998,
+          "student_effective_rank": 23.917516708374023,
+          "clean_silence_feature_rms": 1.1893904209136963,
+          "within_domain_input_swap_rms": 1.1476126909255981
+        },
+        {
+          "step": 1500,
+          "latent_loss": 0.41866302490234375,
+          "zero_predictor_loss": 0.43304455280303955,
+          "relative_gain_over_zero": 0.03321027318691827,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.8292893171310425,
+          "teacher_target_std": 1.0019128322601318,
+          "predictor_std": 0.16785837709903717,
+          "residual/layer_0/attention/rms_ratio": 0.20785046186785056,
+          "residual/layer_0/attention/weight_rms": 0.007204854860901833,
+          "residual/layer_0/ffn/rms_ratio": 0.7340545170747359,
+          "residual/layer_0/ffn/weight_rms": 0.008577886037528515,
+          "residual/layer_1/attention/rms_ratio": 0.22894539261234728,
+          "residual/layer_1/attention/weight_rms": 0.00783444568514824,
+          "residual/layer_1/ffn/rms_ratio": 0.23677409412360323,
+          "residual/layer_1/ffn/weight_rms": 0.006493915803730488,
+          "student_temporal_std": 0.7990479469299316,
+          "student_global_std": 0.8279054760932922,
+          "student_effective_rank": 22.856571197509766,
+          "clean_silence_feature_rms": 1.2223634719848633,
+          "within_domain_input_swap_rms": 1.1273417472839355
+        },
+        {
+          "step": 2000,
+          "latent_loss": 0.4165739417076111,
+          "zero_predictor_loss": 0.4327813684940338,
+          "relative_gain_over_zero": 0.0374494559292613,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.7951587438583374,
+          "teacher_target_std": 1.0021791458129883,
+          "predictor_std": 0.21731850504875183,
+          "residual/layer_0/attention/rms_ratio": 0.21182667683526718,
+          "residual/layer_0/attention/weight_rms": 0.008376146666705608,
+          "residual/layer_0/ffn/rms_ratio": 0.9023471914080156,
+          "residual/layer_0/ffn/weight_rms": 0.00996640045195818,
+          "residual/layer_1/attention/rms_ratio": 0.2996389619727724,
+          "residual/layer_1/attention/weight_rms": 0.009495987556874752,
+          "residual/layer_1/ffn/rms_ratio": 0.3182117593877009,
+          "residual/layer_1/ffn/weight_rms": 0.00785038247704506,
+          "student_temporal_std": 0.7305800318717957,
+          "student_global_std": 0.7532832622528076,
+          "student_effective_rank": 22.194625854492188,
+          "clean_silence_feature_rms": 1.100545048713684,
+          "within_domain_input_swap_rms": 1.0479509830474854
+        },
+        {
+          "step": 2500,
+          "latent_loss": 0.4137316942214966,
+          "zero_predictor_loss": 0.4351838529109955,
+          "relative_gain_over_zero": 0.049294473004921735,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.767052173614502,
+          "teacher_target_std": 1.0056934356689453,
+          "predictor_std": 0.193714439868927,
+          "residual/layer_0/attention/rms_ratio": 0.24533817681079897,
+          "residual/layer_0/attention/weight_rms": 0.009511134587228298,
+          "residual/layer_0/ffn/rms_ratio": 1.0120645047824295,
+          "residual/layer_0/ffn/weight_rms": 0.011177386157214642,
+          "residual/layer_1/attention/rms_ratio": 0.3131594006198325,
+          "residual/layer_1/attention/weight_rms": 0.011143270879983902,
+          "residual/layer_1/ffn/rms_ratio": 0.3258291411738596,
+          "residual/layer_1/ffn/weight_rms": 0.009261106140911579,
+          "student_temporal_std": 0.7222520112991333,
+          "student_global_std": 0.7477193474769592,
+          "student_effective_rank": 21.852123260498047,
+          "clean_silence_feature_rms": 1.1230148077011108,
+          "within_domain_input_swap_rms": 1.0237553119659424
+        },
+        {
+          "step": 3000,
+          "latent_loss": 0.4168649911880493,
+          "zero_predictor_loss": 0.43659651279449463,
+          "relative_gain_over_zero": 0.04519395145909677,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.7520871162414551,
+          "teacher_target_std": 1.007049560546875,
+          "predictor_std": 0.22830332815647125,
+          "residual/layer_0/attention/rms_ratio": 0.2648395586098641,
+          "residual/layer_0/attention/weight_rms": 0.010390487499535084,
+          "residual/layer_0/ffn/rms_ratio": 0.9914308005841119,
+          "residual/layer_0/ffn/weight_rms": 0.012238924391567707,
+          "residual/layer_1/attention/rms_ratio": 0.3017173279470466,
+          "residual/layer_1/attention/weight_rms": 0.012741715647280216,
+          "residual/layer_1/ffn/rms_ratio": 0.3339909057614284,
+          "residual/layer_1/ffn/weight_rms": 0.01072750799357891,
+          "student_temporal_std": 0.745184600353241,
+          "student_global_std": 0.7784326076507568,
+          "student_effective_rank": 23.55312728881836,
+          "clean_silence_feature_rms": 1.1674494743347168,
+          "within_domain_input_swap_rms": 1.0509802103042603
+        },
+        {
+          "step": 3500,
+          "latent_loss": 0.41007575392723083,
+          "zero_predictor_loss": 0.43602803349494934,
+          "relative_gain_over_zero": 0.05951975004840859,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.7427718043327332,
+          "teacher_target_std": 1.0075783729553223,
+          "predictor_std": 0.20340466499328613,
+          "residual/layer_0/attention/rms_ratio": 0.24820297415217205,
+          "residual/layer_0/attention/weight_rms": 0.011280076578259468,
+          "residual/layer_0/ffn/rms_ratio": 1.1219875767884693,
+          "residual/layer_0/ffn/weight_rms": 0.013463347218930721,
+          "residual/layer_1/attention/rms_ratio": 0.31796175371766716,
+          "residual/layer_1/attention/weight_rms": 0.014224540442228317,
+          "residual/layer_1/ffn/rms_ratio": 0.32686898947923465,
+          "residual/layer_1/ffn/weight_rms": 0.012165036983788013,
+          "student_temporal_std": 0.7208663821220398,
+          "student_global_std": 0.7561901807785034,
+          "student_effective_rank": 23.660186767578125,
+          "clean_silence_feature_rms": 1.1251801252365112,
+          "within_domain_input_swap_rms": 1.0147322416305542
+        },
+        {
+          "step": 4000,
+          "latent_loss": 0.4054330885410309,
+          "zero_predictor_loss": 0.4339410066604614,
+          "relative_gain_over_zero": 0.0656953772099641,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.735582709312439,
+          "teacher_target_std": 1.006343126296997,
+          "predictor_std": 0.22192710638046265,
+          "residual/layer_0/attention/rms_ratio": 0.2658379343323044,
+          "residual/layer_0/attention/weight_rms": 0.012266024947166443,
+          "residual/layer_0/ffn/rms_ratio": 1.1448603381655353,
+          "residual/layer_0/ffn/weight_rms": 0.014471781440079212,
+          "residual/layer_1/attention/rms_ratio": 0.3163934764231665,
+          "residual/layer_1/attention/weight_rms": 0.015593568794429302,
+          "residual/layer_1/ffn/rms_ratio": 0.3928620784386769,
+          "residual/layer_1/ffn/weight_rms": 0.013623186387121677,
+          "student_temporal_std": 0.709039568901062,
+          "student_global_std": 0.7450815439224243,
+          "student_effective_rank": 24.035411834716797,
+          "clean_silence_feature_rms": 1.1397086381912231,
+          "within_domain_input_swap_rms": 1.0223172903060913
+        },
+        {
+          "step": 4500,
+          "latent_loss": 0.4037461578845978,
+          "zero_predictor_loss": 0.43460264801979065,
+          "relative_gain_over_zero": 0.07099931460562048,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.7265232801437378,
+          "teacher_target_std": 1.0081150531768799,
+          "predictor_std": 0.24954229593276978,
+          "residual/layer_0/attention/rms_ratio": 0.2608205693570052,
+          "residual/layer_0/attention/weight_rms": 0.013007999397814274,
+          "residual/layer_0/ffn/rms_ratio": 1.1582486800763077,
+          "residual/layer_0/ffn/weight_rms": 0.015485207550227642,
+          "residual/layer_1/attention/rms_ratio": 0.3370250944744419,
+          "residual/layer_1/attention/weight_rms": 0.01707221381366253,
+          "residual/layer_1/ffn/rms_ratio": 0.369977516713625,
+          "residual/layer_1/ffn/weight_rms": 0.015144147910177708,
+          "student_temporal_std": 0.7100359797477722,
+          "student_global_std": 0.7477682828903198,
+          "student_effective_rank": 25.44230842590332,
+          "clean_silence_feature_rms": 1.1099987030029297,
+          "within_domain_input_swap_rms": 1.0204863548278809
+        },
+        {
+          "step": 5000,
+          "latent_loss": 0.3988500237464905,
+          "zero_predictor_loss": 0.4352012276649475,
+          "relative_gain_over_zero": 0.08352734690914765,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.7212406396865845,
+          "teacher_target_std": 1.0096526145935059,
+          "predictor_std": 0.25728949904441833,
+          "residual/layer_0/attention/rms_ratio": 0.2933940090075153,
+          "residual/layer_0/attention/weight_rms": 0.013988145627081394,
+          "residual/layer_0/ffn/rms_ratio": 1.1717306669864531,
+          "residual/layer_0/ffn/weight_rms": 0.016730962321162224,
+          "residual/layer_1/attention/rms_ratio": 0.3280357425977014,
+          "residual/layer_1/attention/weight_rms": 0.018306555226445198,
+          "residual/layer_1/ffn/rms_ratio": 0.4392745760597245,
+          "residual/layer_1/ffn/weight_rms": 0.01652257703244686,
+          "student_temporal_std": 0.7264093160629272,
+          "student_global_std": 0.771547257900238,
+          "student_effective_rank": 25.8426456451416,
+          "clean_silence_feature_rms": 1.118971824645996,
+          "within_domain_input_swap_rms": 1.0565937757492065
+        },
+        {
+          "step": 5500,
+          "latent_loss": 0.3942926824092865,
+          "zero_predictor_loss": 0.4365554451942444,
+          "relative_gain_over_zero": 0.096809610898687,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.7168639898300171,
+          "teacher_target_std": 1.0111668109893799,
+          "predictor_std": 0.28788113594055176,
+          "residual/layer_0/attention/rms_ratio": 0.29973388308717824,
+          "residual/layer_0/attention/weight_rms": 0.014718607999384403,
+          "residual/layer_0/ffn/rms_ratio": 1.2450924519252669,
+          "residual/layer_0/ffn/weight_rms": 0.017777318134903908,
+          "residual/layer_1/attention/rms_ratio": 0.30550924306190463,
+          "residual/layer_1/attention/weight_rms": 0.019719472154974937,
+          "residual/layer_1/ffn/rms_ratio": 0.4437281108894256,
+          "residual/layer_1/ffn/weight_rms": 0.017874527722597122,
+          "student_temporal_std": 0.7146839499473572,
+          "student_global_std": 0.7571039199829102,
+          "student_effective_rank": 27.073564529418945,
+          "clean_silence_feature_rms": 1.1003005504608154,
+          "within_domain_input_swap_rms": 1.0318546295166016
+        },
+        {
+          "step": 6000,
+          "latent_loss": 0.39526402950286865,
+          "zero_predictor_loss": 0.4366455078125,
+          "relative_gain_over_zero": 0.09477133640271174,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.71327805519104,
+          "teacher_target_std": 1.0104718208312988,
+          "predictor_std": 0.2509373128414154,
+          "residual/layer_0/attention/rms_ratio": 0.29586185227371126,
+          "residual/layer_0/attention/weight_rms": 0.015421686694025993,
+          "residual/layer_0/ffn/rms_ratio": 1.208570596717506,
+          "residual/layer_0/ffn/weight_rms": 0.01891005039215088,
+          "residual/layer_1/attention/rms_ratio": 0.3084463991579481,
+          "residual/layer_1/attention/weight_rms": 0.02079806849360466,
+          "residual/layer_1/ffn/rms_ratio": 0.5082845023375009,
+          "residual/layer_1/ffn/weight_rms": 0.01908636838197708,
+          "student_temporal_std": 0.7144457101821899,
+          "student_global_std": 0.7591182589530945,
+          "student_effective_rank": 28.205852508544922,
+          "clean_silence_feature_rms": 1.080035924911499,
+          "within_domain_input_swap_rms": 1.033334732055664
+        },
+        {
+          "step": 6500,
+          "latent_loss": 0.3901243805885315,
+          "zero_predictor_loss": 0.4361168444156647,
+          "relative_gain_over_zero": 0.10545904020001018,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.7105028629302979,
+          "teacher_target_std": 1.0096983909606934,
+          "predictor_std": 0.29408013820648193,
+          "residual/layer_0/attention/rms_ratio": 0.28136104799247713,
+          "residual/layer_0/attention/weight_rms": 0.0160481296479702,
+          "residual/layer_0/ffn/rms_ratio": 1.2862745594194034,
+          "residual/layer_0/ffn/weight_rms": 0.020011842250823975,
+          "residual/layer_1/attention/rms_ratio": 0.3155415385567784,
+          "residual/layer_1/attention/weight_rms": 0.02184339240193367,
+          "residual/layer_1/ffn/rms_ratio": 0.4941589001120422,
+          "residual/layer_1/ffn/weight_rms": 0.02030521258711815,
+          "student_temporal_std": 0.7030566930770874,
+          "student_global_std": 0.746801495552063,
+          "student_effective_rank": 28.44318389892578,
+          "clean_silence_feature_rms": 1.067476749420166,
+          "within_domain_input_swap_rms": 1.0143141746520996
+        },
+        {
+          "step": 7000,
+          "latent_loss": 0.38738420605659485,
+          "zero_predictor_loss": 0.43622732162475586,
+          "relative_gain_over_zero": 0.11196711702110218,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.7049078941345215,
+          "teacher_target_std": 1.0096259117126465,
+          "predictor_std": 0.2980962097644806,
+          "residual/layer_0/attention/rms_ratio": 0.29516999870869254,
+          "residual/layer_0/attention/weight_rms": 0.016672315075993538,
+          "residual/layer_0/ffn/rms_ratio": 1.2955321364738517,
+          "residual/layer_0/ffn/weight_rms": 0.020900001749396324,
+          "residual/layer_1/attention/rms_ratio": 0.30009895207505055,
+          "residual/layer_1/attention/weight_rms": 0.02290594018995762,
+          "residual/layer_1/ffn/rms_ratio": 0.5118297636340728,
+          "residual/layer_1/ffn/weight_rms": 0.021331995725631714,
+          "student_temporal_std": 0.7017859816551208,
+          "student_global_std": 0.7444873452186584,
+          "student_effective_rank": 29.721784591674805,
+          "clean_silence_feature_rms": 1.0656319856643677,
+          "within_domain_input_swap_rms": 1.0230393409729004
+        },
+        {
+          "step": 7500,
+          "latent_loss": 0.3846108317375183,
+          "zero_predictor_loss": 0.4360569715499878,
+          "relative_gain_over_zero": 0.11798031718103585,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.7022503614425659,
+          "teacher_target_std": 1.008543610572815,
+          "predictor_std": 0.3165094256401062,
+          "residual/layer_0/attention/rms_ratio": 0.28870190175919536,
+          "residual/layer_0/attention/weight_rms": 0.017234470695257187,
+          "residual/layer_0/ffn/rms_ratio": 1.3232483247218585,
+          "residual/layer_0/ffn/weight_rms": 0.021885355934500694,
+          "residual/layer_1/attention/rms_ratio": 0.3077434743152517,
+          "residual/layer_1/attention/weight_rms": 0.023964378982782364,
+          "residual/layer_1/ffn/rms_ratio": 0.5056928819479726,
+          "residual/layer_1/ffn/weight_rms": 0.02241361513733864,
+          "student_temporal_std": 0.702959418296814,
+          "student_global_std": 0.7484322190284729,
+          "student_effective_rank": 30.33161735534668,
+          "clean_silence_feature_rms": 1.0692447423934937,
+          "within_domain_input_swap_rms": 1.0376509428024292
+        },
+        {
+          "step": 8000,
+          "latent_loss": 0.38471025228500366,
+          "zero_predictor_loss": 0.43563178181648254,
+          "relative_gain_over_zero": 0.11689121789771173,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.6979608535766602,
+          "teacher_target_std": 1.0082511901855469,
+          "predictor_std": 0.2949865460395813,
+          "residual/layer_0/attention/rms_ratio": 0.2951084447988568,
+          "residual/layer_0/attention/weight_rms": 0.017910445109009743,
+          "residual/layer_0/ffn/rms_ratio": 1.29090977644671,
+          "residual/layer_0/ffn/weight_rms": 0.022787300869822502,
+          "residual/layer_1/attention/rms_ratio": 0.3217495380390537,
+          "residual/layer_1/attention/weight_rms": 0.025055505335330963,
+          "residual/layer_1/ffn/rms_ratio": 0.5577780817274133,
+          "residual/layer_1/ffn/weight_rms": 0.023516079410910606,
+          "student_temporal_std": 0.6971713900566101,
+          "student_global_std": 0.7405866384506226,
+          "student_effective_rank": 30.198884963989258,
+          "clean_silence_feature_rms": 1.0587834119796753,
+          "within_domain_input_swap_rms": 1.0331087112426758
+        },
+        {
+          "step": 8500,
+          "latent_loss": 0.38082271814346313,
+          "zero_predictor_loss": 0.43687304854393005,
+          "relative_gain_over_zero": 0.1282988973279059,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.6969608664512634,
+          "teacher_target_std": 1.009598731994629,
+          "predictor_std": 0.28992918133735657,
+          "residual/layer_0/attention/rms_ratio": 0.2868512969161754,
+          "residual/layer_0/attention/weight_rms": 0.018476607277989388,
+          "residual/layer_0/ffn/rms_ratio": 1.3224172618522023,
+          "residual/layer_0/ffn/weight_rms": 0.023741642013192177,
+          "residual/layer_1/attention/rms_ratio": 0.3061400957340059,
+          "residual/layer_1/attention/weight_rms": 0.025993390008807182,
+          "residual/layer_1/ffn/rms_ratio": 0.5091189911827221,
+          "residual/layer_1/ffn/weight_rms": 0.024601684883236885,
+          "student_temporal_std": 0.7033774852752686,
+          "student_global_std": 0.7436606884002686,
+          "student_effective_rank": 31.114147186279297,
+          "clean_silence_feature_rms": 1.0423333644866943,
+          "within_domain_input_swap_rms": 1.0271804332733154
+        },
+        {
+          "step": 9000,
+          "latent_loss": 0.37829363346099854,
+          "zero_predictor_loss": 0.4387640357017517,
+          "relative_gain_over_zero": 0.137819869725735,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.7001014947891235,
+          "teacher_target_std": 1.0116055011749268,
+          "predictor_std": 0.3216519355773926,
+          "residual/layer_0/attention/rms_ratio": 0.2769546075229582,
+          "residual/layer_0/attention/weight_rms": 0.019022561609745026,
+          "residual/layer_0/ffn/rms_ratio": 1.3586135730368858,
+          "residual/layer_0/ffn/weight_rms": 0.024605950340628624,
+          "residual/layer_1/attention/rms_ratio": 0.29774230214286496,
+          "residual/layer_1/attention/weight_rms": 0.02703424170613289,
+          "residual/layer_1/ffn/rms_ratio": 0.48496920459546355,
+          "residual/layer_1/ffn/weight_rms": 0.025591108947992325,
+          "student_temporal_std": 0.7094029188156128,
+          "student_global_std": 0.7549015283584595,
+          "student_effective_rank": 32.03754425048828,
+          "clean_silence_feature_rms": 1.0577200651168823,
+          "within_domain_input_swap_rms": 1.0315064191818237
+        },
+        {
+          "step": 9500,
+          "latent_loss": 0.3765387237071991,
+          "zero_predictor_loss": 0.4393931031227112,
+          "relative_gain_over_zero": 0.14304817023483973,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.701378345489502,
+          "teacher_target_std": 1.01173996925354,
+          "predictor_std": 0.3264843225479126,
+          "residual/layer_0/attention/rms_ratio": 0.2834921071783115,
+          "residual/layer_0/attention/weight_rms": 0.019659819081425667,
+          "residual/layer_0/ffn/rms_ratio": 1.431749648560519,
+          "residual/layer_0/ffn/weight_rms": 0.02544456534087658,
+          "residual/layer_1/attention/rms_ratio": 0.2983082841008996,
+          "residual/layer_1/attention/weight_rms": 0.028027448803186417,
+          "residual/layer_1/ffn/rms_ratio": 0.45909020277979157,
+          "residual/layer_1/ffn/weight_rms": 0.02648874931037426,
+          "student_temporal_std": 0.6935347318649292,
+          "student_global_std": 0.7394408583641052,
+          "student_effective_rank": 30.92388916015625,
+          "clean_silence_feature_rms": 1.0339540243148804,
+          "within_domain_input_swap_rms": 1.010799527168274
+        },
+        {
+          "step": 10000,
+          "latent_loss": 0.37135130167007446,
+          "zero_predictor_loss": 0.4394177496433258,
+          "relative_gain_over_zero": 0.15490145318094384,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.6997982859611511,
+          "teacher_target_std": 1.0115160942077637,
+          "predictor_std": 0.3431369364261627,
+          "residual/layer_0/attention/rms_ratio": 0.28227489243799087,
+          "residual/layer_0/attention/weight_rms": 0.020382072776556015,
+          "residual/layer_0/ffn/rms_ratio": 1.3892444834839346,
+          "residual/layer_0/ffn/weight_rms": 0.026249611750245094,
+          "residual/layer_1/attention/rms_ratio": 0.3021641461285303,
+          "residual/layer_1/attention/weight_rms": 0.02891704812645912,
+          "residual/layer_1/ffn/rms_ratio": 0.4782924132458054,
+          "residual/layer_1/ffn/weight_rms": 0.027415893971920013,
+          "student_temporal_std": 0.6976873278617859,
+          "student_global_std": 0.7417579889297485,
+          "student_effective_rank": 31.545907974243164,
+          "clean_silence_feature_rms": 1.0286588668823242,
+          "within_domain_input_swap_rms": 1.0196889638900757
+        }
+      ],
+      "training": {
+        "completed": true,
+        "steps": 10000,
+        "additional_steps": 10000,
+        "seconds": 463.026025631174,
+        "last": {
+          "step": 10000,
+          "loss": 0.3241925835609436,
+          "latent": 0.3241925835609436,
+          "gradient_norm": 0.13338366150856018,
+          "ema_decay": 0.999,
+          "teacher_std": 0.9269677400588989,
+          "masked_frames": 238,
+          "lr": 0.0003
+        },
+        "initial_encoder_sha256": "175a02aeb3f6fd087144a61d8431519714f0717942e360c57255727c221c2ee4",
+        "final_encoder_sha256": "a3e84ed1eac4968029fb32b299ecded9761d9346617ec7062a71f318ef86333b",
+        "teacher_sha256": "f9445304765bf6391bc8cd4e8960bded3762fad68f9bca41d71f46b0e2afe67c",
+        "parameters": 1166858,
+        "encoder_parameters": 1025216,
+        "optimizer_step_values": [
+          10000
+        ],
+        "peak_cuda_gib": 0.0842595100402832,
+        "coefficients": {
+          "latent": 1.0
+        },
+        "schedule_sha256": "b6776a034a886c96a0bc4c344cbc775dca2dc5d44153e1f19ec387c01804068a"
+      }
+    },
+    "mel_sinusoidal": {
+      "untrained": {
+        "test": {
+          "cluster": {
+            "music": {
+              "frames": 1120,
+              "accuracy": 0.4258928596973419
+            },
+            "en": {
+              "frames": 1156,
+              "accuracy": 0.008650518953800201
+            },
+            "ja": {
+              "frames": 1178,
+              "accuracy": 0.09507639706134796
+            },
+            "balanced_accuracy": 0.238878158852458
+          },
+          "midi_key_activity": {
+            "frames": 880,
+            "positive_keys": 1030,
+            "tp": 156,
+            "fp": 1335,
+            "fn": 874,
+            "precision": 0.10462776659959759,
+            "recall": 0.15145631067961166,
+            "micro_f1": 0.12376041253470844,
+            "micro_average_precision": 0.07710162642857317
+          },
+          "unsupported_midi_sources": 3
+        },
+        "validation": {
+          "cluster": {
+            "music": {
+              "frames": 880,
+              "accuracy": 0.2238636314868927
+            },
+            "en": {
+              "frames": 527,
+              "accuracy": 0.005692599806934595
+            },
+            "ja": {
+              "frames": 565,
+              "accuracy": 0.09734513610601425
+            },
+            "balanced_accuracy": 0.13769124972168356
+          },
+          "midi_key_activity": {
+            "frames": 480,
+            "positive_keys": 901,
+            "tp": 298,
+            "fp": 779,
+            "fn": 603,
+            "precision": 0.27669452181987003,
+            "recall": 0.33074361820199777,
+            "micro_f1": 0.301314459049545,
+            "micro_average_precision": 0.22954610710042736
+          },
+          "unsupported_midi_sources": 5
+        },
+        "silence": {
+          "cluster": {
+            "music": {
+              "frames": 1120,
+              "accuracy": 0.4776785671710968
+            },
+            "en": {
+              "frames": 1156,
+              "accuracy": 0.0
+            },
+            "ja": {
+              "frames": 1178,
+              "accuracy": 0.0008488964522257447
+            },
+            "balanced_accuracy": 0.23905150769860484
+          },
+          "midi_key_activity": {
+            "frames": 880,
+            "positive_keys": 1030,
+            "tp": 0,
+            "fp": 0,
+            "fn": 1030,
+            "precision": 0.0,
+            "recall": 0.0,
+            "micro_f1": 0.0,
+            "micro_average_precision": 0.04530014636408407
+          },
+          "unsupported_midi_sources": 3
+        },
+        "probe_selection": {
+          "cluster": {
+            "validation_score": 0.13769124972168356,
+            "alpha": 0.1,
+            "threshold": 0,
+            "train_frames": 32278
+          },
+          "pitch": {
+            "validation_score": 0.301314459049545,
+            "alpha": 0.01,
+            "threshold": 0.2,
+            "train_frames": 14400
+          }
+        },
+        "feature_std": 0.9073190689086914,
+        "effective_rank": 73.92118835449219,
+        "clean_silence_feature_rms": 0.9403148889541626,
+        "replayed_test_frames": 3454,
+        "encoder_sha256": "8e0670fbfeb2a966610d0c815a657c6d764b0ecb65f6c4fdc1cfb3e8df8d1854"
+      },
+      "latent": {
+        "test": {
+          "cluster": {
+            "music": {
+              "frames": 1120,
+              "accuracy": 0.5107142925262451
+            },
+            "en": {
+              "frames": 1156,
+              "accuracy": 0.05968858301639557
+            },
+            "ja": {
+              "frames": 1178,
+              "accuracy": 0.18675722181797028
+            },
+            "balanced_accuracy": 0.316968597471714
+          },
+          "midi_key_activity": {
+            "frames": 880,
+            "positive_keys": 1030,
+            "tp": 281,
+            "fp": 2485,
+            "fn": 749,
+            "precision": 0.10159074475777295,
+            "recall": 0.2728155339805825,
+            "micro_f1": 0.14805057955742887,
+            "micro_average_precision": 0.09380380965269405
+          },
+          "unsupported_midi_sources": 3
+        },
+        "validation": {
+          "cluster": {
+            "music": {
+              "frames": 880,
+              "accuracy": 0.2750000059604645
+            },
+            "en": {
+              "frames": 527,
+              "accuracy": 0.07969639450311661
+            },
+            "ja": {
+              "frames": 565,
+              "accuracy": 0.22300885617733002
+            },
+            "balanced_accuracy": 0.2131763156503439
+          },
+          "midi_key_activity": {
+            "frames": 480,
+            "positive_keys": 901,
+            "tp": 412,
+            "fp": 1523,
+            "fn": 489,
+            "precision": 0.21291989664082686,
+            "recall": 0.4572697003329634,
+            "micro_f1": 0.29055007052186177,
+            "micro_average_precision": 0.19407674320596913
+          },
+          "unsupported_midi_sources": 5
+        },
+        "silence": {
+          "cluster": {
+            "music": {
+              "frames": 1120,
+              "accuracy": 0.4776785671710968
+            },
+            "en": {
+              "frames": 1156,
+              "accuracy": 0.0
+            },
+            "ja": {
+              "frames": 1178,
+              "accuracy": 0.0008488964522257447
+            },
+            "balanced_accuracy": 0.23905150769860484
+          },
+          "midi_key_activity": {
+            "frames": 880,
+            "positive_keys": 1030,
+            "tp": 0,
+            "fp": 0,
+            "fn": 1030,
+            "precision": 0.0,
+            "recall": 0.0,
+            "micro_f1": 0.0,
+            "micro_average_precision": 0.045070823108381834
+          },
+          "unsupported_midi_sources": 3
+        },
+        "probe_selection": {
+          "cluster": {
+            "validation_score": 0.2131763156503439,
+            "alpha": 0.001,
+            "threshold": 0,
+            "train_frames": 32278
+          },
+          "pitch": {
+            "validation_score": 0.29055007052186177,
+            "alpha": 1.0,
+            "threshold": 0.1,
+            "train_frames": 14400
+          }
+        },
+        "feature_std": 0.6600003838539124,
+        "effective_rank": 23.467260360717773,
+        "clean_silence_feature_rms": 0.9067544341087341,
+        "replayed_test_frames": 3454,
+        "encoder_sha256": "ff997ea77bfc8469ea8e8187644801d1438abd91496f1359bd3246ac2f27d357"
+      },
+      "validation_diagnostics": [
+        {
+          "step": 0,
+          "latent_loss": 0.5234689712524414,
+          "zero_predictor_loss": 0.427929162979126,
+          "relative_gain_over_zero": -0.223260802344466,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.7585676908493042,
+          "teacher_target_std": 1.001211166381836,
+          "predictor_std": 0.09463681280612946,
+          "residual/layer_0/attention/rms_ratio": 1.211219987676804,
+          "residual/layer_0/attention/weight_rms": 0.05086861923336983,
+          "residual/layer_0/ffn/rms_ratio": 0.870376068672763,
+          "residual/layer_0/ffn/weight_rms": 0.030721105635166168,
+          "residual/layer_1/attention/rms_ratio": 0.872746299071965,
+          "residual/layer_1/attention/weight_rms": 0.05059998854994774,
+          "residual/layer_1/ffn/rms_ratio": 0.5097089573132315,
+          "residual/layer_1/ffn/weight_rms": 0.03082958236336708,
+          "student_temporal_std": 0.7585676908493042,
+          "student_global_std": 0.9411484003067017,
+          "student_effective_rank": 52.14543533325195,
+          "clean_silence_feature_rms": 0.9999999403953552,
+          "within_domain_input_swap_rms": 1.3581042289733887
+        },
+        {
+          "step": 500,
+          "latent_loss": 0.41008812189102173,
+          "zero_predictor_loss": 0.4098813533782959,
+          "relative_gain_over_zero": -0.0005044594271528258,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.23551857471466064,
+          "teacher_target_std": 0.9824278354644775,
+          "predictor_std": 0.005971139296889305,
+          "residual/layer_0/attention/rms_ratio": 1.3711422633084906,
+          "residual/layer_0/attention/weight_rms": 0.05072725936770439,
+          "residual/layer_0/ffn/rms_ratio": 0.850627195992563,
+          "residual/layer_0/ffn/weight_rms": 0.030669765546917915,
+          "residual/layer_1/attention/rms_ratio": 2.523706955889721,
+          "residual/layer_1/attention/weight_rms": 0.05052692070603371,
+          "residual/layer_1/ffn/rms_ratio": 0.4689184988512571,
+          "residual/layer_1/ffn/weight_rms": 0.030827777460217476,
+          "student_temporal_std": 0.21205100417137146,
+          "student_global_std": 0.26760879158973694,
+          "student_effective_rank": 38.559898376464844,
+          "clean_silence_feature_rms": 0.40230998396873474,
+          "within_domain_input_swap_rms": 0.4549967348575592
+        },
+        {
+          "step": 1000,
+          "latent_loss": 0.4191679358482361,
+          "zero_predictor_loss": 0.4201618432998657,
+          "relative_gain_over_zero": 0.002365534775418232,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.32594791054725647,
+          "teacher_target_std": 0.9880585670471191,
+          "predictor_std": 0.06513515114784241,
+          "residual/layer_0/attention/rms_ratio": 1.3111000716315862,
+          "residual/layer_0/attention/weight_rms": 0.05071548745036125,
+          "residual/layer_0/ffn/rms_ratio": 0.7581297560025712,
+          "residual/layer_0/ffn/weight_rms": 0.030919048935174942,
+          "residual/layer_1/attention/rms_ratio": 0.9801667912074324,
+          "residual/layer_1/attention/weight_rms": 0.05066831037402153,
+          "residual/layer_1/ffn/rms_ratio": 0.46789345380357295,
+          "residual/layer_1/ffn/weight_rms": 0.03096136264503002,
+          "student_temporal_std": 0.5735334157943726,
+          "student_global_std": 0.6497400403022766,
+          "student_effective_rank": 26.191133499145508,
+          "clean_silence_feature_rms": 1.038270354270935,
+          "within_domain_input_swap_rms": 0.9814699292182922
+        },
+        {
+          "step": 1500,
+          "latent_loss": 0.4311685562133789,
+          "zero_predictor_loss": 0.4338188171386719,
+          "relative_gain_over_zero": 0.006109142389841948,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.5114514231681824,
+          "teacher_target_std": 1.0042868852615356,
+          "predictor_std": 0.08648830652236938,
+          "residual/layer_0/attention/rms_ratio": 1.1816583826403642,
+          "residual/layer_0/attention/weight_rms": 0.05088479071855545,
+          "residual/layer_0/ffn/rms_ratio": 1.2969391817006384,
+          "residual/layer_0/ffn/weight_rms": 0.031845465302467346,
+          "residual/layer_1/attention/rms_ratio": 0.6585999143717833,
+          "residual/layer_1/attention/weight_rms": 0.05127614364027977,
+          "residual/layer_1/ffn/rms_ratio": 0.47536362695227535,
+          "residual/layer_1/ffn/weight_rms": 0.0317642018198967,
+          "student_temporal_std": 0.5879858732223511,
+          "student_global_std": 0.6845210194587708,
+          "student_effective_rank": 14.61954402923584,
+          "clean_silence_feature_rms": 1.1555683612823486,
+          "within_domain_input_swap_rms": 0.9756343364715576
+        },
+        {
+          "step": 2000,
+          "latent_loss": 0.4349929094314575,
+          "zero_predictor_loss": 0.44148147106170654,
+          "relative_gain_over_zero": 0.014697245650298396,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.5738977193832397,
+          "teacher_target_std": 1.0136027336120605,
+          "predictor_std": 0.12605008482933044,
+          "residual/layer_0/attention/rms_ratio": 1.2635262439204906,
+          "residual/layer_0/attention/weight_rms": 0.051054440438747406,
+          "residual/layer_0/ffn/rms_ratio": 1.2753825155980292,
+          "residual/layer_0/ffn/weight_rms": 0.03249041736125946,
+          "residual/layer_1/attention/rms_ratio": 0.5308791446269008,
+          "residual/layer_1/attention/weight_rms": 0.05207206681370735,
+          "residual/layer_1/ffn/rms_ratio": 0.7054839242485036,
+          "residual/layer_1/ffn/weight_rms": 0.033404551446437836,
+          "student_temporal_std": 0.6154395341873169,
+          "student_global_std": 0.7013278603553772,
+          "student_effective_rank": 12.821395874023438,
+          "clean_silence_feature_rms": 1.1900173425674438,
+          "within_domain_input_swap_rms": 0.9706873297691345
+        },
+        {
+          "step": 2500,
+          "latent_loss": 0.431092768907547,
+          "zero_predictor_loss": 0.44408711791038513,
+          "relative_gain_over_zero": 0.029260810500385537,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.5525495409965515,
+          "teacher_target_std": 1.023882508277893,
+          "predictor_std": 0.19071458280086517,
+          "residual/layer_0/attention/rms_ratio": 1.23323579666958,
+          "residual/layer_0/attention/weight_rms": 0.05118450149893761,
+          "residual/layer_0/ffn/rms_ratio": 1.1731882270456298,
+          "residual/layer_0/ffn/weight_rms": 0.0331597626209259,
+          "residual/layer_1/attention/rms_ratio": 0.7321117522085263,
+          "residual/layer_1/attention/weight_rms": 0.05285527929663658,
+          "residual/layer_1/ffn/rms_ratio": 1.0157854005108946,
+          "residual/layer_1/ffn/weight_rms": 0.034836139529943466,
+          "student_temporal_std": 0.5039958357810974,
+          "student_global_std": 0.6114047765731812,
+          "student_effective_rank": 10.630956649780273,
+          "clean_silence_feature_rms": 1.1438359022140503,
+          "within_domain_input_swap_rms": 0.8611413836479187
+        },
+        {
+          "step": 3000,
+          "latent_loss": 0.42553281784057617,
+          "zero_predictor_loss": 0.4426310360431671,
+          "relative_gain_over_zero": 0.03862860217719455,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.506362795829773,
+          "teacher_target_std": 1.0328285694122314,
+          "predictor_std": 0.21241450309753418,
+          "residual/layer_0/attention/rms_ratio": 1.2957258337779474,
+          "residual/layer_0/attention/weight_rms": 0.05131441354751587,
+          "residual/layer_0/ffn/rms_ratio": 1.2601623196759801,
+          "residual/layer_0/ffn/weight_rms": 0.03394198417663574,
+          "residual/layer_1/attention/rms_ratio": 0.7668139551800368,
+          "residual/layer_1/attention/weight_rms": 0.05353658273816109,
+          "residual/layer_1/ffn/rms_ratio": 1.1194996500660985,
+          "residual/layer_1/ffn/weight_rms": 0.03600068390369415,
+          "student_temporal_std": 0.4520283639431,
+          "student_global_std": 0.5273321866989136,
+          "student_effective_rank": 10.144918441772461,
+          "clean_silence_feature_rms": 0.9489244818687439,
+          "within_domain_input_swap_rms": 0.7369940280914307
+        },
+        {
+          "step": 3500,
+          "latent_loss": 0.4166029691696167,
+          "zero_predictor_loss": 0.44105321168899536,
+          "relative_gain_over_zero": 0.05543603780992201,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.48539066314697266,
+          "teacher_target_std": 1.0343523025512695,
+          "predictor_std": 0.24972891807556152,
+          "residual/layer_0/attention/rms_ratio": 1.33966619764697,
+          "residual/layer_0/attention/weight_rms": 0.05148199945688248,
+          "residual/layer_0/ffn/rms_ratio": 1.1765883403715447,
+          "residual/layer_0/ffn/weight_rms": 0.03463244438171387,
+          "residual/layer_1/attention/rms_ratio": 0.7241269397505975,
+          "residual/layer_1/attention/weight_rms": 0.05411979556083679,
+          "residual/layer_1/ffn/rms_ratio": 1.143931381327987,
+          "residual/layer_1/ffn/weight_rms": 0.0372907780110836,
+          "student_temporal_std": 0.49233096837997437,
+          "student_global_std": 0.5721930265426636,
+          "student_effective_rank": 10.050783157348633,
+          "clean_silence_feature_rms": 1.0811342000961304,
+          "within_domain_input_swap_rms": 0.7882132530212402
+        },
+        {
+          "step": 4000,
+          "latent_loss": 0.4156331717967987,
+          "zero_predictor_loss": 0.4415271282196045,
+          "relative_gain_over_zero": 0.05864635436381793,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.49382779002189636,
+          "teacher_target_std": 1.0370898246765137,
+          "predictor_std": 0.24687939882278442,
+          "residual/layer_0/attention/rms_ratio": 1.3372074898820887,
+          "residual/layer_0/attention/weight_rms": 0.051627594977617264,
+          "residual/layer_0/ffn/rms_ratio": 1.2924177954859062,
+          "residual/layer_0/ffn/weight_rms": 0.035269953310489655,
+          "residual/layer_1/attention/rms_ratio": 0.636056244496822,
+          "residual/layer_1/attention/weight_rms": 0.05480491742491722,
+          "residual/layer_1/ffn/rms_ratio": 1.0944304572154457,
+          "residual/layer_1/ffn/weight_rms": 0.03848164901137352,
+          "student_temporal_std": 0.5318247079849243,
+          "student_global_std": 0.6288834810256958,
+          "student_effective_rank": 11.064912796020508,
+          "clean_silence_feature_rms": 1.153814435005188,
+          "within_domain_input_swap_rms": 0.8995954394340515
+        },
+        {
+          "step": 4500,
+          "latent_loss": 0.4145059883594513,
+          "zero_predictor_loss": 0.4399217963218689,
+          "relative_gain_over_zero": 0.05777346831849661,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.5147495865821838,
+          "teacher_target_std": 1.0344765186309814,
+          "predictor_std": 0.2699339985847473,
+          "residual/layer_0/attention/rms_ratio": 1.307824645540668,
+          "residual/layer_0/attention/weight_rms": 0.0517619363963604,
+          "residual/layer_0/ffn/rms_ratio": 1.2591483709388505,
+          "residual/layer_0/ffn/weight_rms": 0.03597553074359894,
+          "residual/layer_1/attention/rms_ratio": 0.559179150192635,
+          "residual/layer_1/attention/weight_rms": 0.05535982921719551,
+          "residual/layer_1/ffn/rms_ratio": 1.0887799333667543,
+          "residual/layer_1/ffn/weight_rms": 0.03965459018945694,
+          "student_temporal_std": 0.57373046875,
+          "student_global_std": 0.661588191986084,
+          "student_effective_rank": 12.744431495666504,
+          "clean_silence_feature_rms": 1.1927200555801392,
+          "within_domain_input_swap_rms": 0.9256727695465088
+        },
+        {
+          "step": 5000,
+          "latent_loss": 0.41669008135795593,
+          "zero_predictor_loss": 0.4384324252605438,
+          "relative_gain_over_zero": 0.0495910946588114,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.5310713648796082,
+          "teacher_target_std": 1.0280892848968506,
+          "predictor_std": 0.27700042724609375,
+          "residual/layer_0/attention/rms_ratio": 1.3512344246588377,
+          "residual/layer_0/attention/weight_rms": 0.05189814791083336,
+          "residual/layer_0/ffn/rms_ratio": 1.15407666561299,
+          "residual/layer_0/ffn/weight_rms": 0.03659582510590553,
+          "residual/layer_1/attention/rms_ratio": 0.5465788195304326,
+          "residual/layer_1/attention/weight_rms": 0.05600092560052872,
+          "residual/layer_1/ffn/rms_ratio": 1.1982889588109784,
+          "residual/layer_1/ffn/weight_rms": 0.040749549865722656,
+          "student_temporal_std": 0.5680217742919922,
+          "student_global_std": 0.6405798196792603,
+          "student_effective_rank": 14.767792701721191,
+          "clean_silence_feature_rms": 0.936692476272583,
+          "within_domain_input_swap_rms": 0.8663811087608337
+        },
+        {
+          "step": 5500,
+          "latent_loss": 0.4140329658985138,
+          "zero_predictor_loss": 0.4367421567440033,
+          "relative_gain_over_zero": 0.05199679145881153,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.5455714464187622,
+          "teacher_target_std": 1.0230443477630615,
+          "predictor_std": 0.27802544832229614,
+          "residual/layer_0/attention/rms_ratio": 1.2754715459368147,
+          "residual/layer_0/attention/weight_rms": 0.052051324397325516,
+          "residual/layer_0/ffn/rms_ratio": 1.3102650822669104,
+          "residual/layer_0/ffn/weight_rms": 0.03726550191640854,
+          "residual/layer_1/attention/rms_ratio": 0.5573826750228582,
+          "residual/layer_1/attention/weight_rms": 0.05653829127550125,
+          "residual/layer_1/ffn/rms_ratio": 1.1023623441969321,
+          "residual/layer_1/ffn/weight_rms": 0.04172024503350258,
+          "student_temporal_std": 0.5745577216148376,
+          "student_global_std": 0.6423920392990112,
+          "student_effective_rank": 15.335775375366211,
+          "clean_silence_feature_rms": 1.0899657011032104,
+          "within_domain_input_swap_rms": 0.9078527688980103
+        },
+        {
+          "step": 6000,
+          "latent_loss": 0.41093939542770386,
+          "zero_predictor_loss": 0.4345502257347107,
+          "relative_gain_over_zero": 0.05433395015981668,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.551990270614624,
+          "teacher_target_std": 1.0209006071090698,
+          "predictor_std": 0.262972354888916,
+          "residual/layer_0/attention/rms_ratio": 1.3191803841293066,
+          "residual/layer_0/attention/weight_rms": 0.052279409021139145,
+          "residual/layer_0/ffn/rms_ratio": 1.2881820125599632,
+          "residual/layer_0/ffn/weight_rms": 0.03779633343219757,
+          "residual/layer_1/attention/rms_ratio": 0.5216416630361689,
+          "residual/layer_1/attention/weight_rms": 0.057011909782886505,
+          "residual/layer_1/ffn/rms_ratio": 1.0416314720829074,
+          "residual/layer_1/ffn/weight_rms": 0.042614903301000595,
+          "student_temporal_std": 0.549446702003479,
+          "student_global_std": 0.6225978136062622,
+          "student_effective_rank": 15.777899742126465,
+          "clean_silence_feature_rms": 0.956426203250885,
+          "within_domain_input_swap_rms": 0.849147617816925
+        },
+        {
+          "step": 6500,
+          "latent_loss": 0.40841424465179443,
+          "zero_predictor_loss": 0.43298977613449097,
+          "relative_gain_over_zero": 0.056757763894783375,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.5529831647872925,
+          "teacher_target_std": 1.017958402633667,
+          "predictor_std": 0.25311148166656494,
+          "residual/layer_0/attention/rms_ratio": 1.2754608932307454,
+          "residual/layer_0/attention/weight_rms": 0.05236825346946716,
+          "residual/layer_0/ffn/rms_ratio": 1.4171951919051542,
+          "residual/layer_0/ffn/weight_rms": 0.038412030786275864,
+          "residual/layer_1/attention/rms_ratio": 0.5184260703048408,
+          "residual/layer_1/attention/weight_rms": 0.05756585672497749,
+          "residual/layer_1/ffn/rms_ratio": 1.0869227734032985,
+          "residual/layer_1/ffn/weight_rms": 0.04343720152974129,
+          "student_temporal_std": 0.5504597425460815,
+          "student_global_std": 0.6242362260818481,
+          "student_effective_rank": 15.599563598632812,
+          "clean_silence_feature_rms": 0.9036989212036133,
+          "within_domain_input_swap_rms": 0.8353508114814758
+        },
+        {
+          "step": 7000,
+          "latent_loss": 0.4099486470222473,
+          "zero_predictor_loss": 0.43083304166793823,
+          "relative_gain_over_zero": 0.048474449788805773,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.555824875831604,
+          "teacher_target_std": 1.0149116516113281,
+          "predictor_std": 0.2644559144973755,
+          "residual/layer_0/attention/rms_ratio": 1.228538941928113,
+          "residual/layer_0/attention/weight_rms": 0.05247311294078827,
+          "residual/layer_0/ffn/rms_ratio": 1.5000624357304333,
+          "residual/layer_0/ffn/weight_rms": 0.0390048548579216,
+          "residual/layer_1/attention/rms_ratio": 0.5003789764579302,
+          "residual/layer_1/attention/weight_rms": 0.05803854763507843,
+          "residual/layer_1/ffn/rms_ratio": 1.0788556738707908,
+          "residual/layer_1/ffn/weight_rms": 0.04423458129167557,
+          "student_temporal_std": 0.5476019382476807,
+          "student_global_std": 0.6285821795463562,
+          "student_effective_rank": 15.316935539245605,
+          "clean_silence_feature_rms": 0.9138490557670593,
+          "within_domain_input_swap_rms": 0.8504018783569336
+        },
+        {
+          "step": 7500,
+          "latent_loss": 0.4045467674732208,
+          "zero_predictor_loss": 0.4292828440666199,
+          "relative_gain_over_zero": 0.057621861519255746,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.5591548681259155,
+          "teacher_target_std": 1.012892723083496,
+          "predictor_std": 0.26300889253616333,
+          "residual/layer_0/attention/rms_ratio": 1.2690350973326767,
+          "residual/layer_0/attention/weight_rms": 0.05267127603292465,
+          "residual/layer_0/ffn/rms_ratio": 1.3558861866204968,
+          "residual/layer_0/ffn/weight_rms": 0.03940507024526596,
+          "residual/layer_1/attention/rms_ratio": 0.4846879642359476,
+          "residual/layer_1/attention/weight_rms": 0.05848873406648636,
+          "residual/layer_1/ffn/rms_ratio": 1.1797374320576661,
+          "residual/layer_1/ffn/weight_rms": 0.044974349439144135,
+          "student_temporal_std": 0.5943883061408997,
+          "student_global_std": 0.6630245447158813,
+          "student_effective_rank": 17.95795440673828,
+          "clean_silence_feature_rms": 0.9261419773101807,
+          "within_domain_input_swap_rms": 0.9283329248428345
+        },
+        {
+          "step": 8000,
+          "latent_loss": 0.4122093915939331,
+          "zero_predictor_loss": 0.4305168092250824,
+          "relative_gain_over_zero": 0.04252428067582803,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.5696386694908142,
+          "teacher_target_std": 1.011983871459961,
+          "predictor_std": 0.2926321029663086,
+          "residual/layer_0/attention/rms_ratio": 1.3038638187526992,
+          "residual/layer_0/attention/weight_rms": 0.052850913256406784,
+          "residual/layer_0/ffn/rms_ratio": 1.4007467496631647,
+          "residual/layer_0/ffn/weight_rms": 0.03995676711201668,
+          "residual/layer_1/attention/rms_ratio": 0.46567736878739846,
+          "residual/layer_1/attention/weight_rms": 0.05892161279916763,
+          "residual/layer_1/ffn/rms_ratio": 1.2243110681207556,
+          "residual/layer_1/ffn/weight_rms": 0.045694541186094284,
+          "student_temporal_std": 0.5794732570648193,
+          "student_global_std": 0.6513903141021729,
+          "student_effective_rank": 17.222787857055664,
+          "clean_silence_feature_rms": 0.9329336881637573,
+          "within_domain_input_swap_rms": 0.8911569118499756
+        },
+        {
+          "step": 8500,
+          "latent_loss": 0.4039018154144287,
+          "zero_predictor_loss": 0.43128347396850586,
+          "relative_gain_over_zero": 0.06348877294583444,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.574363112449646,
+          "teacher_target_std": 1.0090243816375732,
+          "predictor_std": 0.24998852610588074,
+          "residual/layer_0/attention/rms_ratio": 1.2077462946806663,
+          "residual/layer_0/attention/weight_rms": 0.052959855645895004,
+          "residual/layer_0/ffn/rms_ratio": 1.5123115526798458,
+          "residual/layer_0/ffn/weight_rms": 0.040501855313777924,
+          "residual/layer_1/attention/rms_ratio": 0.4716833422521437,
+          "residual/layer_1/attention/weight_rms": 0.059418484568595886,
+          "residual/layer_1/ffn/rms_ratio": 1.0835880808844172,
+          "residual/layer_1/ffn/weight_rms": 0.0464043989777565,
+          "student_temporal_std": 0.5775333642959595,
+          "student_global_std": 0.6430249810218811,
+          "student_effective_rank": 17.284351348876953,
+          "clean_silence_feature_rms": 0.9253588914871216,
+          "within_domain_input_swap_rms": 0.8902193307876587
+        },
+        {
+          "step": 9000,
+          "latent_loss": 0.40168431401252747,
+          "zero_predictor_loss": 0.43214622139930725,
+          "relative_gain_over_zero": 0.07048981543363464,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.582025945186615,
+          "teacher_target_std": 1.0058667659759521,
+          "predictor_std": 0.28809255361557007,
+          "residual/layer_0/attention/rms_ratio": 1.2137532214469797,
+          "residual/layer_0/attention/weight_rms": 0.05301209166646004,
+          "residual/layer_0/ffn/rms_ratio": 1.5015657038712995,
+          "residual/layer_0/ffn/weight_rms": 0.04099470004439354,
+          "residual/layer_1/attention/rms_ratio": 0.4467033780173741,
+          "residual/layer_1/attention/weight_rms": 0.059854548424482346,
+          "residual/layer_1/ffn/rms_ratio": 1.1830190073678153,
+          "residual/layer_1/ffn/weight_rms": 0.04703376069664955,
+          "student_temporal_std": 0.5979597568511963,
+          "student_global_std": 0.6684538125991821,
+          "student_effective_rank": 19.54437828063965,
+          "clean_silence_feature_rms": 0.9793349504470825,
+          "within_domain_input_swap_rms": 0.9112594723701477
+        },
+        {
+          "step": 9500,
+          "latent_loss": 0.4007071256637573,
+          "zero_predictor_loss": 0.4354363977909088,
+          "relative_gain_over_zero": 0.07975739350991984,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.5876182317733765,
+          "teacher_target_std": 1.0093531608581543,
+          "predictor_std": 0.33585429191589355,
+          "residual/layer_0/attention/rms_ratio": 1.2059152878995099,
+          "residual/layer_0/attention/weight_rms": 0.05320945009589195,
+          "residual/layer_0/ffn/rms_ratio": 1.5431933280584427,
+          "residual/layer_0/ffn/weight_rms": 0.041488166898489,
+          "residual/layer_1/attention/rms_ratio": 0.4291694439044732,
+          "residual/layer_1/attention/weight_rms": 0.06027836352586746,
+          "residual/layer_1/ffn/rms_ratio": 1.098490066083281,
+          "residual/layer_1/ffn/weight_rms": 0.04767289012670517,
+          "student_temporal_std": 0.6095757484436035,
+          "student_global_std": 0.6829822063446045,
+          "student_effective_rank": 18.638290405273438,
+          "clean_silence_feature_rms": 0.9721260070800781,
+          "within_domain_input_swap_rms": 0.913004994392395
+        },
+        {
+          "step": 10000,
+          "latent_loss": 0.3963034749031067,
+          "zero_predictor_loss": 0.4371052384376526,
+          "relative_gain_over_zero": 0.0933454004815496,
+          "target_is_degenerate": 0.0,
+          "teacher_raw_temporal_std": 0.5884783267974854,
+          "teacher_target_std": 1.0113954544067383,
+          "predictor_std": 0.33198052644729614,
+          "residual/layer_0/attention/rms_ratio": 1.2322958774991133,
+          "residual/layer_0/attention/weight_rms": 0.05333191528916359,
+          "residual/layer_0/ffn/rms_ratio": 1.606611214571521,
+          "residual/layer_0/ffn/weight_rms": 0.04199467599391937,
+          "residual/layer_1/attention/rms_ratio": 0.4124972924896578,
+          "residual/layer_1/attention/weight_rms": 0.06069786846637726,
+          "residual/layer_1/ffn/rms_ratio": 1.0154959536553896,
+          "residual/layer_1/ffn/weight_rms": 0.048308953642845154,
+          "student_temporal_std": 0.5892667770385742,
+          "student_global_std": 0.6562643051147461,
+          "student_effective_rank": 18.445465087890625,
+          "clean_silence_feature_rms": 0.9550407528877258,
+          "within_domain_input_swap_rms": 0.8763302564620972
+        }
+      ],
+      "training": {
+        "completed": true,
+        "steps": 10000,
+        "additional_steps": 10000,
+        "seconds": 462.4671519103722,
+        "last": {
+          "step": 10000,
+          "loss": 0.33994218707084656,
+          "latent": 0.33994218707084656,
+          "gradient_norm": 0.14329788088798523,
+          "ema_decay": 0.999,
+          "teacher_std": 0.9352775812149048,
+          "masked_frames": 238,
+          "lr": 0.0003
+        },
+        "initial_encoder_sha256": "8e0670fbfeb2a966610d0c815a657c6d764b0ecb65f6c4fdc1cfb3e8df8d1854",
+        "final_encoder_sha256": "ff997ea77bfc8469ea8e8187644801d1438abd91496f1359bd3246ac2f27d357",
+        "teacher_sha256": "3ca80ede98cf674f21948c5ba0e1021117a66fe95c420ace10ae5469c43a9619",
+        "parameters": 1166858,
+        "encoder_parameters": 1025216,
+        "optimizer_step_values": [
+          10000
+        ],
+        "peak_cuda_gib": 0.0842595100402832,
+        "coefficients": {
+          "latent": 1.0
+        },
+        "schedule_sha256": "b6776a034a886c96a0bc4c344cbc775dca2dc5d44153e1f19ec387c01804068a"
+      }
+    }
+  },
+  "audit": {
+    "passed": true,
+    "total_updates": 30000,
+    "shared_inputs_masks_probes_and_targets": true,
+    "baseline_reproduces_previous_encoder": true,
+    "previous_artifacts_verified": 46,
+    "artifact_files": 45,
+    "artifact_bytes": 96260064,
+    "audit_sha256": "e9f9b635abd5d28fa916e4eeff2c1d6e479b8cc43711d733d7edb6294b1c8515",
+    "gpu_smoke_updates": 12,
+    "tests_passed": 186,
+    "tests_skipped": 1
+  }
+}
